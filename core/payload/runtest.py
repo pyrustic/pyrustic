@@ -1,0 +1,2 @@
+import pyrustic.runtest
+
