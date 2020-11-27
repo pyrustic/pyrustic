@@ -16,7 +16,7 @@ cached_target_about_json = os.path.join(CACHED_TARGET_ROOT,
                                  ".pyrustic_data",
                                  "about.json")
 jasonix = Jasonix(cached_target_about_json)
-jasonix.data["debug"] = False
+jasonix.data["dev_mode"] = False
 jasonix.save()
 
 # Exiting this script

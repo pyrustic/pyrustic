@@ -2,7 +2,7 @@
 	"project_name": null,
 	"project_title": null,
 	"description": null,
-	"debug": null,
+	"dev_mode": null,
 	"author": null,
 	"version": null
 }
