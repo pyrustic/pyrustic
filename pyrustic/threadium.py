@@ -6,14 +6,16 @@ import queue
 class Threadium:
     def __init__(self, tk):
         """
-        - tk: a tk instance
+        - tk: a tk.Tk instance
         """
         self._tk = tk
         self._internal_count = 0
         self._queues = dict()
-        self._task_lock = threading.Lock()
-        self._consume_lock = threading.Lock()
         self._queues_lock = threading.Lock()
+        self._executing_sync_task_lock = threading.Lock()
+        self._waiting_sync_tasks = list()
+        self._executing_sync_task = False
+
 
     # ===========================================
     #               PUBLIC METHODS
@@ -27,7 +29,8 @@ class Threadium:
     def consume(self, queue, consumer=None, unpack_result=False,
                 exception_handler=None, latency=10):
         """
-        Loops through the queue, pick data, then run the callback 'consumer' with data as argument.
+        Loops through the queue, pick data, then run the callback 'consumer' with
+        data as argument.
         Example, assume that there are these integers 3, 4 and 5 in the queue.
         3 -> consumer(3); 4 -> consumer(4); 5 -> consumer(5)
 
@@ -39,13 +42,11 @@ class Threadium:
 
         Returns the 'qid'. You will need this 'qid' to stop, pause, resume the loop or to get info.
         """
-        qid = None
-        with self._consume_lock:
-            qid = self._consume(queue,
-                                consumer,
-                                unpack_result,
-                                exception_handler,
-                                latency)
+        qid = self._consume(queue,
+                            consumer,
+                            unpack_result,
+                            exception_handler,
+                            latency)
         return qid
 
     def pause(self, qid):
@@ -103,36 +104,50 @@ class Threadium:
             return tuple([x.copy() for x in self._queues])
         return self._queues[qid].copy()
 
-    def task(self, host, args=(), kwargs={},
+    def task(self, host, args=[], kwargs={},
              consumer=None,
+             sync=False,
              unpack_result=False,
              upstream_exception_handler=None,
              downstream_exception_handler=None):
         """
-        Executes a task in background.
+        Executes a task in background. Return False if the task is WAITING (sync)
         - host: the host to call
         - args: arguments to use
         - kwargs: keyword-arguments to use
         - consumer: the callback with parameter(s) that will consume the returned value by host
+        - sync
         - unpack_result: boolean, True, to unpack the result returned by host
         - upstream_exception_handler: one parameter callback to handle the exception
             raised while running the host
         - downstream_exception_handler: one parameter callback to handle the exception
             raised while calling the consumer
         """
-        with self._task_lock:
-            self._task(host, args, kwargs, consumer,
-                       unpack_result,
-                       upstream_exception_handler,
-                       downstream_exception_handler)
+        return self._task(host, args, kwargs, consumer,
+                          sync,
+                          unpack_result,
+                          upstream_exception_handler,
+                          downstream_exception_handler)
 
     # ===========================================
     #               INTERNAL
     # ===========================================
     def _task(self, host, args, kwargs, consumer,
+              sync,
               unpack_result,
               upstream_exception_handler,
               downstream_exception_handler):
+        with self._executing_sync_task_lock:
+            if sync and self._executing_sync_task:
+                data = {"host": host, "args": args, "kwargs": kwargs,
+                        "consumer": consumer, "sync": sync,
+                        "unpack_result": unpack_result,
+                        "upstream_exception_handler": upstream_exception_handler,
+                        "downstream_exception_handler": downstream_exception_handler}
+                self._waiting_sync_tasks.append(data)
+                return False
+            if sync:
+                self._executing_sync_task = True
         queue = self.q()
         thread = threading.Thread(target=self._executor,
                                   args=(queue, host, args,
@@ -143,6 +158,7 @@ class Threadium:
         self._short_loop(queue, consumer, unpack_result,
                          upstream_exception_handler,
                          downstream_exception_handler)
+        return True
 
     def _consume(self, queue, consumer, unpack_result,
                 exception_handler, latency):
@@ -200,6 +216,7 @@ class Threadium:
                     upstream_exception_handler,
                     downstream_exception_handler):
         if not queue.empty():
+            self._exec_next_sync_task()
             result = queue.get()
             exception = None
             if not queue.empty():
@@ -242,6 +259,17 @@ class Threadium:
                 raise e
         else:
             raise exception
+
+    def _exec_next_sync_task(self):
+        self._executing_sync_task = False
+        if self._waiting_sync_tasks:
+            data = self._waiting_sync_tasks[0]
+            del self._waiting_sync_tasks[0]
+            self._task(data["host"], data["args"], data["kwargs"],
+                       data["consumer"], data["sync"],
+                       data["unpack_result"], data["upstream_exception_handler"],
+                       data["downstream_exception_handler"])
+
 
     def _is_valid_qid(self, qid):
         with self._queues_lock:

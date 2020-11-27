@@ -1,23 +1,10 @@
 import tkinter as tk
 import operator
 from pyrustic.exception import PyrusticTableException
-from pyrustic.abstract.viewable import Viewable
+from pyrustic.viewable import Viewable
 
 
-# Allowed Options for table, header, and columns
-TABLE_OPTIONS = ["background", "borderwidth", "cursor", "height",
-                 "highlightbackground", "highlightcolor",
-                 "highlightthickness", "name", "padx", "pady",
-                 "relief", "takefocus", "width"]
-
-HEADER_OPTIONS = ["activebackground", "activeforeground", "anchor",
-                  "background", "bitmap", "borderwidth", "cursor",
-                  "compound", "disabledforeground", "font", "foreground",
-                  "height", "highlightbackground", "highlightcolor",
-                  "highlightthickness", "image", "justify", "padx",
-                  "pady", "relief", "state", "text", "textvariable",
-                  "takefocus", "underline", "width", "wraplength"]
-
+# Allowed Options for columns
 COLUMN_OPTIONS = ["background", "borderwidth", "cursor",
                   "disabledforeground", "exportselection", "font",
                   "foreground", "height", "highlightbackground",
@@ -27,11 +14,15 @@ COLUMN_OPTIONS = ["background", "borderwidth", "cursor",
                   "width"]
 
 # Components of table
-HEADER = "header"
-DATA = "data"
-COLUMN = "column"
-TABLE = "table"
-ROW = "row"
+BODY = "body"
+VSB = "vsb"
+HSB = "hsb"
+CANVAS = "canvas"
+FRAME_BACKGROUND = "frame_background"
+FRAMES_HEADERS = "frames_headers"
+LISTBOXES_COLUMNS = "listboxes_columns"
+LABELS_SORTING = "labels_sorting"
+LABELS_TITLES = "labels_titles"
 
 # Layout
 EQUALLY = "equally"
@@ -43,12 +34,14 @@ BROWSE = "browse"
 MULTIPLE = "multiple"
 EXTENDED = "extended"
 
+# Orient
+BOTH = "both"
+VERTICAL = "vertical"
+HORIZONTAL = "horizontal"
+
 # sort data as
 ASC = "[+]"
 DESC = "[-]"
-
-STYLE = [("*Table*background", "red"),
-         ("*Table*foreground", "blue")]
 
 
 def _check_option(option):
@@ -65,77 +58,98 @@ def _verify_options(column_options):
             del column_options[option]
 
 
-class Table(Viewable):
+class Table(Viewable):  # TODO the select_mode MULTIPLE is buggy !
     """
     Table supports data sorting, multiple selection modes, and more...
 
     Example:
+
         import tkinter as tk
         from pyrustic.widget.table import Table
+
         root = tk.Tk()
-        titles = ("Name", "Job")
-        data = [("Jack", "Architect"), ("Diana", "Physicist")]
-        table = Table(root, titles=titles, data=data)
-        table.body.pack()
+        my_titles = ("Name", "Job")
+        my_data = (("Jack", "Architect"), ("Diana", "Physicist"))
+        table = Table(root, titles=my_titles, data=my_data)
+        table.build_pack()
         root.mainloop()
+
     """
     def __init__(self,
                  master=None,
-                 titles=[],
-                 data=[],
-                 hidden_columns=[],
+                 titles=None,
+                 data=None,
+                 hidden_columns=None,
                  sorting=True,
                  mask=None,
                  select_mode=BROWSE,
                  layout=EQUALLY,
-                 orient="both",
-                 options={}):
+                 orient=BOTH,
+                 options=None):
         """
-        - master: widget parent
+        PARAMETERS:
+
+        - master: widget parent. Example: an instance of tk.Frame
+
         - titles: sequence of titles. Example: ("Name", "Job")
+
         - data: sequence of sequences. Each sub-sequence must have same size as titles.
-            Example: [ ("Jack, "Architect"), ("Diana", "Physicist") ]
+            Example: ( ("Jack, "Architect"), ("Diana", "Physicist") )
+
         - hidden_columns: sequence of columns to hide.
             Example: (1, 2) will hide the column at the index 1 and 2.
             Example: (0, ) will hide only the first column
+
         - sorting: boolean, set to True if you want the table to be able to do sorting when user
             clicks on a column title. Default: True
-        - mask:
-        - select_mode: selection modes: "single", "browse", "multiple" and "extended". Default: single
-        - layout: "equally" or "proportionally". Default to "equally".
-        - orient: orientation for scrollbars. "both" or "vertical" or "horizontal"
-        - options: dictionary, these options will be used as argument to the widget's constructors.
-            The widgets are: body, hsb, vsb, canvas, frame_window, frame_header, label_sorting,
-            label_title and listbox_column.
-            Example: Assume that you want to set the label_message's background to black
+
+        - mask: a callable that will be called at each insertion of line of data
+        in the table.
+            The mask must accept 2 arguments:
+                - index: int, index of the row (line)
+                - data: the sequence of strings to insert at this given row
+            The mask must returns a new data with same length or the same old data
+
+        - select_mode: selection modes: SINGLE, BROWSE,
+         MULTIPLE and EXTENDED. Default: SINGLE.
+         Selection modes are the same as described in the tk.Listbox's documentation.
+
+        - layout: EQUALLY or PROPORTIONALLY. Default: EQUALLY
+
+        - orient: orientation for scrollbars. BOTH or VERTICAL or HORIZONTAL
+
+        - options: dictionary of widgets options
+            The widgets keys are: BODY, VSB, HSB, CANVAS, FRAME_BACKGROUND,
+            FRAMES_HEADERS, LISTBOXES_COLUMNS, LABELS_SORTING and LABELS_TITLES.
+            Example: Assume that you want to set the BODY's background to black
             and the horizontal scrollbar's background to red:
-                options = {"body": {"background": "red"},
-                           "hsb": {"background": "black"}}
+                options = {"BODY": {"background": "red"},
+                           "HSB": {"background": "black"}}
         """
-        if "column" in options:
-            _verify_options(options["column"])
+        self._options = {} if options is None else options
+        if "LISTBOXES_COLUMNS" in self._options:
+            _verify_options(self._options["column"])
         self._master = master
-        self._titles_cache = titles
+        self._titles_cache = () if titles is None else titles
         self._titles = []
-        self._data_cache = data
+        self._data_cache = () if data is None else data
         self._data = []
-        self._hidden_columns = hidden_columns
+        self._hidden_columns = () if hidden_columns is None else hidden_columns
         self._sorting = sorting
         self._mask = mask
         self._select_mode = select_mode
         self._layout = layout
         self._orient = orient
-        self._options = options
         self._body_options = None
         self._hsb_options = None
         self._vsb_options = None
         self._canvas_options = None
-        self._frame_window_options = None
-        self._frame_header_options = None
-        self._label_sorting_options = None
-        self._label_title_options = None
-        self._listbox_column_options = None
-        self._parse_options(options)
+        self._frame_background_options = None
+        self._frames_headers_options = None
+        self._labels_sorting_options = None
+        self._labels_titles_options = None
+        self._listboxes_columns_options = None
+        self._parse_options(self._options)
         # misc
         self._components = {}
         self._cache = None
@@ -163,18 +177,23 @@ class Table(Viewable):
         # components
         self._body = None
         self._canvas = None
-        self._window = None
-        self._window_id = None
+        self._background = None
+        self._background_id = None
         self._vsb = None
         self._hsb = None
         self._hsb_under_mouse = False
-        self.build()
-        self._reset_titles(self._titles_cache)
-        self._reset_data(self._data_cache)
+        # Sorry but the select_mode MULTIPLE is buggy
+        if select_mode == MULTIPLE:
+            raise PyrusticTableException("Sorry but the selection mode MULTIPLE is buggy")
+
 
     # ==============================================
     #                   PROPERTIES
     # ==============================================
+    @property
+    def master(self):
+        return self._master
+
     @property
     def body(self):
         return self._body
@@ -185,6 +204,9 @@ class Table(Viewable):
 
     @titles.setter
     def titles(self, titles):
+        """
+        Titles are a sequence of strings. This property overwrite the existing titles.
+        """
         self._reset_titles(titles)
 
     @property
@@ -193,6 +215,13 @@ class Table(Viewable):
 
     @data.setter
     def data(self, data):
+        """
+        Data is a sequence of sequences of strings.
+        This property overwrite the existing data.
+        Example:
+            Assume that the titles are: ("Name", "Age")
+            Data: ( ("Jack", 56), ("Jane", 47) )
+        """
         self._reset_data(data)
 
     @property
@@ -201,6 +230,12 @@ class Table(Viewable):
 
     @hidden_columns.setter
     def hidden_columns(self, val):
+        """
+        val: sequence of indexes to hide.
+        Warning, even if you want to hide just one index,
+        you should put this index into a tuple or list.
+        Example: hide the column of index 1: (1, ) or [1]
+        """
         self._hidden_columns = val
 
     @property
@@ -209,6 +244,14 @@ class Table(Viewable):
 
     @mask.setter
     def mask(self, val):
+        """
+        val: a callable that will be called at each insertion of line of data
+        in the table.
+            The mask must accept 2 arguments:
+                - index: int, index of the row (line)
+                - data: the sequence of strings to insert at this given row
+            The mask must returns a new data with same length or the same old data
+        """
         self._mask = val
 
     @property
@@ -225,23 +268,35 @@ class Table(Viewable):
 
     @property
     def size(self):
-        # return (cols, rows)
-        return len(self._titles), len(self._data)
+        """
+        returns the length of columns and rows: (rows, cols)
+        Example:
+            Assume that the table has 3 columns and 10 rows,
+            this property will return (10, 3)
+        """
+        return len(self._data), len(self._titles)
 
     @property
     def components(self):
         """
-        Get the components used to build this table.
+        Get the components (widgets instances) used to build this dialog.
+
         This property returns a dict. The keys are:
-            'body', 'hsb', 'vsb', 'canvas', 'frame_window', 'frame_header_list',
-            'label_sorting_list', 'label_title_list' and 'listbox_column_list'
-        Warning: 'frame_header_list', 'label_sorting_list', 'label_title_list'
-            and 'listbox_column_list' are sequence of widgets by index
+            BODY, VSB, HSB, CANVAS, FRAME_BACKGROUND,
+            FRAMES_HEADERS, LISTBOXES_COLUMNS, LABELS_SORTING and LABELS_TITLES
+        Warning: FRAMES_HEADERS, LABELS_TITLES, LABELS_SORTING
+         and LISTBOXES_COLUMNS are sequences of widgets by index
         """
         return self._components
 
     @property
     def selection(self):
+        """
+        Return a sequence of the current selection.
+        selection = ( item_1, item_2, ...)
+        item_i = {"index": int, "data": data}
+        data = a sequence of string representing the row at the index.
+        """
         if not self._selection:
             return ()
         data = []
@@ -254,10 +309,9 @@ class Table(Viewable):
     # ==============================================
     #                 PUBLIC METHODS
     # ==============================================
-
     def fill(self, titles=None, data=None):
         """
-        This will reset the titles or data with the new submitted titles or data
+        This will overwrite the titles and/or data with the new given titles or data
         """
         if titles:
             self.titles = titles
@@ -266,13 +320,18 @@ class Table(Viewable):
 
     def insert(self, index, data):
         """
-        Insert into the table this data at this index. Index is an integer or is "end".
-        This method doesn't erase the previous data at this index, but pull it down in the table.
-        data is a sequence of sequences. Example if u want to insert a line, u need to put this
-        line in a sequence.
-        Assume you want to push ("Matrix", "Cameraman") at index 0.
+        Insert into the table this data at this index.
+        Index is an integer or the string "end" (meaning, put the data at the end of table).
+        This method doesn't wipe the previous data stored at this index but instead,
+        pull that data down.
+
+        data is a sequence of sequences of strings.
+
+        Example:
+        Assume you want to push the new line ("Matrix", "Cameraman") at index 0.
             insert(0, [("Matrix", "Cameraman")])
-        Assume you want to push ("Matrix", "Cameraman") and ("Diana", "Seller") at index "end".
+        Assume you want to push ("Matrix", "Cameraman") and ("Diana", "Seller")
+        at index "end".
             insert("end", [("Matrix", "Cameraman"), ("Diana", "Seller")])
         """
         if self._check_data_row_size(data):
@@ -282,7 +341,7 @@ class Table(Viewable):
     def get(self, index_start, index_end=None):
         """
         Returns a line if you don't give a 'index_end'.
-        Returns a sequence of line if you give a 'index_end'.
+        Returns a sequence of lines if you give a 'index_end'.
         """
         if not index_end:
             return self._data[index_start]
@@ -295,7 +354,7 @@ class Table(Viewable):
 
     def delete(self, index_start, index_end=None):
         """
-        Delete lines from the table
+        Deletes lines (rows) from the table
         """
         if not index_end:
             del self._data[index_start]
@@ -318,14 +377,14 @@ class Table(Viewable):
 
     def handle_row_selected(self, handler):
         """
-        This handler will be called at the event 'row selection':
+        This callback will be called at the event 'row selection':
             handler(table, row_data, row_index, column_index)
         """
         self._row_selected_handlers.append(handler)
 
     def handle_row_event(self, sequence, handler):
         """
-        This handler will be called at a row event:
+        This callback will be called at a specific row event (sequence = string):
             handler(table, row_data, row_index, column_index)
         """
         for i, listbox in enumerate(self._listboxes_cache):
@@ -344,7 +403,7 @@ class Table(Viewable):
 
     def config_column(self, index=None, **options):
         """
-
+        Configure column. If index is None, all columns will be configured
         """
         if index is None:
             for x in self._listboxes_cache:
@@ -356,7 +415,8 @@ class Table(Viewable):
 
     def cget_column(self, index=None, option="background"):
         """
-
+        If index is None, returns a sequence of options of listboxes (columns).
+        Else returns the options of the column at the given index
         """
         if index is not None and option:
             return self._listboxes_cache[index].cget(option)
@@ -370,7 +430,10 @@ class Table(Viewable):
         self._body = tk.Frame(master=self._master,
                               class_="Table",
                               cnf=self._body_options)
-        self._components["body"] = self._body
+        self._components[BODY] = self._body
+        # reset titles and data
+        self._reset_titles(self._titles_cache)
+        self._reset_data(self._data_cache)
 
     def _on_display(self):
         pass
@@ -381,37 +444,39 @@ class Table(Viewable):
     def _build(self):
         self._body.columnconfigure(0, weight=1)
         self._body.rowconfigure(0, weight=1)
-        self._canvas = tk.Canvas(self._body, self._canvas_options)
-        self._components["canvas"] = self._canvas
+        self._canvas = tk.Canvas(self._body, cnf=self._canvas_options)
+        self._components[CANVAS] = self._canvas
         self._canvas.grid(row=0, column=0, sticky="nswe")
-        self._window = tk.Frame(self._canvas, self._frame_window_options)
-        self._components["frame_window"] = self._window
-        self._window_id = self._canvas.create_window(0, 0, window=self._window, anchor="nw")
-        self._window.bind("<Configure>", self._on_configure_window, "+")
+        self._background = tk.Frame(self._canvas, self._frame_background_options)
+        self._components[FRAME_BACKGROUND] = self._background
+        self._background_id = self._canvas.create_window(0, 0,
+                                                         window=self._background,
+                                                         anchor="nw")
+        self._background.bind("<Configure>", self._on_configure_background, "+")
         self._build_header_and_columns()
         self._extract_listboxes_color()
         self._set_scrollbars()
 
     def _build_header_and_columns(self):
-        self._components["frame_header_list"] = []
-        self._components["label_sorting_list"] = []
-        self._components["label_title_list"] = []
-        self._components["listbox_column_list"] = []
+        self._components[FRAMES_HEADERS] = []
+        self._components[LABELS_SORTING] = []
+        self._components[LABELS_TITLES] = []
+        self._components[LISTBOXES_COLUMNS] = []
         ignored_i = 0
         for i, title in enumerate(self._titles):
             if i in self._hidden_columns:
                 ignored_i += 1
                 continue
             i -= ignored_i
-            # Configure Window Grid
+            # Configure Background Grid
             if self._layout == EQUALLY:
-                self._window.columnconfigure(i, weight=1, uniform=1)
+                self._background.columnconfigure(i, weight=1, uniform=1)
             # Build Header
             # - install header frame
-            frame_header = tk.Frame(self._window,
+            frame_header = tk.Frame(self._background,
                                     class_="TableHeaderFrame",
-                                    cnf=self._frame_header_options)
-            self._components["frame_header_list"].append(frame_header)
+                                    cnf=self._frames_headers_options)
+            self._components[FRAMES_HEADERS].append(frame_header)
             frame_header.grid(row=0, column=i, sticky="nswe")
             frame_header.columnconfigure(1, weight=1)
             self._header_frames_cache.append(frame_header)
@@ -420,8 +485,8 @@ class Table(Viewable):
             self._labels_sorting_stringvars_cache.append(label_sorting_stringvar)
             label_sorting = tk.Label(frame_header,
                                      textvariable=label_sorting_stringvar,
-                                     cnf=self._label_sorting_options)
-            self._components["label_sorting_list"].append(label_sorting)
+                                     cnf=self._labels_sorting_options)
+            self._components[LABELS_SORTING].append(label_sorting)
             label_sorting.grid(row=0, column=0)
             label_sorting.bind("<Button-1>",
                              lambda event, i=i: self._on_header_clicked(event, i), "+")
@@ -433,19 +498,19 @@ class Table(Viewable):
             self._labels_titles_stringvars_cache.append(label_title_stringvar)
             label_title = tk.Label(frame_header,
                                    textvariable=label_title_stringvar,
-                                   cnf=self._label_title_options)
-            self._components["label_title_list"].append(label_title)
+                                   cnf=self._labels_titles_options)
+            self._components[LABELS_TITLES].append(label_title)
             label_title.grid(row=0, column=1, sticky="nswe")
             label_title.bind("<Button-1>",
                              lambda event, i=i: self._on_header_clicked(event, i), "+")
             self._labels_titles_cache.append(label_title)
             # Build Columns
-            listbox = tk.Listbox(self._window,
+            listbox = tk.Listbox(self._background,
                                  activestyle="none",
                                  selectmode=BROWSE if self._select_mode == MULTIPLE
                                  else self._select_mode,
-                                 cnf=self._listbox_column_options, takefocus=0)
-            self._components["listbox_column_list"].append(listbox)
+                                 cnf=self._listboxes_columns_options, takefocus=0)
+            self._components[LISTBOXES_COLUMNS].append(listbox)
             listbox.config(highlightcolor=listbox.cget("highlightbackground"))
             listbox.grid(row=1, column=i, sticky="nswe")
             listbox.bind('<<ListboxSelect>>',
@@ -459,20 +524,20 @@ class Table(Viewable):
         self._default_listbox_selectforeground = self._listboxes_cache[0].cget("selectforeground")
 
     def _set_scrollbars(self):
-        if self._orient in ("both", "horizontal", "x", "h"):
+        if self._orient in (BOTH, HORIZONTAL, "x", "h"):
             self._hsb = tk.Scrollbar(self._body, name="hsb",
                                      orient="horizontal",
                                      command=self._canvas.xview)
-            self._components["hsb"] = self._hsb
+            self._components[HSB] = self._hsb
             self._hsb.grid(row=1, column=0, columnspan=2, sticky="we")
             self._hsb.bind("<Button-4>", self._on_mouse_wheel, "+")
             self._hsb.bind("<Button-5>", self._on_mouse_wheel, "+")
             self._canvas.config(xscrollcommand=self._hsb.set)
-        if self._orient in ("both", "vertical", "y", "v"):
+        if self._orient in (BOTH, VERTICAL, "y", "v"):
             self._vsb = tk.Scrollbar(self._body, name="vsb",
                                      orient="vertical",
                                      command=self._scroll_listboxes_sync)
-            self._components["vsb"] = self._vsb
+            self._components[VSB] = self._vsb
             self._vsb.grid(row=0, column=1, sticky="ns")
         for listbox in self._listboxes_cache:
             listbox.config(yscrollcommand=self._scroll_listboxes_and_scrollbar_sync)
@@ -633,7 +698,7 @@ class Table(Viewable):
             self._cache = None
         self._reset_data(data_sorted)
 
-    def _table_sorter(self, data, index, count_columns, sorting="asc"):
+    def _table_sorter(self, data, index, count_columns, sorting=ASC):
         reverse = False if sorting == "asc" else True
         data_sorted = sorted(data,
                              key=operator.itemgetter(*range(index, count_columns)),
@@ -688,27 +753,30 @@ class Table(Viewable):
                 raise PyrusticTableException("Invalid data size")
         return True
 
-    def _on_configure_window(self, event):
-        self._canvas.config(height=self._window.winfo_height())
-        self._canvas.config(width=self._window.winfo_width())
+    def _on_configure_background(self, event):
+        self._canvas.config(height=self._background.winfo_height())
+        self._canvas.config(width=self._background.winfo_width())
         self._canvas.config(scrollregion=self._canvas.bbox("all"))
 
     def _parse_options(self, options):
-        self._body_options = options["body"] if "body" in options else {}
-        self._hsb_options = options["hsb"] if "hsb" in options else {}
-        self._vsb_options = options["vsb"] if "vsb" in options else {}
-        self._canvas_options = options["canvas"] if "canvas" in options else {}
-        self._frame_window_options = options["frame_window"] if "frame_window" in options else {}
-        self._frame_header_options = options["frame_header"] if "frame_header" in options else {}
-        self._label_sorting_options = options["label_sorting"] if "label_sorting" in options else {}
-        self._label_title_options = options["label_title"] if "label_title" in options else {}
-        self._listbox_column_options = options["listbox_column"] if "listbox_column" in options else {}
-
-
+        self._body_options = (options[BODY] if BODY in options else {})
+        self._hsb_options = (options[HSB] if HSB in options else {})
+        self._vsb_options = (options[VSB] if VSB in options else {})
+        self._canvas_options = (options[CANVAS] if
+                                CANVAS in options else {})
+        self._frame_background_options = (options[FRAME_BACKGROUND]
+                                      if FRAME_BACKGROUND in options else {})
+        self._frames_headers_options = (options[FRAMES_HEADERS]
+                                      if FRAMES_HEADERS in options else {})
+        self._labels_sorting_options = (options[LABELS_SORTING]
+                                       if LABELS_SORTING in options else {})
+        self._labels_titles_options = (options[LABELS_TITLES]
+                                     if LABELS_TITLES in options else {})
+        self._listboxes_columns_options = (options[LISTBOXES_COLUMNS]
+                                        if LISTBOXES_COLUMNS in options else {})
 
 
 if __name__ == "__main__":
-
     # data
     titles = ["Name", "Age"]
     data = [("Jackson", 22), ("Pollock", 57), ("John", 24), ("Poly", 79),
@@ -716,8 +784,7 @@ if __name__ == "__main__":
             ("Joshua", 23), ("Matthew", 79), ("Mateo", 42), ("Willy", 39)]
     # app
     root = tk.Tk()
-    table = Table(root, titles=titles, data=data, hidden_columns=(0,))
+    table = Table(root, titles=titles, data=data)
+    table.build_pack()
     table.handle_row_selected(lambda *args: print(args))
-    table.body.pack()
-    table.insert(0, (("Matrix", 34),))
     root.mainloop()

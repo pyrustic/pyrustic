@@ -1,16 +1,27 @@
 import tkinter as tk
-from pyrustic.widget.dialog import Dialog
+from pyrustic.viewable import Viewable
 
 
-class Toast(Dialog):
+# Components
+BODY = "body"
+LABEL_HEADER = "label_header"
+LABEL_MESSAGE = "label_message"
+
+
+class Toast(Viewable):
     """
-    This is Toast ! Based on Dialog, this class pop-up a dialog for a given duration.
-    Any 'click' action on the app will destroy the toast.
+    A toast is a dialog box with or without decoration
+    that is displayed for a given duration.
+
+    Any "click" action on the Toast's body will close it.
+
     Example:
         import tkinter as tk
         from pyrustic.widget.toast import Toast
+
         root = tk.Tk()
-        Toast(root, header="My Header", message="My Message")
+        toast = Toast(root, header="My Header", message="My Message")
+        toast.build()
         root.mainloop()
 
     """
@@ -20,25 +31,36 @@ class Toast(Dialog):
                  title=None,
                  header=None,
                  message=None,
-                 duration=2000,
+                 duration=1234,
                  decoration=False,
                  geometry=None,
-                 options={}):
+                 options=None):
         """
-        - master: a tkinter widget object
-        - title: str, the title of the dialog (if you set 'decoration' to True)
-        - header: str, the header text
-        - message: str, message to show
+        PARAMETERS:
+
+        - master: widget parent. Example: an instance of tk.Frame
+
+        - title: title of dialog box
+
+        - header: the text to show as header
+
+        - message: the text to show as message
+
         - duration: int, in milliseconds.
             You can set None to duration to cancel the self-destroying timer
+
         - decoration: True or False to allow Window decoration
-        - geometry: str, the same geometry as described in tkinter doc. Example: "300x200+0+0"
-        - options: dictionary, these options will be used as argument to the widget's constructors.
-            The widgets are: body, label_header and label_message.
-            Example: Assume that you want to set the label_message's background to black
-            and the body's background to red:
-                options = {"body": {"background": "red"},
-                           "label_message": {"background": "black"}}
+
+        - geometry: str, as the dialog box is a toplevel (BODY),
+         you can edit its geometry. Example: "500x300"
+
+        - options: dictionary of widgets options
+            The widgets keys are: BODY, LABEL_HEADER, LABEL_MESSAGE.
+
+            Example: Assume that you want to set the LABEL_MESSAGE's background to black
+            and the BODY's background to red:
+                options = { BODY: {"background": "red"},
+                            LABEL_MESSAGE: {"background": "black"} }
         """
         self._master = master
         self._title = title
@@ -47,15 +69,14 @@ class Toast(Dialog):
         self._duration = duration
         self._decoration = decoration
         self._geometry = geometry
-        self._options = options
+        self._options = {} if options is None else options
         self._body_options = None
         self._label_header_options = None
         self._label_message_options = None
-        self._parse_options(options)
+        self._parse_options(self._options)
         self._body = None
         self._cancel_id = None
         self._components = {}
-        self.build()
 
     # ======================================
     #            PROPERTIES
@@ -95,20 +116,21 @@ class Toast(Dialog):
     @property
     def components(self):
         """
-        Get the components used to build this dialog.
+        Get the components (widgets instances) used to build this Toast.
+
         This property returns a dict. The keys are:
-            'body', 'label_header', and 'label_message'
+            BODY, LABEL_HEADER, LABEL_MESSAGE,
         """
         return self._components
 
     # ======================================
-    #            INTERNAL
+    #            LIFECYCLE
     # ======================================
     def _on_build(self):
         self._body = tk.Toplevel(self._master,
                                  class_="Toast",
                                  cnf=self._body_options)
-        self._components["body"] = self._body
+        self._components[BODY] = self._body
         if not self._decoration:
             self._body.overrideredirect(1)
         if self._geometry:
@@ -123,7 +145,7 @@ class Toast(Dialog):
                               anchor="w",
                               justify=tk.LEFT,
                               cnf=self._label_header_options)
-            self._components["label_header"] = label_header
+            self._components[LABEL_HEADER] = label_header
             label_header.pack(fill=tk.X, padx=10, pady=10)
         if self._message:
             label_message = tk.Label(self._body,
@@ -132,7 +154,7 @@ class Toast(Dialog):
                                anchor="w",
                                justify=tk.LEFT,
                                cnf=self._label_message_options)
-            self._components["label_message"] = label_message
+            self._components[LABEL_MESSAGE] = label_message
             label_message.pack(fill=tk.X, padx=10, pady=10)
 
     def _on_display(self):
@@ -147,21 +169,41 @@ class Toast(Dialog):
             self._body.destroy()
 
     def _parse_options(self, options):
-        self._body_options = options["body"] if "body" in options else {}
-        self._label_header_options = options["label_header"] if "label_header" in options else {}
-        self._label_message_options = options["label_message"] if "label_message" in options else {}
+        self._body_options = (options[BODY] if BODY in options else {})
+        self._label_header_options = (options[LABEL_HEADER]
+                                      if LABEL_HEADER in options else {})
+        self._label_message_options = (options[LABEL_MESSAGE]
+                                       if LABEL_MESSAGE in options else {})
+
+
+class _ToastTest(Viewable):
+
+    def __init__(self, root):
+        self._root = root
+        self._body = None
+
+    def _on_build(self):
+        self._body = tk.Frame(self._root)
+        btn_launch = tk.Button(self._body, text="launch",
+                               command=self._on_click_launch)
+        btn_launch.pack()
+
+    def _on_display(self):
+        pass
+
+    def _on_destroy(self):
+        pass
+
+    def _on_click_launch(self):
+        toast = Toast(self._body, title="Toast Title",
+                      header="Header", message="This is the message",
+                      duration=3000)
+        toast.build_wait()
 
 
 if __name__ == "__main__":
-    def launch_toast(root):
-        print("toasting !")
-        Toast(root,
-              title="Pyrustic Toast",
-              header="This is the long\nheader",
-              message="Hello !\nThis is the message")
-
     root = tk.Tk()
-    root.geometry("500x500+0+0")
-    tk.Button(root, text="Launch Toast",
-              command=lambda root=root: launch_toast(root)).pack()
+    root.geometry("500x300+0+0")
+    toast_test = _ToastTest(root)
+    toast_test.build_pack()
     root.mainloop()

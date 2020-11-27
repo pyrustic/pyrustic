@@ -1,3 +1,0 @@
-CREATE TABLE path(id INTEGER NOT NULL PRIMARY KEY,
-                  project TEXT NOT NULL,
-                  database TEXT NOT NULL);

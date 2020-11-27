@@ -1,0 +1,39 @@
+https://api.github.com/zen
+https://docs.github.com/en/free-pro-team@latest/rest/reference/repos
+https://api.github.com/rate_limit
+https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token
+https://api.github.com/user
+
+
+
+https://api.github.com/repos/{owner}/{repo}
+=======================================
+	owner|type = "Organisation" ou "User"
+	description = str
+	fork = bool
+	created_at = "2020-03-20T20:17:04Z"
+	updated_at =
+	pushed_at =
+	stargazers_count = int
+	watchers_count = int
+	forks_count = int
+	open_issues_count = int
+	license|name = str
+	subscribers_count = int
+
+
+https://api.github.com/repos/{owner}/{repo}/releases   (on peut ajouter ?per_page=int) (on peut aussi /latest)
+[index]
+	tag_name = str
+	target_commitish = "master"
+	name = str
+	draft = bool
+	prerelease = bool
+	created_at = "2020-03-20T20:17:04Z"
+	published_at =
+	body = str
+	assets[0][name] = str
+	assets[0][download_count] = int
+	assets[0][created_at] = "2020-03-20T20:17:04Z"
+	assets[0][updated_at] =
+

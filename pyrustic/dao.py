@@ -7,23 +7,30 @@ import threading
 class Dao:
     """
     It's recommended to use Dao by composition. Meaning: don't subclass it.
-        DAO: Data Access Object (this one is built to work with SQLite).
-        You give an SQL request with some params or not, it spills out the result nicely !
+    DAO: Data Access Object (this one is built to work with SQLite).
+    You give an SQL request with some params or not, it spills out the result nicely !
+    You can even get the list of tables or columns.
     """
     def __init__(self, path, creational_script=None, raise_exception=True,
                  raise_warning=True, connection_kwargs={}):
         """
-        - path: path to database file
-        - creational_script: A tuple (datatype, string). Datatype is "file" or "str".
-            The string is the path to the file or the inline sql script.
-            Example_a: ("file", "/path/to/script.sql")
-            Example_b: ("str", "CREATE TABLE my_table(id INTEGER NOT NULL PRIMARY KEY);"
+        - path: absolute path to database file
+
+        - creational_script: A tuple (format, value).
+            - Format is a string that is either "inline" or "file".
+            - Value is either the inline sql script or the absolute path to the file.
+            Example_a: ("inline", "CREATE TABLE my_table(id INTEGER NOT NULL PRIMARY KEY);"
+            Example_b: ("file", "/path/to/script.sql")
+
         - raise_exception: By default, True, so exceptions (sqlite.Error) will be raised
+
         - raise_warning: By default, True, so exceptions (sqlite.Warning) will be raised
-        - connection_kwargs: connections arguments used while calling the method 'sqlite.connect'
+
+        - connection_kwargs: connections arguments used while calling the
+         method "sqlite.connect()"
         """
 
-        self._path = path
+        self._path = os.path.normpath(path)
         self._creational_script = creational_script
         self._raise_exception = raise_exception
         self._raise_warning = raise_warning
@@ -56,7 +63,7 @@ class Dao:
     @property
     def con(self):
         """
-        Connection obj
+        Connection object
         """
         return self._con
 
@@ -67,7 +74,7 @@ class Dao:
     @property
     def is_new(self):
         """
-        Returns True if the database is newly freshly created, else returns False
+        Returns True if the database has just been created, otherwise returns False
         """
         return self._is_new
 
@@ -76,7 +83,7 @@ class Dao:
     # ====================================
     def test(self):
         """
-        Return True if this is a legal database, else returns False
+        Returns True if this is a legal database, otherwise returns False
         """
         cache = self._raise_exception
         self._raise_exception = True
@@ -90,13 +97,16 @@ class Dao:
         self._raise_exception = cache
         return legal
 
-    def edit(self, sql, param=()):
+    def edit(self, sql, param=None):
         """
         Use this method to edit your database.
         Formally: Data Definition Language (DDL) and Data Manipulation Language (DML).
         It returns True or False or raises sqlite.Error, sqlite.Warning
+        Example:
+            edit( "SELECT * FROM table_x WHERE age=?", param=(15, ) )
         """
         with self._lock:
+            param = () if param is None else param
             result = True
             cur = None
             try:
@@ -116,7 +126,7 @@ class Dao:
                     cur.close()
             return result
 
-    def query(self, sql, param=()):
+    def query(self, sql, param=None):
         """
         Use this method to query your database.
         Formally: Data Query Language (DQL)
@@ -127,6 +137,7 @@ class Dao:
             This method can raise sqlite.Error, sqlite.Warning
         """
         with self._lock:
+            param = () if param is None else param
             description = []
             data = []
             cur = None
@@ -171,7 +182,7 @@ class Dao:
 
     def export(self):
         """
-        export the database: it returns a string of sql
+        export the database: it returns a string of sql code.
         This method can raise sqlite.Error, sqlite.Warning
         """
         with self._lock:
@@ -188,7 +199,7 @@ class Dao:
 
     def tables(self):
         """
-        list of tables.
+        Returns the list of tables names.
         Example: ["table_1", "table_2"]
         This method can raise sqlite.Error, sqlite.Warning
         """
@@ -212,7 +223,7 @@ class Dao:
 
     def columns(self, table):
         """
-        list of columns of a table name
+        Returns the list of columns names of the given table name
         A column is like:
             (int_id, str_column_name, str_column_datatype, int_boolean_nullability,
             default_value, int_primary_key)
@@ -243,7 +254,7 @@ class Dao:
 
     def close(self):
         """
-        well, it closes the connection
+        Well, it closes the connection
         """
         with self._lock:
             if self._con:

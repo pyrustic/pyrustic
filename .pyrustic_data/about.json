@@ -1,0 +1,8 @@
+{
+	"project_name": "pyrustic",
+	"project_title": "Pyrustic Suite",
+	"description": "Lightweight software suite to build Python desktop applications then publishing them into the hub",
+	"debug": true,
+	"author": "Pyrustic Evangelist",
+	"version": "0.0.3"
+}

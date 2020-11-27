@@ -8,7 +8,7 @@ class _Style:
     @property
     def widget_class(self):
         """
-        Get the widget class
+        Get the pyrustic_widget class
         """
         if self._WIDGET_CLASS is None:
             raise PyrusticException("The class attribute _WIDGET_CLASS is missing in the _Style subclass")
@@ -22,7 +22,7 @@ class _Style:
 
     def target(self, widget, raise_exception=False):
         """
-        Individually apply a style to a widget
+        Individually apply a style to a pyrustic_widget
         """
         if raise_exception:
             widget.config(cnf=self.__dict__.copy())
@@ -307,6 +307,41 @@ class Menubutton(_Style):
         self.wrapLength = None  # 0
 
 
+class OptionMenu(_Style):
+    _WIDGET_CLASS = "OptionMenu"
+
+    def __init__(self):
+        self.activeBackground = None  # "#ececec"
+        self.activeForeground = None  # "#000000"
+        self.anchor = None  # center
+        self.background = None  # "#d9d9d9"
+        self.borderWidth = None  # 2
+        self.compound = None  # none
+        self.cursor = None  #
+        self.direction = None  # below
+        self.disabledForeground = None  # #a3a3a3
+        self.font = None  # TkDefaultFont
+        self.foreground = None  # #000000
+        self.height = None  # 0
+        self.highlightBackground = None  # #d9d9d9
+        self.highlightColor = None  # #000000
+        self.highlightThickness = None  # 2
+        self.image = None  #
+        self.indicatorOn = None  # 1
+        self.justify = None  # center
+        self.menu = None  # .140544366545328.menu
+        self.padX = None  # 5
+        self.padY = None  # 4
+        self.relief = None  # raised
+        self.state = None  # normal
+        self.takeFocus = None  # 0
+        self.text = None  #
+        self.textVariable = None  # PY_VAR0
+        self.underline = None  # -1
+        self.width = None  # 0
+        self.wrapLength = None  # 0
+
+
 class PanedWindow(_Style):
     _WIDGET_CLASS = "Panedwindow"
 
@@ -454,9 +489,9 @@ class Text(_Style):
         self.background = None  # "#ffffff"
         self.blockCursor = None  # 0
         self.borderWidth = None  # 1
-        self.cursor = None  # None  # xterm
+        self.cursor = None  # xterm
         self.exportSelection = None  # 1
-        self.font = None  # None  # TkFixedFont
+        self.font = None  # TkFixedFont
         self.foreground = None  # #000000
         self.height = None  # 24
         self.highlightBackground = None  # #d9d9d9

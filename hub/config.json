@@ -1,0 +1,12 @@
+{
+	"gui":
+	{
+		"root_geometry": "900x500+0+0",
+		"ignore_geometry": false,
+		"maximize_window": false,
+		"resizable_width": true,
+		"resizable_height": true,
+		"allow_theme": true,
+		"exit_quickly": false
+	}
+}
