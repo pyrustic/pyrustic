@@ -193,6 +193,7 @@ Get the latest release version `0.0.3` [here](https://github.com/pyrustic/pyrust
 ## Installation
 - Download the latest release [here](#download);
 - uncompress the archive wherever you want (please choose a decent location);
+- make sure you gave the correct permissions to the files and folders in `pyrustic` otherwise you couldn't update `pyrustic` later;
 - go to the `ROOT_DIR`: the folder with files `main.py`, `install.py` and `about.py` inside;
 - from the `ROOT_DIR`, run `install.py`;
 - from the `ROOT_DIR`, run `main.py` to launch the `Manager`;
