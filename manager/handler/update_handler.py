@@ -29,9 +29,6 @@ class UpdateHandler:
         self._process(args)
 
     def _process(self, args):
-        if self._target is None:
-            print("  Please link a Target first !")
-            return
         if args:
             print("Wrong usage of this command")
             return

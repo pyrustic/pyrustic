@@ -60,6 +60,8 @@ Via the `Manager` you can:
 - launch the `SQL Editor`, `Test Runner` and `Hub`;
 - and more...
 
+The `update` command creates a backup of the current version, erases the current version, then installs the latest version. If you want the `update` command to run smoothly, make sure you gave the correct permissions to the files and folders in `pyrustic` during the first install.
+
 ### The SQL Editor
 <!-- Image -->
 <div align="center">
