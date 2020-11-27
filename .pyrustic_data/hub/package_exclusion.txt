@@ -16,3 +16,6 @@ __pycache__
 
 ### Secret
 ./secret
+
+### Git
+./.git
