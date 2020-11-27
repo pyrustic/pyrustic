@@ -74,7 +74,7 @@ class UpdateHandler:
     def _check_latest_release(self, gurl):
         url = None
         name = None
-        res = "/repos/{}/{}/releases/latest".format("pyrustic", "test")
+        res = "/repos/{}/{}/releases/latest".format("pyrustic", "pyrustic")
         response = gurl.request(common_funcs.get_hub_url(res))
         code = response.code
         json = response.json
