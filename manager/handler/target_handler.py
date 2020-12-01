@@ -33,7 +33,7 @@ class TargetHandler:
             print("  Wrong usage of this command")
             return
         # target version
-        cache = os.path.join(self._target, ".pyrustic_data", "about.json")
+        cache = os.path.join(self._target, "pyrustic_data", "about.json")
         target_version = None
         if os.path.exists(cache):
             jasonix = Jasonix(cache)

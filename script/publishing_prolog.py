@@ -13,7 +13,7 @@ PUBLISHING_FORM_PATH = sys.argv[3]
 
 # Write your code here
 cached_target_about_json = os.path.join(CACHED_TARGET_ROOT,
-                                 ".pyrustic_data",
+                                 "pyrustic_data",
                                  "about.json")
 jasonix = Jasonix(cached_target_about_json)
 jasonix.data["dev_mode"] = False

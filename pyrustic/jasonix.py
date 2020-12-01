@@ -1,7 +1,11 @@
 import os
 import os.path
 import json
-from pyrustic.exception import PyrusticException
+try:
+    from pyrustic.exception import PyrusticException
+except ImportError:
+    class PyrusticException(Exception):
+        pass
 
 
 class Jasonix:

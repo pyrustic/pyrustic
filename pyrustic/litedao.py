@@ -4,9 +4,9 @@ import atexit
 import threading
 
 
-class Dao:
+class LiteDao:
     """
-    It's recommended to use Dao by composition. Meaning: don't subclass it.
+    It's recommended to use LiteDao by composition. Meaning: don't subclass it.
     DAO: Data Access Object (this one is built to work with SQLite).
     You give an SQL request with some params or not, it spills out the result nicely !
     You can even get the list of tables or columns.

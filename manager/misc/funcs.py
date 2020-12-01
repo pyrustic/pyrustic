@@ -8,7 +8,7 @@ import json
 def copyto(src, dest):
     """
     Please make sure that DEST doesn't exist yet !
-    Copy a file or directory (src) to a destination folder (dest)
+    Copy a file or contents of directory (src) to a destination file or folder (dest)
     """
     if not os.path.exists(src) or os.path.exists(dest):
         return False
@@ -27,7 +27,28 @@ def copyto(src, dest):
 
 def moveto(src, dest):
     """
-    Please make sure that DEST doesn't exist yet !
+    If the DEST exists:
+        * Before moveto *
+        - /home/lake (SRC)
+        - /home/lake/fish.txt
+        - /home/ocean (DEST)
+        * Moveto *
+        moveto("/home/lake", "/home/ocean")
+        * After Moveto *
+        - /home/ocean
+        - /home/ocean/lake
+        - /home/ocean/lake/fish.txt
+    Else IF the DEST doesn't exist:
+        * Before moveto *
+        - /home/lake (SRC)
+        - /home/lake/fish.txt
+        * Moveto *
+        moveto("/home/lake", "/home/ocean")
+        * After Moveto *
+        - /home/ocean
+        - /home/ocean/fish.txt
+
+
     Move a file or directory (src) to a destination folder (dest)
     """
     if not os.path.exists(src) or os.path.exists(dest):
@@ -134,21 +155,3 @@ def get_root_from_package(package_name):
         root = x
         break
     return root
-
-
-def unzip_to(src, dest):
-    """
-    Please make sure that DEST does exist yet !
-    Unzip an archive (src) into a location (dest)
-    """
-    if not os.path.isfile(src) or not os.path.exists(dest):
-        return False
-    #os.mkdir(dest)
-    with ZipFile(src, 'r') as zip:
-        # Extract all the contents of zip file in different directory
-        try:
-            zip.extractall(dest)
-        except Exception as e:
-            #shutil.rmtree(dest)
-            return False
-    return True

@@ -121,7 +121,7 @@ class MainHost:
     def allowed_to_publishing(self):
         """ Returns a bool """
         publishing_data_path = os.path.join(self.target_project(),
-                                            ".pyrustic_data",
+                                            "pyrustic_data",
                                             "hub",
                                             "publishing.json")
         if not os.path.exists(publishing_data_path):
@@ -190,7 +190,7 @@ class MainHost:
         data = {"target": target,
                 "project_name": project_name,
                 "version": version}
-        about_path = os.path.join(target, ".pyrustic_data", "about.json")
+        about_path = os.path.join(target, "pyrustic_data", "about.json")
         if not os.path.exists(about_path):
             return data
         jasonix = Jasonix(about_path)

@@ -56,7 +56,7 @@ class KstartHandler:
             funcs.build_package(self._target, package)
 
     def _make_folders(self):
-        folders = ("cache", ".pyrustic_data", "docs", "script")
+        folders = ("cache", "pyrustic_data", "docs", "script")
         for folder in folders:
             path = os.path.join(self._target, folder)
             if os.path.exists(path):
@@ -121,7 +121,7 @@ class KstartHandler:
         self._add_file(dest_path, data)
         # add publishing_exclusion
         src_path = os.path.join(template_path, "package_exclusion_template.txt")
-        dest_path = os.path.join(self._target, ".pyrustic_data", "hub",
+        dest_path = os.path.join(self._target, "pyrustic_data", "hub",
                                  "package_exclusion.txt")
         data = self._get_data_from_template(src_path)
         self._add_file(dest_path, data)
@@ -138,7 +138,7 @@ class KstartHandler:
 
     def _add_json_data_files(self):
         local_pyrustic_data_folder = os.path.join(self._target,
-                                                  ".pyrustic_data")
+                                                  "pyrustic_data")
         # add publishing.json
         path = os.path.join(local_pyrustic_data_folder, "hub", "publishing.json")
         default_path = os.path.join(about.ROOT_DIR,
@@ -147,7 +147,7 @@ class KstartHandler:
         jasonix = Jasonix(path, default=default_path)
         jasonix.data["prolog"] = "script.publishing_prolog"
         jasonix.data["epilog"] = "script.publishing_epilog"
-        jasonix.data["exclusion"] = "./.pyrustic_data/hub/package_exclusion.txt"
+        jasonix.data["exclusion"] = "./pyrustic_data/hub/package_exclusion.txt"
         jasonix.save()
         # add about.json
         path = os.path.join(local_pyrustic_data_folder, "about.json")

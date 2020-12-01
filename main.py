@@ -212,12 +212,23 @@ def signal_handler(signum, frame, pm):
     return
 
 def check_installation():
-    if not os.path.exists(constants.PYRUSTIC_DATA_FOLDER):
-        print("\n-----\n")
-        print("You haven't completed the installation of Pyrustic Suite")
-        print("Installation...")
-        install.installation()
-        print("\n-----\n")
+    should_install = False
+    paths = (constants.SUITE_SHARED_FOLDER,
+             constants.MANAGER_SHARED_FOLDER,
+             constants.SQLEDITOR_SHARED_FOLDER,
+             constants.RUNTEST_SHARED_FOLDER,
+             constants.HUB_SHARED_FOLDER)
+    for path in paths:
+        if not os.path.exists(path):
+            should_install = True
+            break
+    if not should_install:
+        return
+    print("\n-----\n")
+    print("You haven't completed the installation of Pyrustic Suite")
+    print("Installation...")
+    install.installation()
+    print("\n-----\n")
 
 
 check_installation()

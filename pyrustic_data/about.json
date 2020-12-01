@@ -1,0 +1,11 @@
+{
+	"project_name": "pyrustic",
+	"project_title": "Pyrustic Suite",
+	"description": "Pyrustic Suite is a lightweight software suite to help develop, package, and publish Python desktop applications",
+	"url": "https://github.com/pyrustic/pyrustic",
+	"email": "pyrustic@protonmail.com",
+	"dev_mode": true,
+	"author": "Pyrustic Evangelist",
+	"version": "0.0.3",
+	"install_script": "install"
+}

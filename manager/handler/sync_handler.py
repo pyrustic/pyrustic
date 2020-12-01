@@ -86,7 +86,7 @@ class SyncHandler:
         return True
 
     def _inject_about_json_in_target_framework(self):
-        default = os.path.join(about.ROOT_DIR, ".pyrustic_data", "about.json")
+        default = os.path.join(about.ROOT_DIR, "pyrustic_data", "about.json")
         dest = os.path.join(self._target, "pyrustic", "about.json")
         if os.path.exists(default):
             Jasonix(dest, default=default)
@@ -102,7 +102,7 @@ class SyncHandler:
                                    os.path.join(cache_path, name))
 
     def _inject_pyrustic_data_in_target(self):
-        pyrustic_data_path = os.path.join(self._target, ".pyrustic_data")
+        pyrustic_data_path = os.path.join(self._target, "pyrustic_data")
         if not os.path.exists(pyrustic_data_path):
             os.mkdir(pyrustic_data_path)
             os.mkdir(os.path.join(pyrustic_data_path, "hub"))

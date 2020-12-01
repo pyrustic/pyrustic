@@ -1,5 +1,5 @@
 {
-	"exclusion": "./.pyrustic_data/hub/package_exclusion.txt",
+	"exclusion": "./pyrustic_data/hub/package_exclusion.txt",
 	"prolog": "script.publishing_prolog",
 	"epilog": "script.publishing_epilog",
 	"allow_publishing": true

@@ -8,12 +8,12 @@ from sqleditor.view.footer import Footer
 from sqleditor.view.editor import Editor
 from sqleditor.view.nodebar import Nodebar
 from common import funcs
-from pyrustic.dao import Dao
+from pyrustic.litedao import LiteDao
 
 
 class MainDaoBuilder:
     def build(self, path):
-        dao = Dao(path)
+        dao = LiteDao(path)
         return MainDao(dao)
 
 

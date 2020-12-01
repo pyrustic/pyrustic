@@ -1,6 +1,6 @@
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/demo.gif" alt="Demo">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.gif" alt="Cover">
     <br>
     <p align="center">
     Quick demo
@@ -177,6 +177,7 @@ A non-exhaustive list of features:
 - `pyrustic.viewable.Viewable`: bring an intuitive lifecycle system to your `Views` by making them implement `Viewable`. The mega-widgets in this framework implement `Viewable`.
 - the `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
 - `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic Suite` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
+- for obvious reasons (clue: `beta`), `Pyrustic Suite` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `cache` folder.
 - and more...
 
 <!-- Requirements -->
@@ -208,7 +209,7 @@ If you are not on `Windows`, check this [article](https://opensource.com/article
 - Run `main.py` in `Pyrustic Suite` to open the `Manager`.
 - Link your project to the `Manager` by typing the command `link` in the `Manager`. A dialog will appear so you could choose your demo project folder. You can also put the absolute path of the folder directly in front of the `link` command. The `link` command does not make any change in your project.
 - Your project is now linked to the `Manager` and becomes the Target project. The `target` command displays the path to the Target project (its `ROOT_DIR`). You can unlink it with the command `unlink`. Whenever you come back to the `Manager`, just type `relink` to link again your previous Target project. Use the command `last` to see the list of last projects.
-- You can now inject `Pyrustic Framework` in your project as well as other files/folders like for example the `tests` folder or the hidden folder `.pyrustic_data`. You just have to type `kstart` in the `Manager` to perform a Kickstart. The `kstart` command modifies your project.
+- You can now inject `Pyrustic Framework` in your project as well as other files/folders like for example the `tests` folder or the hidden folder `pyrustic_data`. You just have to type `kstart` in the `Manager` to perform a Kickstart. The `kstart` command modifies your project.
 - You can run your project with the `run` command without arguments. You can also run a specific `module` in your project. Example: `run host.calc.addition`.
 - Type `sql`, `test` or `hub` commands in the `Manager` to launch the `SQL Editor`, `Test Runner` or `Hub` respectively.
 - Your project has an entry point which is `main.py`. In the `main.py` file, there is an instance of `pyrustic.app.App` to which the first `View` to display is passed.
@@ -220,7 +221,7 @@ If you are not on `Windows`, check this [article](https://opensource.com/article
     - and the call of the method `on_destroy()` when the `View` is destroyed.
 - To run a `View`, call the `build()` method which will execute `on_build()` and will return the content of the `_body` instance variable. The `build_pack()` method builds the `View` then calls the method `pack()` on the `body` in a single call. Same stuff with `build_grid()` and `build_place()`. The method `build_wait()` is used for `View` built with a `Toplevel` as `_body`, thus, execution of the next instructions is paused until the destruction of the `View`. To destroy a `View`, call the method `destroy()`.
 
-Note: Initializing your project with the `kstart` command in the `Manager` will create the `.pyrustic_data` folder at the root of your project (`ROOT_DIR`). This folder may be hidden, so check your operating system settings. Take a look at this folder. The `Hub` application checks this folder to use some data like your project version or the path to the `Prolog` and `Epilog` scripts.
+Note: Initializing your project with the `kstart` command in the `Manager` will create the `pyrustic_data` folder at the root of your project (`ROOT_DIR`). This folder may be hidden, so check your operating system settings. Take a look at this folder. The `Hub` application checks this folder to use some data like your project version or the path to the `Prolog` and `Epilog` scripts.
 
 A better tutorial will come later. Use the `kstart` command in the `Manager` to get an equivalent of a graphical `Hello World` demo project, then explore the contents of your project. Start with `main.py`, then `view/main_view.py`. Good luck !
 

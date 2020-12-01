@@ -173,7 +173,7 @@ class PublishingHost:
         return publishing_cache
 
     def _get_publishing_config(self):
-        project_pyrustic_data_path = os.path.join(self._target_project, ".pyrustic_data")
+        project_pyrustic_data_path = os.path.join(self._target_project, "pyrustic_data")
         if not os.path.exists(project_pyrustic_data_path):
              return []
         project_publishing_path = os.path.join(project_pyrustic_data_path,

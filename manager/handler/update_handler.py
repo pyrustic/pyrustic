@@ -1,3 +1,4 @@
+import os
 import os.path
 from pyrustic.gurl import Gurl
 from pyrustic.jasonix import Jasonix
@@ -6,6 +7,7 @@ from manager.misc import funcs
 from common import funcs as common_funcs
 import tempfile
 import shutil
+import uuid
 import about
 
 
@@ -94,7 +96,6 @@ class UpdateHandler:
             with open(cached_zip, "wb") as file:
                 file.write(response.body)
         except Exception as e:
-            print("rror: ", e)
             cached_zip = None
             cache_temp.cleanup()
             cache_temp = None
@@ -102,14 +103,17 @@ class UpdateHandler:
 
     def _backup_current_version(self):
         backup_path = os.path.join(constants.PYRUSTIC_DATA_FOLDER,
-                                   "suite",
-                                   "backup",
-                                   about.VERSION)
-        if os.path.exists(backup_path):
+                                   "cache")
+        if not os.path.exists(backup_path):
             try:
-                shutil.rmtree(backup_path, ignore_errors=True)
-            except Exception as e:
+                os.makedirs(backup_path)
+            except Exception:
                 return False
+        while True:
+            random_data = str(uuid.uuid4().hex)
+            backup_path = os.path.join(backup_path, random_data)
+            if not os.path.exists(backup_path):
+                break
         src = about.ROOT_DIR
         dest = backup_path
         return funcs.moveto(src, dest)
