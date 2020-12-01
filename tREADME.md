@@ -78,7 +78,7 @@ The graphical `SQL Editor` allows you to:
 - open in-memory database;
 - and more...
 
-The `SQL Editor` makes extensive use of the `pyrustic.dao` library.
+The `SQL Editor` makes extensive use of the `pyrustic.litedao` library.
 
 ### The Test Runner
 <!-- Image -->
@@ -170,7 +170,7 @@ A non-exhaustive list of features:
 - `Hub`: package your app, publish it, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
 - An optional `Framework` to inject in your project. The same `Framework` used by `Pyrustic Suite`.
 - `pyrustic.threadium`: a `library` included in the `Framework` to make it easy to develop multithreading applications.
-- `pyrustic.dao`: a `library` included in the `Framework` to simplify the connection to your database.
+- `pyrustic.litedao`: a `library` included in the `Framework` to simplify the connection to your database.
 - `pyrustic.gurl`: a `library` included in the `Framework` to fetch resources with an implementation of conditional request and a smart responses caching system. `Hub` uses this library to fetch resources as a good API citizen.
 - `pyrustic.default_style` and `pyrustic.theme`: a style/theme system to make it easy for you to build beautiful GUIs.
 - `pyrustic.themes.darkmatter`: a dark theme ready to use, the one used as base theme by the `SQL Editor`, `Test Runner` and the `Hub`.
