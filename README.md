@@ -3,7 +3,7 @@
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
     <br>
     <p align="center">
-    Quick demo
+    Pyrustic Suite
     </p>
 </div>
 
@@ -135,7 +135,7 @@ You can update the `Framework` of your Target project by executing the command `
 
 <!-- Demo -->
 ## Demo
-This is the [Demo.mp4](https://raw.githubusercontent.com/pyrustic/misc/master/media/demo.mp4)
+This is the [demo video](https://pyrustic.github.io#demo).
 
 To open the video in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
 
