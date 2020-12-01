@@ -195,5 +195,8 @@ class Viewable():
             self._on_destroy()
             if destroy:
                 self._body.destroy()
-            if self.__master.focus_get() is None:
-                self.__master.winfo_toplevel().focus_lastfor().focus_force()
+            try:
+                if self.__master.focus_get() is None:
+                    self.__master.winfo_toplevel().focus_lastfor().focus_force()
+            except Exception as e:
+                pass

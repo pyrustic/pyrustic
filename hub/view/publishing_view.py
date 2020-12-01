@@ -240,7 +240,7 @@ class PublishingView(Viewable):
         if not self._check_mandatory_field():
             return
         confirm = Confirm(self._body, title="Confirmation",
-                          header="Ready to publishing your project",
+                          header="Ready to publish your project",
                           message="Do you want to continue ?")
         confirm.build_wait()
         if not confirm.ok:

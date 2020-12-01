@@ -1,6 +1,6 @@
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.gif" alt="Cover">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
     <br>
     <p align="center">
     Quick demo
@@ -14,11 +14,12 @@
 This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
 
 <!-- Quick Links -->
-[Features](#features) | [Download](#download) | [Tutorial](#tutorial) | [Memes](#memes)
+[Demo](#demo) | [Features](#features) | [Download](#download) | [Tutorial](#tutorial) | [Memes](#memes)
 
 <!-- Table of contents -->
 ## Table Of Contents
 - [Overview](#overview)
+- [Demo](#demo)
 - [Philosophy](#philosophy)
 - [Features](#features)
 - [Requirements](#requirements)
@@ -131,6 +132,12 @@ The `Framework` contains libraries that target:
 - and more...
 
 You can update the `Framework` of your Target project by executing the command `sync` in the `Manager`.
+
+<!-- Demo -->
+## Demo
+This is the [Demo.mp4](https://raw.githubusercontent.com/pyrustic/misc/master/media/demo.mp4)
+
+To open the video in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
 
 <!-- Philosophy -->
 ## Philosophy
