@@ -14,7 +14,7 @@
 This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
 
 <!-- Quick Links -->
-[Demo](#demo) | [Features](#features) | [Download](#download) | [Tutorial](#tutorial) | [Memes](#memes)
+[Demo](#demo) | [Features](#features) | [Installation](#installation) | [Tutorial](#tutorial) | [Memes](#memes)
 
 <!-- Table of contents -->
 ## Table Of Contents
@@ -23,7 +23,6 @@ This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encour
 - [Philosophy](#philosophy)
 - [Features](#features)
 - [Requirements](#requirements)
-- [Download](#download)
 - [Installation](#installation)
 - [Tutorial](#tutorial)
 - [Documentation](#documentation)
@@ -137,7 +136,7 @@ You can update the `Framework` of your Target project by executing the command `
 ## Demo
 This is the [demo video](https://pyrustic.github.io).
 
-To open the video in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
+To open the page in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
 
 <!-- Philosophy -->
 ## Philosophy
@@ -193,14 +192,23 @@ A non-exhaustive list of features:
 
 As `Pyrustic Suite` is built with `Python` for `Python developers` and also makes extensive use of `Tkinter`, you may need to learn [Python](#introduction-to-python) and [Tkinter](#introduction-to-tkinter).
 
-<!-- Download -->
-## Download
-Get the latest release version `0.0.3` [here](https://github.com/pyrustic/pyrustic/releases/download/v0.0.3/pyrustic-v0.0.3-released-by-pyrustic.zip).
-
 <!-- Installation -->
 ## Installation
-- Download the latest release [here](#download);
-- uncompress the archive wherever you want (please choose a decent location);
+There are two ways to get `Pyrustic Suite`. You can use `Geet` or you can go with the old school way.
+
+### Geet
+`Geet` is like one of these useful tools we discover by serendipity.
+With `Geet`, you get, install, and run the latest release of a compatible app published on Github.
+
+Do you want to learn more about `Geet` ? Check the demo [here](https://github.com/pyrustic/geet#readme).
+
+```shell
+pip install geet
+python3 -m geet pyrustic/pyrustic
+``` 
+### The old school way
+- Download the latest release [here](https://github.com/pyrustic/pyrustic/releases/latest);
+- unpack the archive wherever you want (please choose a decent location);
 - make sure you gave the correct permissions to the files and folders in `pyrustic` otherwise you couldn't update `pyrustic` later;
 - go to the `ROOT_DIR`: the folder with files `main.py`, `install.py` and `about.py` inside;
 - from the `ROOT_DIR`, run `install.py`;
