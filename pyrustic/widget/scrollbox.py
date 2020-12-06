@@ -66,7 +66,6 @@ class Scrollbox(Viewable):
         self._hsb = None
         self._hsb_under_mouse = False
         self._is_scrollable = False
-        self._bind_func_ids = ()
         self._components = {}
 
     # ==============================================
@@ -157,20 +156,21 @@ class Scrollbox(Viewable):
                               class_="Scrollbox",
                               cnf=self._body_options)
         self._components[BODY] = self._body
-        self._body.bind("<Enter>", self._on_enter_body, "+")
-        self._body.bind("<Leave>", self._on_leave_body, "+")
-        self._body.bind("<Unmap>", self._on_unmap_body, "+")
-        self._body.bind("<Destroy>", self._on_destroy_body, "+")
-        id_1 = self._body.bind_all("<MouseWheel>", self._on_mouse_wheel, "+")
-        id_2 = self._body.bind_all("<Button-4>", self._on_mouse_wheel, "+")
-        id_3 = self._body.bind_all("<Button-5>", self._on_mouse_wheel, "+")
-        self._bind_func_ids = (id_1, id_2, id_3)
+        self._body.bind("<Enter>", self._on_enter_body)
+        self._body.bind("<Leave>", self._on_leave_body)
+        self._body.bind("<Unmap>", self._on_unmap_body)
+        self._body.bind("<Destroy>", self._on_destroy_body)
+        self._body.bind_all("<MouseWheel>", self._on_mouse_wheel)
+        self._body.bind_all("<Button-4>", self._on_mouse_wheel)
+        self._body.bind_all("<Button-5>", self._on_mouse_wheel)
         self._body.columnconfigure(0, weight=1)
         self._body.rowconfigure(0, weight=1)
-        self._body.winfo_toplevel().bind("<Configure>", self._on_configure_box_canvas, "+")
+        self._body.winfo_toplevel().bind("<Configure>", self._on_configure_box_canvas)
         # canvas
         self._canvas = tk.Canvas(self._body,
                                  name=CANVAS,
+                                 width=320,
+                                 height=175,
                                  cnf=self._canvas_options)
         self._components[CANVAS] = self._canvas
         self._canvas.grid(row=0, column=0, sticky="nswe")
@@ -254,14 +254,14 @@ class Scrollbox(Viewable):
         self._is_scrollable = False
 
     def _unbind_funcs(self):
-        if not self._bind_func_ids or len(self._bind_func_ids) != 3:
-            return
         try:
-            for i, val in enumerate(("<MouseWheel>", "<Button-4>", "<Button-5>")):
-                self._master.unbind(val, self._bind_func_ids[i])
+            for val in ("<Enter>", "<Leave>",
+                        "<Unmap>", "<Destroy>",
+                        "<MouseWheel>", "<Button-4>",
+                        "<Button-5>", "<Configure>"):
+                self._body.unbind(val)
         except Exception as e:
             pass
-        self._bind_func_ids = []
 
     def _parse_options(self, options):
         self._body_options = options[BODY] if BODY in options else {}

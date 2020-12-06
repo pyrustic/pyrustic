@@ -1,23 +1,10 @@
 import subprocess
 import sys
+import os
 import os.path
+import about
 import shutil
-
-
-def py_script(command=None, cwd=None):
-    """
-    Example of command: ["host.my.script", "argument_1", "argument 2"]
-    Returns returncode, stdout_data, stderr_data """
-    command = [] if not command else command
-    return _script(command=["-m", *command], cwd=cwd, py=True)
-
-
-def script(command=None, cwd=None):
-    """
-    Example of command: ["git", "commit", "-m", "Message"]
-    Returns returncode, stdout_data, stderr_data """
-    command = [] if not command else command
-    return _script(command=command, cwd=cwd, py=False)
+from pyrustic.jasonix import Jasonix
 
 
 def make_archive(name, src, dest, format="zip"):
@@ -41,6 +28,12 @@ def make_archive(name, src, dest, format="zip"):
     return cache, error
 
 
+def convert_dotted_path(root, dotted_path, prefix="", suffix=""):
+    # returns a dotted package name to a regular pathname
+    # example: package_name_to_path("/home/proj", "view.lol", prefix="tests.")
+    return os.path.join(root, *((prefix + dotted_path).split("."))) + suffix
+
+
 def tab_to_space(text, tab_size=4):
     TAB = "\t"
     SPACE = " "
@@ -58,10 +51,26 @@ def tab_to_space(text, tab_size=4):
     return "\n".join(results)
 
 
+def edit_build_version():
+    about_json_path = os.path.join(about.ROOT_DIR, "pyrustic_data",
+                                   "about.json")
+    if not os.path.exists(about_json_path):
+        return
+    jasonix = Jasonix(about_json_path)
+    current_version = jasonix.data.get("version", "0.0.1")
+    message = "The current version is {}".format(current_version)
+    print(message)
+    message = "Set a new version or ignore: "
+    new_version = input(message)
+    if not new_version:
+        return
+    jasonix.data["version"] = new_version
+    jasonix.save()
+
 # ========================
 #        PRIVATE
 # ========================
-def _script(command=None, cwd=None, py=True):
+def _script(command=None, cwd=None, py=True):  # ARCHIVE
     command = [] if not command else command
     command = [sys.executable, *command] if py else command
     p = subprocess.Popen(command,

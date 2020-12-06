@@ -292,6 +292,10 @@ def _code_to_status(code):
 
 
 class _WebCache:
+    #  TODO: what happens when you make a request 1, the server doesn't return
+    # a body. You do a request 2, the server states you that the resources
+    # hasn't changed, so technically you can count on the cached_response.
+    # but... the cached_response doesn't have a body (there aren't even a cached response !)
 
     def __init__(self, cache_response):
         self._response_cache = {} if cache_response else None
@@ -324,4 +328,6 @@ class _WebCache:
                                 cached_response=self._response_cache.get(url, None))
         elif response.body:
             self._response_cache[url] = response
+        # TODO, what if response.body is None ? No cached_response. But next
+        # request will state that resource hasn't changed... so it won't send any body !
         return response

@@ -20,10 +20,10 @@ from manager.handler.test_handler import TestHandler
 from manager.handler.hub_handler import HubHandler
 from manager.handler.version_handler import VersionHandler
 from manager.handler.update_handler import UpdateHandler
+from manager.handler.build_handler import BuildHandler
 import install
-import time
-import random
 from manager.misc.update_reminder import UpdateReminder
+
 
 # decorator for all commands handlers
 def guard(func):
@@ -124,6 +124,10 @@ class PyrusticManager(cmd.Cmd):
         AddHandler(self.target, args)
 
     @guard
+    def do_build(self, args):
+        BuildHandler(self.target)
+
+    @guard
     def do_sql(self, args):
         handler = SqlHandler(self.target)
         self.__popen_instances.append(handler.popen_instance)
@@ -147,6 +151,9 @@ class PyrusticManager(cmd.Cmd):
         if about.DEV_MODE:
             print("  DEV_MODE is ON, you can't use the command 'update'")
         else:
+            print("This command is obsolete since Geet exists !")
+            print("Check Geet: https://github.com/pyrustic/geet")
+            print("Geet is available on pip: pip install geet")
             UpdateHandler(self.target, args)
 
     @guard
@@ -184,6 +191,9 @@ class PyrusticManager(cmd.Cmd):
 
     def help_run(self):
         print(RunHandler.__doc__)
+
+    def build_run(self):
+        print(BuildHandler.__doc__)
 
     def help_add(self):
         print(AddHandler.__doc__)

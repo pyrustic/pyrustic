@@ -65,6 +65,11 @@ class KstartHandler:
 
     def _add_files(self):
         template_path = os.path.join(about.ROOT_DIR, "manager", "template")
+        # add about.py
+        src_path = os.path.join(template_path, "about_template.txt")
+        dest_path = os.path.join(self._target, "about.py")
+        data = self._get_data_from_template(src_path)
+        self._add_file(dest_path, data)
         # add main.py
         src_path = os.path.join(template_path, "kstart_main_template.txt")
         dest_path = os.path.join(self._target, "main.py")
@@ -109,20 +114,30 @@ class KstartHandler:
         dest_path = os.path.join(self._target, ".gitignore")
         data = self._get_data_from_template(src_path)
         self._add_file(dest_path, data)
-        # add publishing_epilog
-        src_path = os.path.join(template_path, "publishing_epilog_template.txt")
-        dest_path = os.path.join(self._target, "script", "publishing_epilog.py")
+        # add build_epilog
+        src_path = os.path.join(template_path, "build_epilog_template.txt")
+        dest_path = os.path.join(self._target, "script", "build_epilog.py")
         data = self._get_data_from_template(src_path)
         self._add_file(dest_path, data)
-        # add publishing_prolog
-        src_path = os.path.join(template_path, "publishing_prolog_template.txt")
-        dest_path = os.path.join(self._target, "script", "publishing_prolog.py")
+        # add build_act_1
+        src_path = os.path.join(template_path, "build_act_1_template.txt")
+        dest_path = os.path.join(self._target, "script", "build_act_1.py")
         data = self._get_data_from_template(src_path)
         self._add_file(dest_path, data)
-        # add publishing_exclusion
-        src_path = os.path.join(template_path, "package_exclusion_template.txt")
-        dest_path = os.path.join(self._target, "pyrustic_data", "hub",
-                                 "package_exclusion.txt")
+        # add build_act_2
+        src_path = os.path.join(template_path, "build_act_2_template.txt")
+        dest_path = os.path.join(self._target, "script", "build_act_2.py")
+        data = self._get_data_from_template(src_path)
+        self._add_file(dest_path, data)
+        # add build_prolog
+        src_path = os.path.join(template_path, "build_prolog_template.txt")
+        dest_path = os.path.join(self._target, "script", "build_prolog.py")
+        data = self._get_data_from_template(src_path)
+        self._add_file(dest_path, data)
+        # add build_exclusion
+        src_path = os.path.join(template_path, "build_exclusion_template.txt")
+        dest_path = os.path.join(self._target, "pyrustic_data",
+                                 "build_exclusion.txt")
         data = self._get_data_from_template(src_path)
         self._add_file(dest_path, data)
         # add LICENSE
@@ -139,20 +154,24 @@ class KstartHandler:
     def _add_json_data_files(self):
         local_pyrustic_data_folder = os.path.join(self._target,
                                                   "pyrustic_data")
-        # add publishing.json
-        path = os.path.join(local_pyrustic_data_folder, "hub", "publishing.json")
+        # add build.json
+        path = os.path.join(local_pyrustic_data_folder, "build.json")
         default_path = os.path.join(about.ROOT_DIR,
-                                    "misc",
-                                    "default_publishing.json")
+                                    "common",
+                                    "default_json_data",
+                                    "default_build.json")
         jasonix = Jasonix(path, default=default_path)
-        jasonix.data["prolog"] = "script.publishing_prolog"
-        jasonix.data["epilog"] = "script.publishing_epilog"
-        jasonix.data["exclusion"] = "./pyrustic_data/hub/package_exclusion.txt"
+        jasonix.data["prolog"] = "script.build_prolog"
+        jasonix.data["act_1"] = "script.build_act_1"
+        jasonix.data["act_2"] = "script.build_act_2"
+        jasonix.data["epilog"] = "script.build_epilog"
+        jasonix.data["exclusion"] = "./pyrustic_data/build_exclusion.txt"
         jasonix.save()
         # add about.json
         path = os.path.join(local_pyrustic_data_folder, "about.json")
-        default_path = os.path.join(about.ROOT_DIR, "manager",
-                                    "misc", "default_about.json")
+        default_path = os.path.join(about.ROOT_DIR, "common",
+                                    "default_json_data",
+                                    "default_about.json")
         jasonix = Jasonix(path, default=default_path)
         project_name = os.path.basename(self._target)
         jasonix.data["project_name"] = project_name

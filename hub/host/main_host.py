@@ -1,11 +1,11 @@
 from common.constants import *
 from common import constants
-from common.funcs import get_hub_url, get_manager_jasonix
+from common.funcs import get_hub_url, get_manager_jasonix, create_gurl
 from pyrustic.jasonix import Jasonix
-from pyrustic.gurl import Gurl
 from hub.host.publishing_host import PublishingHost
+from distutils.version import StrictVersion
+import os
 import os.path
-from hub.host.test_host import Reloader
 
 
 class MainHost:
@@ -13,7 +13,7 @@ class MainHost:
         self._login = None
         self._jasonix = Jasonix(constants.HUB_SHARED_DATA_FILE,
                                 default=constants.DEFAULT_HUB_SHARED_DATA_FILE)
-        self._gurl = self._create_gurl()
+        self._gurl = create_gurl()
 
     @property
     def login(self):
@@ -118,21 +118,29 @@ class MainHost:
                 data += self._downloads_counter(release)
         return (*response.status, data)
 
-    def allowed_to_publishing(self):
-        """ Returns a bool """
-        publishing_data_path = os.path.join(self.target_project(),
-                                            "pyrustic_data",
-                                            "hub",
-                                            "publishing.json")
-        if not os.path.exists(publishing_data_path):
-            return True
-        jasonix = Jasonix(publishing_data_path)
-        return jasonix.data.get("allow_publishing", True)
+    def get_assets_from_dist_folder(self):
+        dist_folder = os.path.join(self.target_project(),
+                                   "pyrustic_data", "dist")
+        if not os.path.exists(dist_folder):
+            return []
+        versions = []
+        for item in os.listdir(dist_folder):
+            path = os.path.join(dist_folder, item)
+            if not os.path.isfile(path):
+                continue
+            cache = os.path.splitext(item)
+            if len(cache) != 2:
+                continue
+            version, ext = cache
+            versions.append(version)
+        versions.sort(key=StrictVersion)
+        versions.reverse()
+        return versions
 
-    def publishing(self, owner, repo, name, tag_name,
-                 target_commitish, description, prerelease,
-                 asset_name, asset_label, run_tests=True,
-                 run_scripts=True):
+    def publishing(self, owner, repo, name,
+                   tag_name, target_commitish,
+                   description, prerelease, draft,
+                   asset_path, asset_name, asset_label):
         """
         Return meta code, status code, status text
         meta code:
@@ -144,14 +152,12 @@ class MainHost:
         # exec prolog
         # publishing
         # exec epilog
-        reloader = Reloader()
-        reloader.save_state()
-        publishing_host = PublishingHost(self._gurl, self.target_project(),
-                                       owner, repo, run_tests, run_scripts)
+        publishing_host = PublishingHost(self._gurl, owner, repo)
         data = publishing_host.publishing(name, tag_name,
-                                          target_commitish, description,
-                                          prerelease, asset_name, asset_label)
-        reloader.restore_state()
+                                          target_commitish,
+                                          description, prerelease,
+                                          draft, asset_path,
+                                          asset_name, asset_label)
         return data
 
     def update_activity(self, operation, owner, repo):
@@ -217,12 +223,6 @@ class MainHost:
             return splitted
         else:
             return None
-
-    def _create_gurl(self):
-        accept_header = ("Accept", "application/vnd.github.v3+json")
-        user_agent_header = constants.USER_AGENT
-        gurl = Gurl(headers=(accept_header, user_agent_header))
-        return gurl
 
     def _downloads_counter(self, json):
         count = 0

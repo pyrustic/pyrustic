@@ -21,3 +21,6 @@ __pycache__
 
 ### Git
 ./.git
+
+### Releases
+./pyrustic_data/dist

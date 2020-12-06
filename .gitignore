@@ -2,7 +2,6 @@
 
 # Python
 __pycache__/
-
 *.py[cod]
 
 # Environments
@@ -17,3 +16,6 @@ env/
 
 # Secret
 secret/
+
+# Releases
+pyrustic_data/dist/

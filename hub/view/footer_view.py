@@ -1,6 +1,7 @@
 import tkinter as tk
 from pyrustic.viewable import Viewable
 from pyrustic.widget.toast import Toast
+from pyrustic.widget.choice import Choice
 from hub.view.auth_view import AuthView
 from hub.view.publishing_view import PublishingView
 
@@ -89,11 +90,37 @@ class FooterView(Viewable):
         if self._main_host.login is None:
             toast = Toast(self._body, message="Please authenticate yourself !")
             toast.build()
-        else:
-            if not self._main_host.allowed_to_publishing():
-                message = "This project isn't allowed to be published"
-                toast = Toast(self._body, message=message, duration=3000)
-                toast.build()
-            else:
-                publishing_view = PublishingView(self._body, self._main_view, self._main_host)
-                publishing_view.build()
+            return
+        items = self._main_host.get_assets_from_dist_folder()
+        if not items:
+            message = "Please build an asset first !\nType 'build' in the Manager."
+            toast = Toast(self._body, message=message,
+                          duration=5000)
+            toast.build_wait()
+            return
+        message = "This is the list of available assets "
+        message += "in the folder $TARGET/pyrustic_data/dist"
+        choice = Choice(self._body,
+                        items=items,
+                        title="Asset selection",
+                        header="Select an asset",
+                        message=message,
+                        is_long_message=True,
+                        use_scrollbox=True,
+                        flavor="radio")
+        choice.build_wait()
+        asset_version = choice.selected
+        if not asset_version:
+            return
+        asset_version = asset_version[1]
+        publishing_view = PublishingView(self._body,
+                                         self._main_view,
+                                         self._main_host,
+                                         asset_version)
+        publishing_view.build()
+
+    def _get_scrollbox_config(self):
+        data = { "scrollbox":
+                    {"canvas":
+                         {"width": 100}}}
+        return data

@@ -7,7 +7,8 @@ from pyrustic import tkmisc
 BODY = "body"
 ENTRY = "entry"
 DIALOG = "dialog"
-LABEL_HEADER = "label_header"
+LABEL_EXPAND = "label_expand"
+LABEL_PROMPT = "label_prompt"
 LABELS = "labels"
 
 
@@ -39,6 +40,7 @@ class Spinner(Viewable):
                  items=None,
                  selected=None,
                  width=None,
+                 editable=False,
                  handler=None,
                  options=None):
         """
@@ -54,6 +56,8 @@ class Spinner(Viewable):
 
         - width: int, width of the Spinner. Actually it is the ENTRY width.
 
+        - editable: bool, editable Spinner or not.
+
         - handler: a callback to be executed immediately
         after picking an item in the dialog box.
         The callback should allow one parameter, the result:
@@ -62,7 +66,8 @@ class Spinner(Viewable):
             Example: None or (0, "item 1")
 
         - options: dictionary of widgets options.
-            The widgets keys are: BODY, ENTRY, DIALOG, LABEL_HEADER, LABELS.
+            The widgets keys are: BODY, ENTRY, LABEL_EXPAND,
+             DIALOG, LABEL_PROMPT, LABELS.
 
         """
         self._master = master
@@ -70,11 +75,12 @@ class Spinner(Viewable):
         self._items = () if not items else items
         self._selected = selected
         self._width = width
+        self._editable = editable
         self._handler = handler
         self._body_options = None
         self._entry_options = None
+        self._label_expand_options = None
         self._options = {} if options is None else options
-        self._body_options = None
         self._parse_options(self._options)
         self._stringvar = tk.StringVar()
         self._index = selected
@@ -103,13 +109,21 @@ class Spinner(Viewable):
         return self._items
 
     @property
+    def editable(self):
+        return self._editable
+
+    @property
     def selected(self):
         """
         If the user picks the prompt, this method returns None.
-        Else this method returns a tuple like: (index, str item)
+        Else this method returns a tuple like: (index, str item).
+
+        If this spinner is in Editable mode, selected returns None.
 
         Example: None or (0, "item 1")
         """
+        if self._editable:
+            return None
         if self._index is None or not self._items:
             return None
         return self._index, self._items[self._index]
@@ -134,12 +148,13 @@ class Spinner(Viewable):
     def _on_build(self):
         self._body = tk.Frame(self._master,
                               class_="Spinner", cnf=self._body_options)
+        state = "normal" if self._editable else "readonly"
         entry = tk.Entry(self._body,
                          textvariable=self._stringvar,
-                         state="readonly",
+                         state=state ,
                          width=self._width,
                          cnf=self._entry_options)
-        entry.pack()
+        entry.pack(side=tk.LEFT, expand=1, fill=tk.X)
         # bind
         entry.bind("<Button-1>",
                    lambda event,
@@ -152,6 +167,11 @@ class Spinner(Viewable):
         entry.bind("<Down>", lambda event,
                                     self=self:
                                         self._on_key_down_entry(event))
+        # label
+        label_expand = tk.Label(self._body,
+                         text="v",
+                         cnf=self._label_expand_options)
+        label_expand.pack(side=tk.LEFT)
 
     def _on_display(self):
         self._update_entry()
@@ -206,6 +226,8 @@ class Spinner(Viewable):
     def _parse_options(self, options):
         self._body_options = options[BODY] if BODY in options else {}
         self._entry_options = options[ENTRY] if ENTRY in options else {}
+        self._label_expand_options = (options[LABEL_EXPAND]
+                                      if LABEL_EXPAND in options else {})
 
 
 class _SpinnerDialog(Viewable):
@@ -220,7 +242,7 @@ class _SpinnerDialog(Viewable):
         self._handler = callback
         self._close_dialog_callback = close_dialog_callback
         self._dialog_options = None
-        self._label_header_options = None
+        self._label_prompt_options = None
         self._labels_options = None
         self._options = {} if options is None else options
         self._parse_options(self._options)
@@ -235,12 +257,12 @@ class _SpinnerDialog(Viewable):
         self._body.bind("<Escape>", self._on_close, "+")
         self._master.winfo_toplevel().bind("<Configure>", self._on_close, "+")
         # prompt
-        label_header = tk.Label(self._body,
+        label_prompt = tk.Label(self._body,
                                 name="header",
-                                cnf=self._label_header_options,
+                                cnf=self._label_prompt_options,
                                 text=self._prompt)
-        label_header.pack(anchor="w")
-        label_header.bind("<Button-1>",
+        label_prompt.pack(anchor="w")
+        label_prompt.bind("<Button-1>",
                    lambda event,
                           self=self:
                    self._handler())
@@ -281,8 +303,8 @@ class _SpinnerDialog(Viewable):
     def _parse_options(self, options):
         self._dialog_options = (options[DIALOG] if
                                 DIALOG in options else {})
-        self._label_header_options = (options[LABEL_HEADER] if
-                                      LABEL_HEADER in options else {})
+        self._label_prompt_options = (options[LABEL_PROMPT] if
+                                      LABEL_PROMPT in options else {})
         self._labels_options = (options[LABELS] if
                                 LABELS in options else {})
 
@@ -291,6 +313,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.geometry("500x300+0+0")
     my_items = ("Lion", "Jaguar", "Eagle")
-    spinner = Spinner(root, items=my_items, selected=0)
+    spinner = Spinner(root, width=30, items=my_items, selected=0)
     spinner.build_pack()
     root.mainloop()

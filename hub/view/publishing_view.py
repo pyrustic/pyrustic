@@ -8,10 +8,11 @@ from hub.view.failure_view import FailureView
 
 
 class PublishingView(Viewable):
-    def __init__(self, master, main_view, main_host):
+    def __init__(self, master, main_view, main_host, asset_version):
         self._master = master
         self._main_view = main_view
         self._main_host = main_host
+        self._asset_version = asset_version
         # stringvars and intvars
         self._strvar_target = tk.StringVar()
         self._strvar_owner = tk.StringVar()
@@ -21,12 +22,15 @@ class PublishingView(Viewable):
         self._strvar_description = tk.StringVar()
         self._strvar_release_name = tk.StringVar()
         self._intvar_prerelease = tk.IntVar(value=0)
+        self._intvar_draft = tk.IntVar(value=0)
         self._strvar_asset_name = tk.StringVar()
         self._strvar_asset_label = tk.StringVar()
-        self._intvar_run_tests = tk.IntVar(value=1)
-        self._intvar_run_scripts = tk.IntVar(value=1)
         # cache toast "Processing..."
         self._cache_toast_processing = None
+        # asset path
+        self._asset_path = None
+        # target project
+        self._target_project = None
 
     def _on_build(self):
         self._body = tk.Toplevel()
@@ -220,13 +224,9 @@ class PublishingView(Viewable):
                                   text="Cancel",
                                   command=self._on_click_cancel)
         button_cancel.pack(side=tk.RIGHT, padx=(20, 2))
-        # checkbutton run tests
-        checkbutton_run_tests = tk.Checkbutton(frame_footer, text="Run tests",
-                                               variable=self._intvar_run_tests)
-        checkbutton_run_tests.pack(side=tk.LEFT, padx=(0, 10))
-        # checkbutton run scripts
-        checkbutton_run_scripts = tk.Checkbutton(frame_footer, text="Run scripts",
-                                               variable=self._intvar_run_scripts)
+        # checkbutton Draft
+        checkbutton_run_scripts = tk.Checkbutton(frame_footer, text="Draft",
+                                               variable=self._intvar_draft)
         checkbutton_run_scripts.pack(side=tk.LEFT, padx=(0, 10))
         # checkbutton pre-release
         checkbutton_prerelease = tk.Checkbutton(frame_footer, text="Pre-release",
@@ -252,16 +252,18 @@ class PublishingView(Viewable):
         target_commitish = self._strvar_target_commitish.get()
         description = self._text_description.get("1.0","end-1c")
         prerelease = True if self._intvar_prerelease.get() == 1 else False
+        draft = True if self._intvar_draft.get() == 1 else False
         asset_name = self._strvar_asset_name.get()
         asset_label = self._strvar_asset_label.get()
-        run_tests = True if self._intvar_run_tests.get() == 1 else False
-        run_scripts = True if self._intvar_run_scripts.get() == 1 else False
+        self._asset_path = os.path.join(self._target_project,
+                                        "pyrustic_data", "dist",
+                                        "{}.zip".format(self._asset_version))
         # threadium stuff
         threadium = self._main_view.threadium
         host = self._main_host.publishing
         host_args = (owner, repo, name, tag_name, target_commitish,
-                     description, prerelease, asset_name, asset_label,
-                     run_tests, run_scripts)
+                     description, prerelease, draft,
+                     self._asset_path, asset_name, asset_label)
         consumer = self._notify_publishing_response
         threadium.task(host, args=host_args, consumer=consumer)
         self._cache_toast_processing = Toast(self._body, message="Processing...",
@@ -280,10 +282,11 @@ class PublishingView(Viewable):
         return True
 
     def _populate(self):
+        self._target_project = self._main_host.target_project()
         data = self._main_host.about_target_project()
         target = data["target"]
         project_name = data["project_name"]
-        version = data["version"]
+        version = self._asset_version
         owner = self._main_host.login
         default_target_commitish = "master"
         # target
@@ -299,7 +302,7 @@ class PublishingView(Viewable):
         # release name
         self._strvar_release_name.set("v{}".format(version))
         # asset name
-        cache = "{}-v{}-released-by-{}".format(project_name, version, owner)
+        cache = "{}-v{}-released-by-{}.zip".format(project_name, version, owner)
         self._strvar_asset_name.set(cache)
         # asset label
         self._strvar_asset_label.set("Download the release")
