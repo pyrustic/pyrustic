@@ -1,9 +1,7 @@
-import subprocess
-import sys
 import os
 import os.path
-import about
 import shutil
+import subprocess
 from pyrustic.jasonix import Jasonix
 
 
@@ -51,8 +49,8 @@ def tab_to_space(text, tab_size=4):
     return "\n".join(results)
 
 
-def edit_build_version():
-    about_json_path = os.path.join(about.ROOT_DIR, "pyrustic_data",
+def edit_build_version(root_dir):
+    about_json_path = os.path.join(root_dir, "pyrustic_data",
                                    "about.json")
     if not os.path.exists(about_json_path):
         return
@@ -67,23 +65,59 @@ def edit_build_version():
     jasonix.data["version"] = new_version
     jasonix.save()
 
-# ========================
-#        PRIVATE
-# ========================
-def _script(command=None, cwd=None, py=True):  # ARCHIVE
-    command = [] if not command else command
-    command = [sys.executable, *command] if py else command
-    p = subprocess.Popen(command,
-                         cwd=cwd,
-                         stdout=subprocess.PIPE,
-                         stderr=subprocess.PIPE,
-                         bufsize=1,
-                         universal_newlines=True)
-    stdout_data = []
-    stderr_data = []
-    for line in p.stdout:
-        stdout_data.append(line)
-    for line in p.stderr:
-        stderr_data.append(line)
-    p.communicate()
-    return p.returncode, stdout_data, stderr_data
+
+def script(cmd, cwd=None, interactive=True):
+    """
+    Execute a cmd. Cmd is either a list of args or a string.
+    Example of commands:
+        - "something 'path/to/dir'"
+        - ["something", "path/to/dir"]
+    """
+    if isinstance(cmd, str):
+        cmd = parse_cmd(cmd)
+    stdin = None if interactive else subprocess.DEVNULL
+    stdout = None if interactive else subprocess.DEVNULL
+    stderr = None if interactive else subprocess.DEVNULL
+    process = subprocess.Popen(cmd, stdin=stdin, stdout=stdout,
+                               stderr=stderr, cwd=cwd)
+    if not interactive:
+        return 0
+    process.communicate()
+    return process.returncode
+
+
+def parse_cmd(cmd):
+    """
+    Split the cmd string. Delimiters are: space, simple and double quotes
+    """
+    SINGLE_QUOTE = "'"
+    DOUBLE_QUOTE = "\""
+    ESPACE = " "
+    result = []
+    cache = ""
+    quote_context = None
+    collect_cache = False
+    for char in cmd:
+        if quote_context is None:  # outside a quote context
+            if char in (SINGLE_QUOTE, DOUBLE_QUOTE):
+                quote_context = char
+                collect_cache = True
+            elif char == ESPACE:
+                collect_cache = True
+            else:
+                cache += char
+        else:  # inside a quote context
+            if char == quote_context:
+                quote_context = None
+                collect_cache = True
+            else:
+                cache += char
+        # cache collection
+        if collect_cache:
+            collect_cache = False
+            if cache:
+                result.append(cache)
+            cache = ""
+    if cache:
+        result.append(cache)
+    return result

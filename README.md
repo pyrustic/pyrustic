@@ -3,13 +3,13 @@
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
     <br>
     <p align="center">
-    Pyrustic Suite
+    Pyrustic
     </p>
 </div>
 
 <!-- Intro Text -->
-# Pyrustic Suite
-`Pyrustic Suite` is a lightweight software suite to help develop, package, and publish `Python` `desktop applications`.
+# Pyrustic
+`Pyrustic` is a lightweight software suite to help develop, package, and publish `Python` `desktop applications`.
 
 This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
 
@@ -32,13 +32,13 @@ This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encour
 
 <!-- Overview -->
 ## Overview
-Since `Python` comes with battery included, `Pyrustic Suite` makes extensive use of `Tkinter` as GUI Toolkit and `SQLite` as database engine.
-`Pyrustic Suite` is made up of:
+Since `Python` comes with battery included, `Pyrustic` makes extensive use of `Tkinter` as GUI Toolkit and `SQLite` as database engine.
+As a lightweight software suite, `Pyrustic` is made up of:
 - `Manager`: a command-line application to rule them all;
 - a graphical `SQL Editor`;
 - a graphical `Test Runner`;
-- `Hub`: a smart application to publish your project;
-- and a `Framework`, on which all other components are based.
+- `Hub`: an application to publish your project;
+- and a `Framework`, available to you, on which all other components are based.
 
 ### The Manager
 <!-- Image -->
@@ -49,18 +49,25 @@ Since `Python` comes with battery included, `Pyrustic Suite` makes extensive use
     </p>
 </div>
 
-The `Manager` is the entry point to the `Suite`.
+The `Manager` is the entry point to the software suite.
 Via the `Manager` you can:
 - create a project with battery included;
-- add `packages`, `modules` or `files` to your project;
+- easily add `packages`, `modules` or `files` to your project;
 - run a specific `module` of your project;
-- update the `Framework` of your project;
-- update `Pyrustic Suite` itself;
 - view recent projects list and quickly switch between projects;
 - launch the `SQL Editor`, `Test Runner` and `Hub`;
+- build a package from your project with a system of hook scripts and exclusion rules;
 - and more...
 
-The `update` command creates a backup of the current version, erases the current version, then installs the latest version. If you want the `update` command to run smoothly, make sure you gave the correct permissions to the files and folders in `pyrustic` during the first install.
+The `build` command builds a package that could be published with the application `Hub`.
+The metaphor of a drama is used for the process:
+- a script named `Prolog` will be executed as the prologue;
+- a script named `Act I` will be executed just before the tests run;
+- a script name `Act II` will be executed just before the packaging;
+- a script named `Epilog` will be executed as the epilogue.
+
+`Pyrustic` thus gives you the possibility to influence this drama (the build of the package).
+For example, in the `Act I` you can set a flag in the ready-to-publish project to indicate that it is no longer in `dev` mode. You could even automate a part of your `git` workflow in the script.
 
 ### The SQL Editor
 <!-- Image -->
@@ -107,14 +114,7 @@ The `Test Runner` makes extensive use of the `pyrustic.threadium` library to per
     </p>
 </div>
 
-The `Hub` is an application that allows you to package your project then publish it as new release on `Github`. Once published, you can track your project, see metrics like the number of `stargazers`, `subscribers` or releases `downloads`.
-The metaphor of a drama is used for the process:
-- a script named `Prolog` will be executed as the prologue;
-- a script named `Epilog` will be executed as the epilogue.
-
-The `Hub` thus gives you the possibility to influence this drama.
-For example, in the `Prolog` you can set a flag in the ready-to-publish project to indicate that it is no longer in `dev` mode. 
-You could even automate a part of your `git` workflow in the `Prolog` and/or `Epilog` script(s).
+The `Hub` is an application that allows you to publish a new release of your application on `Github`. Once published, you can track your project, see metrics like the number of `stargazers`, `subscribers` or releases `downloads`.
 
 The `Hub` makes extensive use of `pyrustic.gurl` to fetch resources.
 
@@ -122,7 +122,7 @@ You need a personal access token to publish a release via `Hub` or to increase t
 It is easy to generate a personal access token. Read this [article](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token).
 
 ### The Framework
-`Pyrustic Suite` is based on a `Framework`. This `Framework` can be injected into your project if you wish.
+`Pyrustic` is based on a `Framework`. This `Framework` can be used by your project if you wish.
 The `Framework` contains libraries that target:
 - GUI;
 - multithreading;
@@ -130,7 +130,113 @@ The `Framework` contains libraries that target:
 - database connection;
 - and more...
 
-You can update the `Framework` of your Target project by executing the command `sync` in the `Manager`.
+#### Example of code - A simple Hello Friend demo - main.py
+Note: this is generated by `Pyrustic` when you issue the command `kstart`.
+
+<details>
+    <summary>Click to expand (or collapse)</summary>
+
+```python
+# "main.py" generated by Pyrustic Manager
+import about
+import os.path
+from pyrustic.app import App
+from view.main_view import MainView
+from misc import my_theme
+
+
+# The App
+app = App()
+
+# Set config
+config_path = os.path.join(about.ROOT_DIR, "app_config.json")
+app.config = config_path
+
+# Set theme
+app.theme = my_theme.get_theme()
+
+# Set view
+app.view = MainView(app)
+
+# Center the window
+app.center()
+
+# Lift off !
+app.start()
+
+```
+
+</details>
+
+#### Example of code - A simple Hello Friend demo - view/main_view.py
+Note: this is generated by `Pyrustic` when you issue the command `kstart`.
+
+<details>
+    <summary>Click to expand (or collapse)</summary>
+
+```python
+# a "view" module generated by Pyrustic Manager
+import about
+import tkinter as tk
+from pyrustic.viewable import Viewable
+from pyrustic.widget.toast import Toast
+
+
+class MainView(Viewable):
+
+    def __init__(self, app):
+        self._app = app
+        self._root = app.root
+        self._body = None
+        self._btn_max = None
+
+    def _on_build(self):
+        self._body = tk.Frame(self._root)
+        self._root.geometry("500x300")
+        # Label
+        label = tk.Label(self._body, text="Hello Friend !")
+        label.pack(expand=1, fill=tk.BOTH)
+        # Footer
+        footer = tk.Frame(self._body)
+        footer.pack(side=tk.BOTTOM)
+        # Button Leave
+        btn_leave = tk.Button(self._body, text="Leave",
+                              command=self._on_click_btn_leave)
+        btn_leave.pack(side=tk.RIGHT, padx=2)
+        # Button Maximize
+        self._btn_max = tk.Button(self._body, text="Maximize",
+                                  command=self._on_click_btn_max)
+        self._btn_max.pack(side=tk.RIGHT)
+
+    def _on_display(self):
+        pass
+
+    def _on_destroy(self):
+        pass
+
+    def _on_click_btn_max(self):
+        self._app.maximize()
+        self._btn_max.destroy()
+
+    def _on_click_btn_leave(self):
+        toast = Toast(self._body, message="Goodbye Friend !")
+        toast.build_wait()
+        self._app.exit()
+
+```
+
+</details>
+
+### Application Publishing
+Once you are ready to release a new version of your app, ZAT allows you to create a package with the `build` command and then publish it to Github with the` Hub` app.
+
+Then the question that arises is "How to make the download-unpack-install-run process easier for users?". This is where `Geet` comes in.
+
+`Geet` is like one of these useful tools we discover by serendipity.
+With `Geet`, you get, install, and run the latest release of a compatible app published on Github.
+
+Do you want to learn more about `Geet` ? Check the demo [here](https://github.com/pyrustic/geet#readme).
+
 
 <!-- Demo -->
 ## Demo
@@ -151,7 +257,7 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 
 <br>
 
->He owned a cup which served also as a bowl for food but threw it away when he saw a boy drinking water from his hands and realized one did not even need a cup to sustain oneself.</p>
+> He owned a cup which served also as a bowl for food but threw it away when he saw a boy drinking water from his hands and realized one did not even need a cup to sustain oneself.</p>
 >
 >    --Mark, J. J. (2014, August 02). [Diogenes of Sinope](href="https://www.ancient.eu/Diogenes_of_Sinope/). Ancient History Encyclopedia. Retrieved from https://www.ancient.eu/Diogenes_of_Sinope/
 
@@ -170,11 +276,11 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 <!-- Features -->
 ## Features
 A non-exhaustive list of features:
-- `Manager`: entry-point, command-line application to help you to manage your project.
+- `Manager`: entry-point, command-line application to help you to manage your project, build package, launch the `Test Runner`, launch the `SQL Editor` and `Hub`.
 - `Test Runner`: a graphical `Test Runner` to run test `packages`, `modules`, `classes` and `methods`.
 - `SQL Editor`: a graphical `SQL Editor` to edit your database, open `in-memory` database, load scripts.
-- `Hub`: package your app, publish it, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
-- An optional `Framework` to inject in your project. The same `Framework` used by `Pyrustic Suite`.
+- `Hub`: publish your app, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
+- An optional `Framework` to use in your project. The same `Framework` used by `Pyrustic`.
 - `pyrustic.threadium`: a `library` included in the `Framework` to make it easy to develop multithreading applications.
 - `pyrustic.litedao`: a `library` included in the `Framework` to simplify the connection to your database.
 - `pyrustic.gurl`: a `library` included in the `Framework` to fetch resources with an implementation of conditional request and a smart responses caching system. `Hub` uses this library to fetch resources as a good API citizen.
@@ -182,49 +288,44 @@ A non-exhaustive list of features:
 - `pyrustic.themes.darkmatter`: a dark theme ready to use, the one used as base theme by the `SQL Editor`, `Test Runner` and the `Hub`.
 - `pyrustic.viewable.Viewable`: bring an intuitive lifecycle system to your `Views` by making them implement `Viewable`. The mega-widgets in this framework implement `Viewable`.
 - the `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
-- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic Suite` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
-- for obvious reasons (clue: `beta`), `Pyrustic Suite` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `cache` folder.
+- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
+- for obvious reasons (clue: `beta`), `Pyrustic` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `cache` folder.
 - and more...
 
 <!-- Requirements -->
 ## Requirements
-`Pyrustic Suite` is a `cross platform` software suite. It should work on your computer (or nope haha, versions under `1.0.0` will be considered `Beta` at best). It is built on [Ubuntu](https://ubuntu.com/download/desktop) with `Python 3.5`. `Pyrustic Suite` comes with absolutely no warranty. So... à la guerre comme à la guerre.
+`Pyrustic` is a `cross platform` software suite. It should work on your computer (or nope, haha, versions under `1.0.0` will be considered `Beta` at best). It is built on [Ubuntu](https://ubuntu.com/download/desktop) with `Python 3.5`. `Pyrustic` comes with absolutely no warranty. So... à la guerre comme à la guerre.
 
-As `Pyrustic Suite` is built with `Python` for `Python developers` and also makes extensive use of `Tkinter`, you may need to learn [Python](#introduction-to-python) and [Tkinter](#introduction-to-tkinter).
+As `Pyrustic` is built with `Python` for `Python developers` and also makes extensive use of `Tkinter`, you may need to learn [Python](#introduction-to-python) and [Tkinter](#introduction-to-tkinter).
 
 <!-- Installation -->
 ## Installation
-There are two ways to get `Pyrustic Suite`. You can use `Geet` or you can go with the old school way.
+`Pyrustic` is available on [PyPI](https://pypi.org/) (the Python Package Index) to simplify the life of Python developers.
 
-### Geet
-`Geet` is like one of these useful tools we discover by serendipity.
-With `Geet`, you get, install, and run the latest release of a compatible app published on Github.
+If you have never installed a library from PyPI, you must install the pip tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
 
-Do you want to learn more about `Geet` ? Check the demo [here](https://github.com/pyrustic/geet#readme).
+```bash
+$ pip install pyrustic
 
-```shell
-pip install geet
-python3 -m geet pyrustic/pyrustic
+$ python3 -m pyrustic
+Welcome to Pyrustic Manager !
+Version: 0.0.5
+Type "help" or "?" to list commands. Type "exit" to leave.
+
+(pyrustic) 
 ``` 
-### The old school way
-- Download the latest release [here](https://github.com/pyrustic/pyrustic/releases/latest);
-- unpack the archive wherever you want (please choose a decent location);
-- make sure you gave the correct permissions to the files and folders in `pyrustic` otherwise you couldn't update `pyrustic` later;
-- go to the `ROOT_DIR`: the folder with files `main.py`, `install.py` and `about.py` inside;
-- from the `ROOT_DIR`, run `install.py`;
-- from the `ROOT_DIR`, run `main.py` to launch the `Manager`;
-- welcome to `Pyrustic Suite` ! Type `help` in the `Manager` to discover the commands.
 
-If you want to be able to run `Pyrustic Suite` after installation just by typing `pyrustic` in the shell, then consider making a small change to your system's `PATH`.
+
+If you want to be able to run `Pyrustic` after installation just by typing `pyrustic` in the shell, then consider making a small change to your system's `PATH`.
 If you are not on `Windows`, check this [article](https://opensource.com/article/17/6/set-path-linux).
 
 <!-- Tutorial -->
 ## Tutorial
 - Create a `demo` folder to contain the project you want to start. This folder will be the `ROOT_DIR` of your project.
-- Run `main.py` in `Pyrustic Suite` to open the `Manager`.
+- Run `python3 -m pyrustic` to open the `Manager`.
 - Link your project to the `Manager` by typing the command `link` in the `Manager`. A dialog will appear so you could choose your demo project folder. You can also put the absolute path of the folder directly in front of the `link` command. The `link` command does not make any change in your project.
 - Your project is now linked to the `Manager` and becomes the Target project. The `target` command displays the path to the Target project (its `ROOT_DIR`). You can unlink it with the command `unlink`. Whenever you come back to the `Manager`, just type `relink` to link again your previous Target project. Use the command `last` to see the list of last projects.
-- You can now inject `Pyrustic Framework` in your project as well as other files/folders like for example the `tests` folder or the hidden folder `pyrustic_data`. You just have to type `kstart` in the `Manager` to perform a Kickstart. The `kstart` command modifies your project.
+- Type `kstart` in the `Manager` to perform a project Kickstart. The `kstart` command modifies your project. This command will create the minimal project structure.
 - You can run your project with the `run` command without arguments. You can also run a specific `module` in your project. Example: `run host.calc.addition`.
 - Type `sql`, `test` or `hub` commands in the `Manager` to launch the `SQL Editor`, `Test Runner` or `Hub` respectively.
 - Your project has an entry point which is `main.py`. In the `main.py` file, there is an instance of `pyrustic.app.App` to which the first `View` to display is passed.
@@ -235,14 +336,15 @@ If you are not on `Windows`, check this [article](https://opensource.com/article
     - then the call of the method `on_display()` when the `View` is visible;
     - and the call of the method `on_destroy()` when the `View` is destroyed.
 - To run a `View`, call the `build()` method which will execute `on_build()` and will return the content of the `_body` instance variable. The `build_pack()` method builds the `View` then calls the method `pack()` on the `body` in a single call. Same stuff with `build_grid()` and `build_place()`. The method `build_wait()` is used for `View` built with a `Toplevel` as `_body`, thus, execution of the next instructions is paused until the destruction of the `View`. To destroy a `View`, call the method `destroy()`.
+- About application publishing, read [this](#application-publishing).
 
-Note: Initializing your project with the `kstart` command in the `Manager` will create the `pyrustic_data` folder at the root of your project (`ROOT_DIR`). This folder may be hidden, so check your operating system settings. Take a look at this folder. The `Hub` application checks this folder to use some data like your project version or the path to the `Prolog` and `Epilog` scripts.
+Note: Initializing your project with the `kstart` command in the `Manager` will create the `pyrustic_data` folder at the root of your project (`ROOT_DIR`). Take a look at this folder. The command `build` will store packages inside this folder after consuming some data from configuration files in the same folder.
 
 A better tutorial will come later. Use the `kstart` command in the `Manager` to get an equivalent of a graphical `Hello World` demo project, then explore the contents of your project. Start with `main.py`, then `view/main_view.py`. Good luck !
 
 <!-- Documentation -->
 ## Documentation
-The versions of `Pyrustic Suite` under `1.0.0` are aimed at an audience of early adopters. The documentation is precarious but public classes and methods have minimal documentation in the source code. You can also check the command `help` in the `Manager`.
+The versions of `Pyrustic` under `1.0.0` are aimed at an audience of early adopters. The documentation is precarious but public classes and methods have minimal documentation in the source code. You can also check the command `help` in the `Manager`.
 
 ### Introduction to Python
 - [python-guide](https://docs.python-guide.org/intro/learning/).
@@ -260,7 +362,7 @@ Note: I am not affiliated with any of these entities. A simple web search brings
 
 <!-- License -->
 ## License
-`Pyrustic Suite` is licensed under the terms of the permissive free software license `MIT License`.
+`Pyrustic` is licensed under the terms of the permissive free software license `MIT License`.
 
 <!-- Memes -->
 ## Memes

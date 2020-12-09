@@ -16,8 +16,8 @@ class Tree(Viewable):
 
     pyrustic.tree.SimpleTree is a nice example to study.
 
-    Scroll to the bottom of this file (./pyrustic/widget/tree.py)
-    at the top-level script environment to see the usage of SimpleTree
+    Scroll to the bottom of this file at the top-level script
+    environment to see the usage of SimpleTree
     """
     def __init__(self,
                  master=None,

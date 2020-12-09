@@ -1,17 +1,17 @@
+import tkinter as tk
 import copy
 import platform
 import sys
-import about
-import tkinter as tk
 import os.path
 from pyrustic.viewable import Viewable
+from pyrustic import tkmisc
+from pyrustic import about as pyrustic_about
 from pyrustic.exception import PyrusticAppException
 from pyrustic.private.enhance_tk import EnhanceTk
 from pyrustic.jasonix import Jasonix
 
 
-_DEFAULT_CONFIG_PATH = os.path.join(about.ROOT_DIR,
-                                    "pyrustic",
+_DEFAULT_CONFIG_PATH = os.path.join(pyrustic_about.ROOT_DIR,
                                     "private",
                                     "default_app_config.json")
 
@@ -32,6 +32,7 @@ class App:
         self._config_data = None
         self._theme = None
         self._view = None
+        self._center_window = False
         self._set_default_title()
 
     # ============================================
@@ -56,16 +57,14 @@ class App:
     @config.setter
     def config(self, path):
         """
-        The path to config file.
-        Note that it should be a relative path to ROOT_DIR,
+        The absolute path to config file.
         Example:
-            path = "my_config.json"
+            path = "/path/to/my_config.json"
 
         Warning: it is recommended to avoid hard-coding paths.
-        Avoid a path like this: "./this/is/a/relative/path"
-        Instead, do this: os.path.join("this", "is", "a", "relative", "path")
+        Avoid a path like this: "/path/to/my_config.json"
+        Instead, do this: os.path.join("path", "to", "my_config.json")
         """
-        path = os.path.join(about.ROOT_DIR, path)
         path = os.path.normpath(path)
         self._config_path = path
 
@@ -97,7 +96,7 @@ class App:
     def view(self):
         """
         Get the view object.
-        A view should implement "pyrustic.abstract.viewable.Viewable"
+        A view should implement "pyrustic.viewable.Viewable"
         """
         return self._view
 
@@ -106,7 +105,7 @@ class App:
         """
         Set a view object.
         If you set None, the previous view will be destroyed.
-        A view should implement "pyrustic.abstract.viewable.Viewable".
+        A view should implement "pyrustic.viewable.Viewable".
         The new view will destroy the previous one if there are a previous one.
         """
         if val is not None and not isinstance(val, Viewable):
@@ -127,7 +126,6 @@ class App:
             message = "This method shouldn't be called twice. Please use 'restart' instead"
             raise PyrusticAppException(message)
         self._is_running = True
-        self._root.config(background="white")
         self._root.protocol("WM_DELETE_WINDOW", self._on_exit)
         EnhanceTk(self._root)
         self._set_config()
@@ -153,7 +151,7 @@ class App:
         """
         Exit, simply ;-)
         Depending on your config file, the application will close quickly or not.
-        A quick exit will ignore the lifecycle of a Viewable (pyrustic.abstract.viewable).
+        A quick exit will ignore the lifecycle of a Viewable (pyrustic.viewable).
         In others words, '_on_destroy()' methods won't be called.
         Exit quickly if you don't care clean-up but want the app to close as fast as possible.
         """
@@ -169,6 +167,12 @@ class App:
         else:  # for "Darwin" (OSX) and "Window"
             self._root.state("zoomed")
 
+    def center(self):
+        """
+        Center the window
+        """
+        self._center_window = True
+
     # ============================================
     #               PRIVATE METHODS
     # ============================================
@@ -179,6 +183,9 @@ class App:
         # app geometry
         if not self._config_data["gui"]["ignore_geometry"]:
             self._root.geometry(self._config_data["gui"]["root_geometry"])
+        # background
+        background_color = self._config_data["gui"]["root_background"]
+        self._root.config(background=background_color)
         # resizable width and height
         resizable_width = self._config_data["gui"]["resizable_width"]
         resizable_height = self._config_data["gui"]["resizable_height"]
@@ -201,8 +208,11 @@ class App:
             return
         if isinstance(self._view.body, tk.Frame):
             self._view.body.pack(in_=self._root,
-                      expand=1,
-                      fill=tk.BOTH)
+                                 expand=1, fill=tk.BOTH)
+        # center
+        if self._center_window:
+            tkmisc.center_window(self._root)
+
 
     def _on_exit(self):
         if not self._config_data["gui"]["exit_quickly"]:
@@ -212,5 +222,5 @@ class App:
         sys.exit()
 
     def _set_default_title(self):
-        title = "{} | built with Pyrustic".format(about.PROJECT_NAME)
+        title = "{} | built with Pyrustic".format(pyrustic_about.PROJECT_NAME)
         self._root.title(title)

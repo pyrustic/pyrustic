@@ -1,7 +1,0 @@
-{
-	"prolog": "script.build_prolog",
-	"act_1": "script.build_act_1",
-	"act_2": "script.build_act_2",
-	"epilog": "script.build_epilog",
-	"exclusion": "./pyrustic_data/build_exclusion.txt"
-}

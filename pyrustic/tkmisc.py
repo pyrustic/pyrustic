@@ -4,8 +4,10 @@ import tkinter as tk
 def center_window(window, within=None):
     window.withdraw()
     window.update_idletasks()
-    width = window.winfo_reqwidth()
-    height = window.winfo_reqheight()
+    window.geometry("+0+0")
+    window.update_idletasks()
+    width = window.winfo_width()
+    height = window.winfo_height()
     if within is None:
         x = (window.winfo_screenwidth() - width) // 2
         y = (window.winfo_screenheight() - height) // 2

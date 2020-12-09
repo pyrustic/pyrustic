@@ -1,0 +1,3 @@
+recursive-include pyrustic *.json
+recursive-include pyrustic *.txt
+recursive-include pyrustic LICENSE
