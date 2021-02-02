@@ -6,7 +6,6 @@ from pyrustic.viewable import Viewable
 # Components
 BODY = "body"
 LABEL_HEADER = "label_header"
-TEXT_MESSAGE = "text_message"
 LABEL_MESSAGE = "label_message"
 FRAME_FOOTER = "frame_footer"
 BUTTON_CANCEL = "button_cancel"
@@ -38,7 +37,6 @@ class Confirm(Viewable):
                  title=None,
                  header=None,
                  message=None,
-                 is_long_message=False,
                  handler=None,
                  geometry=None,
                  options=None):
@@ -53,9 +51,6 @@ class Confirm(Viewable):
 
         - message: the text to show as message
 
-        - is_long_message: bool, set it to True if you want the message
-        widget to be a Text. Set it to False if you want the message to be a Label
-
         - handler: a callback to be executed immediately after closing the dialog box.
             This callback should accept a boolean positional argument.
             True means Ok, confirmed.
@@ -64,7 +59,7 @@ class Confirm(Viewable):
          you can edit its geometry. Example: "500x300"
 
         - options: dictionary of widgets options
-            The widgets keys are: BODY, LABEL_HEADER, TEXT_MESSAGE,
+            The widgets keys are: BODY, LABEL_HEADER,
              LABEL_MESSAGE, FRAME_FOOTER, BUTTON_CANCEL, BUTTON_CONFIRM.
 
             Example: Assume that you want to set the LABEL_MESSAGE's background to black
@@ -77,14 +72,12 @@ class Confirm(Viewable):
         self._title = title
         self._header = header
         self._message = message
-        self._is_long_message = is_long_message
         self._handler = handler
         self._geometry = geometry
         self._body = None
         self._options = {} if options is None else options
         self._body_options = None
         self._label_header_options = None
-        self._text_message_options = None
         self._label_message_options = None
         self._frame_footer_options = None
         self._button_cancel_options = None
@@ -113,10 +106,6 @@ class Confirm(Viewable):
         return self._message
 
     @property
-    def is_long_message(self):
-        return self._is_long_message
-
-    @property
     def handler(self):
         return self._handler
 
@@ -141,12 +130,10 @@ class Confirm(Viewable):
         Get the components (widgets instances) used to build this dialog.
 
         This property returns a dict. The keys are:
-            BODY, LABEL_HEADER, TEXT_MESSAGE,
+            BODY, LABEL_HEADER,
             LABEL_MESSAGE, FRAME_FOOTER, BUTTON_CANCEL, BUTTON_CONFIRM
 
-        Warning: check the presence of key before usage. Example,
-        the widget linked to the LABEL_MESSAGE key may be missing because
-        TEXT_MESSAGE replaced it
+        Warning: check the presence of key before usage
         """
         return self._components
 
@@ -168,34 +155,25 @@ class Confirm(Viewable):
         #
         if self._header:
             label_header = tk.Label(self._body,
-                             text=self._header,
-                             anchor="w",
-                             name="header",
-                             cnf=self._label_header_options)
+                                    text=self._header,
+                                    anchor="w",
+                                    justify=tk.LEFT,
+                                    name="header",
+                                    cnf=self._label_header_options)
             self._components[LABEL_HEADER] = label_header
             label_header.pack(fill=tk.X, expand=1, anchor="w", pady=5, padx=5)
         #
         if self._message:
-            if self._is_long_message:
-                text_message = tk.Text(self._body,
-                               wrap="word",
-                               width=35,
-                               height=5,
-                               name="long_message",
-                               cnf=self._text_message_options)
-                self._components[TEXT_MESSAGE] = text_message
-                text_message.pack(fill=tk.BOTH, expand=1, padx=5, pady=5)
-                text_message.insert("end", self._message)
-                text_message.config(state="disabled")
-            else:
-                label_message = tk.Label(self._body,
-                                         name="message",
-                                         text=self._message,
-                                         anchor="w",
-                                         cnf=self._label_message_options)
-                self._components[LABEL_MESSAGE] = label_message
-                label_message.pack(fill=tk.BOTH,
-                                   expand=1, padx=5, pady=(5, 10))
+            label_message = tk.Label(self._body,
+                                     name="message",
+                                     text=self._message,
+                                     anchor="w",
+                                     justify=tk.LEFT,
+                                     cnf=self._label_message_options)
+            self._components[LABEL_MESSAGE] = label_message
+            label_message.pack(fill=tk.BOTH,
+                               expand=1, padx=5, pady=(5, 10))
+
         #
         frame_footer = tk.Frame(self._body, cnf=self._frame_footer_options)
         self._components[FRAME_FOOTER] = frame_footer
@@ -240,8 +218,6 @@ class Confirm(Viewable):
         self._body_options = (options[BODY] if BODY in options else {})
         self._label_header_options = (options[LABEL_HEADER]
                                       if LABEL_HEADER in options else {})
-        self._text_message_options = (options[TEXT_MESSAGE]
-                                      if TEXT_MESSAGE in options else {})
         self._label_message_options = (options[LABEL_MESSAGE]
                                        if LABEL_MESSAGE in options else {})
         self._frame_footer_options = (options[FRAME_FOOTER]
@@ -256,7 +232,6 @@ class _ConfirmTest(Viewable):
     def __init__(self, root):
         self._root = root
         self._body = None
-        self._text_widget = None
 
     def _on_build(self):
         self._body = tk.Frame(self._root)
@@ -273,7 +248,7 @@ class _ConfirmTest(Viewable):
     def _on_click_launch(self):
         confirm = Confirm(root, title="Confirm",
                           header="Confirmation",
-                          message="Do you really want to continue ?")
+                          message="Do you really want to continue ?\nPress ok to continue\nOr die !")
         confirm.build_wait()
         print("Confirm:", confirm.ok)
 

@@ -7,10 +7,10 @@ with open("README.md", "r") as file:
 
 
 NAME = "pyrustic"
-VERSION = "0.0.5"
+VERSION = "0.0.8"
 AUTHOR = "Pyrustic Evangelist"
 EMAIL = "pyrustic@protonmail.com"
-DESCRIPTION = "Lightweight software suite to help develop, package, and publish Python desktop applications"
+DESCRIPTION = "Lightweight framework and software suite to help develop, package, and publish Python desktop applications"
 URL = "https://github.com/pyrustic/pyrustic"
 
 
@@ -25,7 +25,12 @@ setuptools.setup(
     url=URL,
     packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=[],
+    install_requires=["rustiql", "jupitest", "hubway"],
+    entry_points={
+        "console_scripts": [
+            "pyrustic = pyrustic.manager.main:main",
+        ],
+    },
     python_requires='>=3.5',
     classifiers=[
         "Programming Language :: Python :: 3",

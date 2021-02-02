@@ -13,7 +13,6 @@ BODY = "body"
 LABEL_HEADER = "label_header"
 SCROLLBOX = "scrollbox"
 LABEL_MESSAGE = "label_message"
-TEXT_MESSAGE = "text_message"
 FRAME_PANE = "frame_pane"
 FRAME_FOOTER = "frame_footer"
 BUTTON_CONTINUE = "button_continue"
@@ -49,9 +48,7 @@ class Choice(Viewable):
                  title=None,
                  header=None,
                  message=None,
-                 is_long_message=False,
-                 use_scrollbox=False,
-                 items=(),
+                 items=None,
                  selected=None,
                  flavor="radio",
                  handler=None,
@@ -67,9 +64,6 @@ class Choice(Viewable):
         - header: the text to show as header
 
         - message: the text to show as message
-
-        - is_long_message: bool, set it to True if you want the message
-        widget to be a Text. Set it to False if you want the message to be a Label
 
         - use_scrollbox: bool, set it to True to make the Dialog scrollable
 
@@ -97,7 +91,7 @@ class Choice(Viewable):
          you can edit its geometry. Example: "500x300"
 
         - options: dictionary of widgets options
-            The widgets keys are: BODY, LABEL_HEADER, SCROLLBOX, LABEL_MESSAGE, TEXT_MESSAGE,
+            The widgets keys are: BODY, LABEL_HEADER, SCROLLBOX, LABEL_MESSAGE,
             FRAME_PANE, FRAME_FOOTER, BUTTON_CONTINUE, BUTTON_CANCEL,
             RADIOBUTTONS, CHECKBUTTONS.
 
@@ -111,9 +105,7 @@ class Choice(Viewable):
         self._title = title
         self._header = header
         self._message = message
-        self._is_long_message = is_long_message
-        self._use_scrollbox = use_scrollbox
-        self._items = items
+        self._items = [] if not items else items
         self._selected = selected
         self._flavor = flavor
         self._handler = handler
@@ -124,7 +116,6 @@ class Choice(Viewable):
         self._label_header_options = None
         self._scrollbox_options = None
         self._label_message_options = None
-        self._text_message_options = None
         self._frame_pane_options = None
         self._frame_footer_options = None
         self._button_continue_options = None
@@ -165,10 +156,6 @@ class Choice(Viewable):
     @property
     def message(self):
         return self._message
-
-    @property
-    def is_long_message(self):
-        return self._is_long_message
 
     @property
     def items(self):
@@ -214,16 +201,14 @@ class Choice(Viewable):
         Get the components (widgets instances) used to build this dialog.
 
         This property returns a dict. The keys are:
-            BODY, LABEL_HEADER, SCROLLBOX, LABEL_MESSAGE, TEXT_MESSAGE,
+            BODY, LABEL_HEADER, SCROLLBOX, LABEL_MESSAGE,
             FRAME_PANE, FRAME_FOOTER, BUTTON_CONTINUE, BUTTON_CANCEL,
             RADIOBUTTONS, CHECKBUTTONS.
 
         Warning: radiobuttons and checkbuttons are sequences of widgets positioned
         in the sequence according to the index.
 
-        Another Warning: check the presence of key before usage. Example,
-        the widget linked to the LABEL_MESSAGE key may be missing because
-        TEXT_MESSAGE replaced it
+        Another Warning: check the presence of key before usage.
         """
         return self._components
 
@@ -234,65 +219,53 @@ class Choice(Viewable):
         self._body = tk.Toplevel(self._master,
                                  class_="Choice",
                                  cnf=self._body_options)
-        self._body.resizable(0, 0)
+        #self._body.resizable(0, 0)
         self._components[BODY] = self._body
         self._body.title(self._title)
         #
         if self._geometry:
             self._body.geometry(self._geometry)
-        #
+        self._body.columnconfigure(0, weight=1)
+        self._body.rowconfigure(0, weight=0)
+        self._body.rowconfigure(1, weight=0)
+        self._body.rowconfigure(2, weight=2, uniform="a")
+        self._body.rowconfigure(3, weight=0, uniform="a")
+
+        # == Set Header
         if self._header:
             label_header = tk.Label(self._body,
                                     name="header",
+                                    text=self._header,
                                     justify=tk.LEFT,
                                     anchor="w",
                                     cnf=self._label_header_options)
             self._components[LABEL_HEADER] = label_header
-            label_header.pack(fill=tk.X, anchor="w",
-                                    padx=(5, 0), pady=(5, 5))
+            label_header.grid(row=0, column=0, sticky="w",
+                                    padx=(5, 5), pady=(5, 5))
             label_header.config(text=self._header)
-        # Scrollbox
-        container = self._body
-        if self._use_scrollbox:
-            scrollbox = Scrollbox(self._body,
-                                  options=self._scrollbox_options)
-            self._components[SCROLLBOX] = scrollbox
-            scrollbox.build_pack(expand=1, fill=tk.BOTH)
-            container = scrollbox.box
+        # == Set Message
         if self._message:
-            if self._is_long_message:
-                text_message = tk.Text(container,
-                                       wrap="word",
-                                       width=35,
-                                       height=5,
-                                       name="long_message",
-                                       cnf=self._text_message_options)
-                self._components[TEXT_MESSAGE] = text_message
-                text_message.pack(fill=tk.BOTH, expand=1, padx=5, pady=5)
-                text_message.insert("end", self._message)
-                text_message.config(state="disabled")
-            else:
-                label_message = tk.Label(container,
-                                         name="message",
-                                         justify=tk.LEFT,
-                                         anchor="w",
-                                         cnf=self._label_message_options)
-                self._components[LABEL_MESSAGE] = label_message
-                label_message.pack(fill=tk.X, anchor="w",
-                                         padx=(5, 0), pady=(0, 5))
-                label_message.config(text=self._message)
-        #
-        pane = tk.Frame(container,
-                        name="pane",
-                        cnf=self._frame_pane_options)
-        self._components[FRAME_PANE] = pane
-        pane.pack(fill=tk.X, anchor="w", pady=(0, 10))
-        #
+            label_message = tk.Label(self.body,
+                                     name="message",
+                                     text=self._message,
+                                     justify=tk.LEFT,
+                                     anchor="w",
+                                     cnf=self._label_message_options)
+            self._components[LABEL_MESSAGE] = label_message
+            label_message.grid(row=1, column=0, sticky="w",
+                               padx=(5, 5), pady=(0, 5))
+        # == Scrollbox
+        scrollbox = Scrollbox(self._body, orient="vertical",
+                              options=self._scrollbox_options)
+        self._components[SCROLLBOX] = scrollbox
+        scrollbox.build_grid(row=2, column=0, sticky="nswe",
+                             padx=5)
+        # == Footer
         self._footer = tk.Frame(self._body,
                                 name="footer",
                                 cnf=self._frame_footer_options)
         self._components[FRAME_FOOTER] = self._footer
-        self._footer.pack(side=tk.BOTTOM, fill=tk.X, pady=(30, 0))
+        self._footer.grid(row=3, column=0, sticky="swe", pady=(30, 0))
         #
         button_continue = tk.Button(self._footer, name="continue",
                                     text="Continue",
@@ -315,14 +288,14 @@ class Choice(Viewable):
             if not self._flavor or self._flavor not in ("radio", "check"):
                 break
             if self._flavor == "radio":
-                cache = tk.Radiobutton(pane,
+                cache = tk.Radiobutton(scrollbox.box,
                                        variable=self._intvar,
                                        text=choice, value=i)
                 self._components[RADIOBUTTONS].append(cache)
             elif self._flavor == "check":
                 tk_var = tk.IntVar()
                 self._intvars.append(tk_var)
-                cache = tk.Checkbutton(pane,
+                cache = tk.Checkbutton(scrollbox.box,
                                        variable=tk_var,
                                        onvalue=1, offvalue=0,
                                        text=choice)
@@ -384,8 +357,6 @@ class Choice(Viewable):
                                    if SCROLLBOX in options else {})
         self._label_message_options = (options[LABEL_MESSAGE]
                                        if LABEL_MESSAGE in options else {})
-        self._text_message_options = (options[TEXT_MESSAGE]
-                                      if TEXT_MESSAGE in options else {})
         self._frame_pane_options = (options[FRAME_PANE]
                                     if FRAME_PANE in options else {})
         self._frame_footer_options = (options[FRAME_FOOTER]
@@ -425,7 +396,7 @@ class _ChoiceTest(Viewable):
 
     def _on_click_btn_check(self):
         choice = Choice(self._root, title="Title", header="header", flavor="check",
-                        message="message", geometry=None,
+                        message="message",
                         items=["first", "second", "third"],
                         selected=1, handler=self._choice_handler)
         choice.build_wait()
@@ -433,8 +404,8 @@ class _ChoiceTest(Viewable):
     def _on_click_btn_radio(self):
         tests = ("test "*10).split()
         choice = Choice(self._root, title="Title", header="header", flavor="radio",
-                        use_scrollbox=True, is_long_message=True,
-                        message="message", geometry=None,
+                        use_scrollbox=True,
+                        message="message",
                         items=["first", "second", "third", *tests],
                         selected=1, handler=self._choice_handler)
         choice.build_wait()

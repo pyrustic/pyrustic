@@ -1,5 +1,6 @@
 import os
 import os.path
+import math
 import shutil
 import subprocess
 from pyrustic.jasonix import Jasonix
@@ -51,7 +52,7 @@ def tab_to_space(text, tab_size=4):
 
 def edit_build_version(root_dir):
     about_json_path = os.path.join(root_dir, "pyrustic_data",
-                                   "about.json")
+                                   "app.json")
     if not os.path.exists(about_json_path):
         return
     jasonix = Jasonix(about_json_path)
@@ -121,3 +122,22 @@ def parse_cmd(cmd):
     if cache:
         result.append(cache)
     return result
+
+
+def convert_size(size):
+    """ Size should be in bytes.
+    Return a tuple (float_or_int_val, str_unit) """
+    if size == 0:
+        return (0, "B")
+    KILOBYTE = 1024
+    size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+    i = int(math.floor(math.log(size, KILOBYTE)))
+    p = math.pow(KILOBYTE, i)
+    result = round(size/p, 2)
+    return (result, size_name[i])
+
+
+def truncate_str(data, max_size=15, ellipsis="..."):
+    val = ((data[:max_size] + ellipsis)
+            if len(data) > max_size else data)
+    return val

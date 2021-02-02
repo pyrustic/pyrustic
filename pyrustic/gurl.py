@@ -27,18 +27,18 @@ HTTP_STATUS_CODES = {
 
 class Gurl:  # TODO write a better documentation !  ;)
     """
-    Gurl is a great tool for accessing the web!
+    Gurl is a great suite for accessing the web!
     """
-    def __init__(self, token=None, headers=(),
+    def __init__(self, token=None, headers=None,
                  web_cache=True, response_cache=True):
         """
         PARAMETERS:
 
         - token: Authentication token
 
-        - headers: list of headers. Example:
-                ( ("Accept", "application/vnd.github.v3+json"),
-                  ("User-Agent", "Mozilla/5.0") )
+        - headers: dict of headers. Example:
+                { "Accept": "application/vnd.github.v3+json",
+                  "User-Agent": "Mozilla/5.0" )
 
         - web_cache: bool, set it to True to activate the web cache
 
@@ -46,7 +46,7 @@ class Gurl:  # TODO write a better documentation !  ;)
 
         """
         self._token = token
-        self._headers = list(headers)
+        self._headers = {} if not headers else headers
         self._web_cache = _WebCache(response_cache) if web_cache else None
 
     @property
@@ -77,7 +77,7 @@ class Gurl:  # TODO write a better documentation !  ;)
 
     def request(self, url, body=None, method="GET", headers=None):
         """ Returns a Response object """
-        headers = () if headers is None else headers
+        headers = {} if not headers else headers
         # request object
         req = _get_req(url, body, method)
         # add request to webcache
@@ -86,7 +86,7 @@ class Gurl:  # TODO write a better documentation !  ;)
         # set authorization
         _set_authorization(req, self._token)
         # set headers
-        _set_headers(req, self._headers + list(headers))
+        _set_headers(req, {**self._headers, **headers})
         # get response
         response = _get_response(req)
         # add response to webcache
@@ -242,8 +242,8 @@ def _set_authorization(req, token):
 
 def _set_headers(req, headers):
     # add headers
-    for x, y in headers:
-        req.add_header(x, y)
+    for key, val in headers.items():
+        req.add_header(key, val)
 
 
 def _get_response(req):
@@ -307,7 +307,7 @@ class _WebCache:
             header = _IF_NONE_MATCH
             if validator == _LAST_MODIFIED:
                 header = _IF_MODIFIED_SINCE
-            headers = ((header, value), )
+            headers = {header: value}
             _set_headers(req, headers)
 
     def add_response(self, url, response):

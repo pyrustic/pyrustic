@@ -24,10 +24,12 @@ class _Style:
         """
         Individually apply a style to a pyrustic_widget
         """
+        data = self.__dict__
+        cnf = {key.lower(): val for key, val in data.items()}
         if raise_exception:
-            widget.config(cnf=self.__dict__.copy())
+            widget.config(cnf=cnf)
         else:
-            for key, val in self.__dict__.copy().items():
+            for key, val in cnf.items():
                 try:
                     widget.config(cnf={key: val})
                 except Exception as e:

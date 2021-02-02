@@ -2,6 +2,7 @@ import tkinter as tk
 import copy
 import platform
 import sys
+import os
 import os.path
 from pyrustic.viewable import Viewable
 from pyrustic import tkmisc
@@ -21,18 +22,21 @@ class App:
     Pyrustic Framework's entry point.
     This class should be instantiated inside the file "main.py".
     """
-    def __init__(self):
+    def __init__(self, root_dir=None):
         """
         Create an App instance.
         It's recommended to don't write any code above this instantiation.
         """
+        self._root_dir = root_dir
+        self._project_name = None
         self._is_running = False
         self._root = tk.Tk()
-        self._config_path = None
-        self._config_data = None
         self._theme = None
         self._view = None
         self._center_window = False
+        self._config_data = None
+        self._setup()
+        self._config_path = self._get_config_path()
         self._set_default_title()
 
     # ============================================
@@ -53,28 +57,13 @@ class App:
         """
         return self._config_path, copy.deepcopy(self._config_data)
 
-
-    @config.setter
-    def config(self, path):
-        """
-        The absolute path to config file.
-        Example:
-            path = "/path/to/my_config.json"
-
-        Warning: it is recommended to avoid hard-coding paths.
-        Avoid a path like this: "/path/to/my_config.json"
-        Instead, do this: os.path.join("path", "to", "my_config.json")
-        """
-        path = os.path.normpath(path)
-        self._config_path = path
-
     @property
     def theme(self):
         """
         Get the theme object
         For more information about what a theme is:
         - check 'pyrustic.theme.Theme';
-        - then check the beautiful theme 'pyrustic.themes.darkmatter'
+        - then check the beautiful theme 'pyrustic.theme.cyberpunk'
         """
         return self._theme
 
@@ -87,7 +76,7 @@ class App:
         Remember that "start()" should be called only once !
         For more information about what a theme is:
         - check "pyrustic.theme.Theme";
-        - then check the beautiful theme "pyrustic.themes.darkmatter"
+        - then check the beautiful theme "pyrustic.theme.cyberpunk"
         """
         self._root.option_clear()
         self._theme = val
@@ -177,25 +166,27 @@ class App:
     #               PRIVATE METHODS
     # ============================================
     def _set_config(self):
+        if not os.path.exists(self._config_path):
+            return
         jasonix = Jasonix(self._config_path,
                             _DEFAULT_CONFIG_PATH)
         self._config_data = jasonix.data
         # app geometry
-        if not self._config_data["gui"]["ignore_geometry"]:
-            self._root.geometry(self._config_data["gui"]["root_geometry"])
+        if not self._config_data["ignore_geometry"]:
+            self._root.geometry(self._config_data["root_geometry"])
         # background
-        background_color = self._config_data["gui"]["root_background"]
+        background_color = self._config_data["root_background"]
         self._root.config(background=background_color)
         # resizable width and height
-        resizable_width = self._config_data["gui"]["resizable_width"]
-        resizable_height = self._config_data["gui"]["resizable_height"]
+        resizable_width = self._config_data["resizable_width"]
+        resizable_height = self._config_data["resizable_height"]
         self._root.resizable(width=resizable_width, height=resizable_height)
         # maximize screen
-        if self._config_data["gui"]["maximize_window"]:
+        if self._config_data["maximize_window"]:
             self.maximize()
 
     def _set_theme(self):
-        if not self._config_data["gui"]["allow_theme"]:
+        if not self._config_data["allow_theme"]:
             return
         if not self._theme:
             return
@@ -215,12 +206,32 @@ class App:
 
 
     def _on_exit(self):
-        if not self._config_data["gui"]["exit_quickly"]:
-            if self._root:
-                self._root.destroy()
-                self._root = None
+        if self._view:
+            self._view.destroy()
+            self._view = None
+        if self._root:
+            self._root.destroy()
+            self._root = None
         sys.exit()
 
     def _set_default_title(self):
-        title = "{} | built with Pyrustic".format(pyrustic_about.PROJECT_NAME)
+        title = "{} | built with Pyrustic".format(self._project_name)
         self._root.title(title)
+
+    def _get_config_path(self):
+        pyrustic_data = os.path.join(self._root_dir, "pyrustic_data")
+        if not os.path.exists(pyrustic_data):
+            os.mkdir(pyrustic_data)
+        return os.path.join(pyrustic_data, "gui.json")
+
+    def _setup(self):
+        if self._root_dir is None:
+            try:
+                import about
+                self._root_dir = about.ROOT_DIR
+                self._project_name = about.PROJECT_NAME
+            except ImportError:
+                message = "Please set the root_dir or put an about.py module in the root of your project"
+                raise PyrusticAppException(message)
+        if not self._project_name:
+            self._project_name = os.path.basename(self._root_dir)

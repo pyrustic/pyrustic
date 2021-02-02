@@ -21,9 +21,9 @@ def center_window(window, within=None):
         data = formal_geometry(within)
         x = ((data[0] // 2) + data[2]) - (width//2)
         y = ((data[1] // 2) + data[3]) - (height//2)
-    if window.winfo_screenwidth() - x < width:
+    if (window.winfo_screenwidth() - x) < width:
         x = window.winfo_screenwidth() - width
-    if window.winfo_screenheight() - y < height:
+    if (window.winfo_screenheight() - y) < height:
         y = window.winfo_screenheight() - height
     window.geometry("+{}+{}".format(x, y))
     window.deiconify()

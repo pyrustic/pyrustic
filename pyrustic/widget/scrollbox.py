@@ -38,6 +38,8 @@ class Scrollbox(Viewable):
     def __init__(self,
                  master=None,
                  orient=VERTICAL,
+                 box_sticky="nswe",
+                 resizable_box=True,
                  options=None):
         """
         - master: widget parent. Example: an instance of tk.Frame
@@ -51,6 +53,8 @@ class Scrollbox(Viewable):
         """
         self._master = master
         self._orient = orient
+        self._box_sticky = box_sticky
+        self._resizable_box = resizable_box
         self._options = {} if options is None else options
         self._body_options = None
         self._canvas_options = None
@@ -113,15 +117,23 @@ class Scrollbox(Viewable):
     def xview_moveto(self, fraction):
         """
         Calls canvas's method 'xview_moveto'
+        Set:
+            - 0: to scroll to left
+            - 1: to scroll to right
         """
         if self._canvas:
+            self._body.update_idletasks()
             self._canvas.xview_moveto(fraction)
 
     def yview_moveto(self, fraction):
         """
         Calls canvas's method 'yview_moveto'
+        Set:
+            - 0: to scroll to top
+            - 1: to scroll to bottom
         """
         if self._canvas:
+            self._body.update_idletasks()
             self._canvas.yview_moveto(fraction)
 
     def box_config(self, **options):
@@ -156,24 +168,25 @@ class Scrollbox(Viewable):
                               class_="Scrollbox",
                               cnf=self._body_options)
         self._components[BODY] = self._body
-        self._body.bind("<Enter>", self._on_enter_body)
-        self._body.bind("<Leave>", self._on_leave_body)
-        self._body.bind("<Unmap>", self._on_unmap_body)
-        self._body.bind("<Destroy>", self._on_destroy_body)
-        self._body.bind_all("<MouseWheel>", self._on_mouse_wheel)
-        self._body.bind_all("<Button-4>", self._on_mouse_wheel)
-        self._body.bind_all("<Button-5>", self._on_mouse_wheel)
-        self._body.columnconfigure(0, weight=1)
-        self._body.rowconfigure(0, weight=1)
-        self._body.winfo_toplevel().bind("<Configure>", self._on_configure_box_canvas)
+        self._body.bind("<Enter>", self._on_enter_body, "+")
+        self._body.bind("<Leave>", self._on_leave_body, "+")
+        self._body.bind("<Unmap>", self._on_unmap_body, "+")
+        self._body.bind("<Destroy>", self._on_destroy_body, "+")
+        self._body.bind_all("<MouseWheel>", self._on_mouse_wheel, "+")
+        self._body.bind_all("<Button-4>", self._on_mouse_wheel, "+")
+        self._body.bind_all("<Button-5>", self._on_mouse_wheel, "+")
+        self._body.columnconfigure(0, weight=1, uniform=1)
+        self._body.rowconfigure(0, weight=1, uniform=1)
+        self._body.winfo_toplevel().bind("<Configure>",
+                                         self._on_configure_box_canvas, "+")
         # canvas
         self._canvas = tk.Canvas(self._body,
                                  name=CANVAS,
-                                 width=320,
-                                 height=175,
+                                 width=0,
+                                 height=0,
                                  cnf=self._canvas_options)
         self._components[CANVAS] = self._canvas
-        self._canvas.grid(row=0, column=0, sticky="nswe")
+        self._canvas.grid(row=0, column=0, sticky=self._box_sticky)
         # box
         self._box = tk.Frame(self._canvas,
                              name=BOX,
@@ -213,7 +226,7 @@ class Scrollbox(Viewable):
                                      command=self._canvas.xview,
                                      cnf=self._hsb_options)
             self._components[HSB] = self._hsb
-            self._hsb.grid(row=1, column=0, columnspan=2, sticky="we")
+            self._hsb.grid(row=1, column=0, columnspan=2, sticky="swe")
             self._canvas.config(xscrollcommand=self._hsb.set)
             self._bind_enter_leave_to_hsb()
         if self._orient in ("both", "vertical", "v", "y"):
@@ -222,7 +235,7 @@ class Scrollbox(Viewable):
                                      command=self._canvas.yview,
                                      cnf=self._vsb_options)
             self._components[VSB] = self._vsb
-            self._vsb.grid(row=0, column=1, sticky="ns")
+            self._vsb.grid(row=0, column=1, sticky=self._box_sticky)
             self._canvas.config(yscrollcommand=self._vsb.set)
 
     def _bind_enter_leave_to_hsb(self):
@@ -236,9 +249,17 @@ class Scrollbox(Viewable):
     def _on_configure_box_canvas(self, event):
         if self._box:
             if self._orient in ("horizontal", "h", "x"):
-                self._canvas.itemconfig(self._box_id, height=self._canvas.winfo_height())
+                if self._resizable_box:
+                    self._canvas.itemconfig(self._box_id,
+                                            height=self._canvas.winfo_height())
+                else:
+                    self._canvas.config(height=self._box.winfo_height())
             elif self._orient in ("vertical", "v", "y"):
-                self._canvas.itemconfig(self._box_id, width=self._canvas.winfo_width())
+                if self._resizable_box:
+                    self._canvas.itemconfig(self._box_id,
+                                            width=self._canvas.winfo_width())
+                else:
+                    self._canvas.config(width=self._box.winfo_width())
             self._canvas.config(scrollregion=self._canvas.bbox("all"))
 
     def _on_enter_body(self, event):
@@ -285,7 +306,7 @@ class _ScrollboxTest(Viewable):
                     pady=10, expand=1, fill=tk.BOTH)
         # Scrollbox 1
         scrollbox_1 = Scrollbox(pane_1, orient=VERTICAL)
-        scrollbox_1.build_pack(pady=5)
+        scrollbox_1.build_pack(pady=5, expand=1, fill=tk.BOTH)
         # Button 1
         command = (lambda self=self, box=scrollbox_1.box, side=tk.TOP:
                    self._on_click_add(box, side))
@@ -298,7 +319,7 @@ class _ScrollboxTest(Viewable):
                     pady=10, expand=1, fill=tk.BOTH)
         # Scrollbox 2
         scrollbox_2 = Scrollbox(pane_2, orient=HORIZONTAL)
-        scrollbox_2.build_pack(pady=5)
+        scrollbox_2.build_pack(pady=5, expand=1, fill=tk.BOTH)
         # Button 2
         command = (lambda self=self, box=scrollbox_2.box, side=tk.LEFT:
                    self._on_click_add(box, side))
@@ -320,5 +341,5 @@ class _ScrollboxTest(Viewable):
 if __name__ == "__main__":
     root = tk.Tk()
     scrollbox_test = _ScrollboxTest(root)
-    scrollbox_test.build_pack()
+    scrollbox_test.build_pack(fill=tk.BOTH, expand=1)
     root.mainloop()

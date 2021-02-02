@@ -3,13 +3,13 @@
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
     <br>
     <p align="center">
-    Pyrustic
+    The Pyrustic software suite with the cyberpunk theme
     </p>
 </div>
 
 <!-- Intro Text -->
 # Pyrustic
-`Pyrustic` is a lightweight software suite to help develop, package, and publish `Python` `desktop applications`.
+`Pyrustic` is a lightweight framework and software suite to help develop, package, and publish `Python` `desktop applications`.
 
 This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
 
@@ -27,23 +27,22 @@ This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encour
 - [Tutorial](#tutorial)
 - [Documentation](#documentation)
 - [License](#license)
-- [Memes](#memes)
 - [Contact](#contact)
 
 <!-- Overview -->
 ## Overview
 Since `Python` comes with battery included, `Pyrustic` makes extensive use of `Tkinter` as GUI Toolkit and `SQLite` as database engine.
-As a lightweight software suite, `Pyrustic` is made up of:
+`Pyrustic` is made up of:
 - `Manager`: a command-line application to rule them all;
-- a graphical `SQL Editor`;
-- a graphical `Test Runner`;
-- `Hub`: an application to publish your project;
+- `Rustiql`: a graphical `SQL Editor`;
+- `Jupitest`: a graphical `Test Runner`;
+- `Hubway`: an application to publish your project;
 - and a `Framework`, available to you, on which all other components are based.
 
 ### The Manager
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/manager.gif" alt="Manager">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/manager.gif" alt="Manager" width="650">
     <p align="center">
     Manager
     </p>
@@ -55,11 +54,11 @@ Via the `Manager` you can:
 - easily add `packages`, `modules` or `files` to your project;
 - run a specific `module` of your project;
 - view recent projects list and quickly switch between projects;
-- launch the `SQL Editor`, `Test Runner` and `Hub`;
+- launch the `SQL Editor`, `Test Runner` and `Hubway`;
 - build a package from your project with a system of hook scripts and exclusion rules;
 - and more...
 
-The `build` command builds a package that could be published with the application `Hub`.
+The `pkg` command builds a package that could be published with the application `Hubway`.
 The metaphor of a drama is used for the process:
 - a script named `Prolog` will be executed as the prologue;
 - a script named `Act I` will be executed just before the tests run;
@@ -69,10 +68,10 @@ The metaphor of a drama is used for the process:
 `Pyrustic` thus gives you the possibility to influence this drama (the build of the package).
 For example, in the `Act I` you can set a flag in the ready-to-publish project to indicate that it is no longer in `dev` mode. You could even automate a part of your `git` workflow in the script.
 
-### The SQL Editor
+### Rustiql - The SQL Editor
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/sql_editor.gif" alt="SQL Editor">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/rustiql.gif" alt="SQL Editor" width="650">
     <p align="center">
     SQL Editor
     </p>
@@ -85,12 +84,12 @@ The graphical `SQL Editor` allows you to:
 - open in-memory database;
 - and more...
 
-The `SQL Editor` makes extensive use of the `pyrustic.litedao` library.
+The `SQL Editor` makes extensive use of the `pyrustic.dao` library.
 
-### The Test Runner
+### Jupitest - The Test Runner
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/test_runner.gif" alt="Test Runner">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/jupitest.gif" alt="Test Runner" width="650">
     <p align="center">
     Test Runner
     </p>
@@ -103,22 +102,22 @@ The `Test Runner` reproduces the tree structure of the `tests` folder in your pr
 - and even run test `methods`;
 - and more...
 
-The `Test Runner` makes extensive use of the `pyrustic.threadium` library to perform smooth real-time test reporting.
+The `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
 
-### The Hub
+### Hubway
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/hub.gif" alt="Hub">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/hubway.gif" alt="Hubway" width="650">
     <p align="center">
-    Hub
+    Hubway
     </p>
 </div>
 
-The `Hub` is an application that allows you to publish a new release of your application on `Github`. Once published, you can track your project, see metrics like the number of `stargazers`, `subscribers` or releases `downloads`.
+`Hubway` is an application that allows you to publish a new release of your application on `Github`. Once published, you can track your project, see metrics like the number of `stargazers`, `subscribers` or releases `downloads`.
 
-The `Hub` makes extensive use of `pyrustic.gurl` to fetch resources.
+`Hubway` makes extensive use of `pyrustic.gurl` to fetch resources.
 
-You need a personal access token to publish a release via `Hub` or to increase the API rate limit.
+You need a personal access token to publish a release via `Hubway` or to increase the API rate limit.
 It is easy to generate a personal access token. Read this [article](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token).
 
 ### The Framework
@@ -131,7 +130,7 @@ The `Framework` contains libraries that target:
 - and more...
 
 #### Example of code - A simple Hello Friend demo - main.py
-Note: this is generated by `Pyrustic` when you issue the command `kstart`.
+Note: this is generated by `Pyrustic` when you issue the command `init`.
 
 <details>
     <summary>Click to expand (or collapse)</summary>
@@ -139,18 +138,13 @@ Note: this is generated by `Pyrustic` when you issue the command `kstart`.
 ```python
 # "main.py" generated by Pyrustic Manager
 import about
-import os.path
 from pyrustic.app import App
 from view.main_view import MainView
 from misc import my_theme
 
 
 # The App
-app = App()
-
-# Set config
-config_path = os.path.join(about.ROOT_DIR, "app_config.json")
-app.config = config_path
+app = App(about.ROOT_DIR)
 
 # Set theme
 app.theme = my_theme.get_theme()
@@ -169,7 +163,7 @@ app.start()
 </details>
 
 #### Example of code - A simple Hello Friend demo - view/main_view.py
-Note: this is generated by `Pyrustic` when you issue the command `kstart`.
+Note: this is generated by `Pyrustic` when you issue the command `init`.
 
 <details>
     <summary>Click to expand (or collapse)</summary>
@@ -228,14 +222,16 @@ class MainView(Viewable):
 </details>
 
 ### Application Publishing
-Once you are ready to release a new version of your app, ZAT allows you to create a package with the `build` command and then publish it to Github with the` Hub` app.
+Once you are ready to release a new version of your app, `Pyrustic` allows you to create a package with the `pkg` command and then publish it to Github with `Hubway`.
 
-Then the question that arises is "How to make the download-unpack-install-run process easier for users?". This is where `Geet` comes in.
+Then the question that arises is "How to make the download-unpack-install-run process easier for users?". This is where the `Hubstore` comes in.
 
-`Geet` is like one of these useful tools we discover by serendipity.
-With `Geet`, you get, install, and run the latest release of a compatible app published on Github.
+`Hubstore` is like one of these useful tools we discover by serendipity.
+With `Hubstore`, it's easy to showcase, distribute, manage your FOSS apps.
 
-Do you want to learn more about `Geet` ? Check the demo [here](https://github.com/pyrustic/geet#readme).
+`Hubstore` is available on PyPI and yes it's built with `Pyrustic` too !
+
+Do you want to learn more about `Hubstore` ? Click on this [link](https://github.com/pyrustic/hubstore#readme).
 
 
 <!-- Demo -->
@@ -249,7 +245,7 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 ### Wisdom from Antiquity
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/diogenes.jpg" alt="Diogenes">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/diogenes.jpg" alt="Diogenes" width="650">
     <p align="center">
     By <a href="https://en.wikipedia.org/wiki/en:Jean-L%C3%A9on_G%C3%A9r%C3%B4me" class="extiw" title="w:en:Jean-Léon Gérôme">Jean-Léon Gérôme</a> - <a href="https://en.wikipedia.org/wiki/en:Walters_Art_Museum" class="extiw" title="w:en:Walters Art Museum">Walters Art Museum</a>: <a href="https://thewalters.org/" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://thewalters.org/">Home page</a>&nbsp;<a href="https://art.thewalters.org/detail/31957" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://art.thewalters.org/detail/31957">Info about artwork</a>, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=323523">Link</a>
     </p>
@@ -266,7 +262,7 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 ### Advertisement from the twentieth century
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/ibm.jpg" alt="IBM">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/ibm.jpg" alt="IBM" width="650">
     <p align="justify">
     By Cecile &amp; Presbrey advertising agency for International Business Machines. - Scanned from the December 1951 issue of Fortune by <a href="//commons.wikimedia.org/wiki/User:Swtpc6800" title="User:Swtpc6800">User:Swtpc6800</a> Michael Holley. The image was touched up with Adobe Photo Elements., Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=17480483">Link</a>
     </p>
@@ -276,16 +272,16 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 <!-- Features -->
 ## Features
 A non-exhaustive list of features:
-- `Manager`: entry-point, command-line application to help you to manage your project, build package, launch the `Test Runner`, launch the `SQL Editor` and `Hub`.
+- `Manager`: entry-point, command-line application to help you to manage your project, build package, launch the `Test Runner`, launch the `SQL Editor` and `Hubway`.
 - `Test Runner`: a graphical `Test Runner` to run test `packages`, `modules`, `classes` and `methods`.
 - `SQL Editor`: a graphical `SQL Editor` to edit your database, open `in-memory` database, load scripts.
-- `Hub`: publish your app, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
+- `Hubway`: publish your app, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
 - An optional `Framework` to use in your project. The same `Framework` used by `Pyrustic`.
-- `pyrustic.threadium`: a `library` included in the `Framework` to make it easy to develop multithreading applications.
-- `pyrustic.litedao`: a `library` included in the `Framework` to simplify the connection to your database.
-- `pyrustic.gurl`: a `library` included in the `Framework` to fetch resources with an implementation of conditional request and a smart responses caching system. `Hub` uses this library to fetch resources as a good API citizen.
+- `pyrustic.threadom`: a `library` included in the `Framework` to make it easy to develop multithreading applications.
+- `pyrustic.dao`: a `library` included in the `Framework` to simplify the connection to your database.
+- `pyrustic.gurl`: a `library` included in the `Framework` to fetch resources with an implementation of conditional request and a smart responses caching system. `Hubway` uses this library to fetch resources as a good API citizen.
 - `pyrustic.default_style` and `pyrustic.theme`: a style/theme system to make it easy for you to build beautiful GUIs.
-- `pyrustic.themes.darkmatter`: a dark theme ready to use, the one used as base theme by the `SQL Editor`, `Test Runner` and the `Hub`.
+- `pyrustic.theme.cyberpunk`: a dark theme ready to use, the one used as base theme by the `SQL Editor`, `Test Runner` and `Hubway`.
 - `pyrustic.viewable.Viewable`: bring an intuitive lifecycle system to your `Views` by making them implement `Viewable`. The mega-widgets in this framework implement `Viewable`.
 - the `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
 - `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
@@ -307,27 +303,24 @@ If you have never installed a library from PyPI, you must install the pip tool e
 ```bash
 $ pip install pyrustic
 
-$ python3 -m pyrustic
+$ pyrustic
 Welcome to Pyrustic Manager !
-Version: 0.0.5
+Version: 0.0.7
 Type "help" or "?" to list commands. Type "exit" to leave.
 
 (pyrustic) 
-``` 
+```
 
-
-If you want to be able to run `Pyrustic` after installation just by typing `pyrustic` in the shell, then consider making a small change to your system's `PATH`.
-If you are not on `Windows`, check this [article](https://opensource.com/article/17/6/set-path-linux).
 
 <!-- Tutorial -->
 ## Tutorial
 - Create a `demo` folder to contain the project you want to start. This folder will be the `ROOT_DIR` of your project.
-- Run `python3 -m pyrustic` to open the `Manager`.
+- Run `pyrustic` in your shell to open the `Manager`.
 - Link your project to the `Manager` by typing the command `link` in the `Manager`. A dialog will appear so you could choose your demo project folder. You can also put the absolute path of the folder directly in front of the `link` command. The `link` command does not make any change in your project.
 - Your project is now linked to the `Manager` and becomes the Target project. The `target` command displays the path to the Target project (its `ROOT_DIR`). You can unlink it with the command `unlink`. Whenever you come back to the `Manager`, just type `relink` to link again your previous Target project. Use the command `last` to see the list of last projects.
-- Type `kstart` in the `Manager` to perform a project Kickstart. The `kstart` command modifies your project. This command will create the minimal project structure.
+- Type `init` in the `Manager` to perform a project Kickstart. The `init` command modifies your project. This command will create the minimal project structure.
 - You can run your project with the `run` command without arguments. You can also run a specific `module` in your project. Example: `run host.calc.addition`.
-- Type `sql`, `test` or `hub` commands in the `Manager` to launch the `SQL Editor`, `Test Runner` or `Hub` respectively.
+- Type `sql`, `test` or `hub` commands in the `Manager` to launch the `SQL Editor`, `Test Runner` or `Hubway` respectively.
 - Your project has an entry point which is `main.py`. In the `main.py` file, there is an instance of `pyrustic.app.App` to which the first `View` to display is passed.
 - A `View` is a class that implements `pyrustic.viewable.Viewable`. In a `View` you must implement the `on_build()` method in which you assign a `Tk` object (`tk.Frame` or `tk.Toplevel`) to the `_body` instance variable.
 - The `life cycle` of a `View` that implements `pyrustic.viewable.Viewable` is:
@@ -338,9 +331,9 @@ If you are not on `Windows`, check this [article](https://opensource.com/article
 - To run a `View`, call the `build()` method which will execute `on_build()` and will return the content of the `_body` instance variable. The `build_pack()` method builds the `View` then calls the method `pack()` on the `body` in a single call. Same stuff with `build_grid()` and `build_place()`. The method `build_wait()` is used for `View` built with a `Toplevel` as `_body`, thus, execution of the next instructions is paused until the destruction of the `View`. To destroy a `View`, call the method `destroy()`.
 - About application publishing, read [this](#application-publishing).
 
-Note: Initializing your project with the `kstart` command in the `Manager` will create the `pyrustic_data` folder at the root of your project (`ROOT_DIR`). Take a look at this folder. The command `build` will store packages inside this folder after consuming some data from configuration files in the same folder.
+Note: Initializing your project with the `init` command in the `Manager` will create the `pyrustic_data` folder at the root of your project (`ROOT_DIR`). Take a look at this folder. The command `pkg` will build and store packages inside this folder after consuming some data from configuration files in the same folder.
 
-A better tutorial will come later. Use the `kstart` command in the `Manager` to get an equivalent of a graphical `Hello World` demo project, then explore the contents of your project. Start with `main.py`, then `view/main_view.py`. Good luck !
+A better tutorial will come later. Use the `init` command in the `Manager` to get an equivalent of a graphical `Hello World` demo project, then explore the contents of your project. Start with `main.py`, then `view/main_view.py`. Good luck !
 
 <!-- Documentation -->
 ## Documentation
@@ -364,49 +357,63 @@ Note: I am not affiliated with any of these entities. A simple web search brings
 ## License
 `Pyrustic` is licensed under the terms of the permissive free software license `MIT License`.
 
+<!-- Contact -->
+## Contact
+Hi ! I'm Alex, operating by ["Crocker's Rules"](http://sl4.org/crocker.html)
+<!-- Image -->
+![email](https://raw.githubusercontent.com/pyrustic/misc/master/media/email.png)
+
+
 <!-- Memes -->
-## Memes
 <details>
-    <summary>Click to expand (or collapse)</summary>
+    <summary></summary>
+        <br>
+        <br>
+        Congratz ! You found the Easter Memeggs ! Enjoy (or cry) !
+        <br>
         <br>
         <!-- Image -->
         <div align="center">
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_1.jpg" alt="Meme">
             <br>
             <br>
+            <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_2.jpg" alt="Meme">
+            <br>
             <br>
             <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_3.jpg" alt="Meme">
             <br>
             <br>
+            <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_4.jpg" alt="Meme">
+            <br>
             <br>
             <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_5.jpg" alt="Meme">
             <br>
             <br>
+            <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_6.jpg" alt="Meme">
+            <br>
             <br>
             <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_7.jpg" alt="Meme">
             <br>
             <br>
+            <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_8.jpg" alt="Meme">
+            <br>
             <br>
             <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_9.jpg" alt="Meme">
             <br>
             <br>
+            <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_10.jpg" alt="Meme">
+            <br>
             <br>
             <br>
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_11.jpg" alt="Meme">
         </div>
 </details>
-
-<!-- Contact -->
-## Contact
-Hi ! I'm Alex, operating by ["Crocker's Rules"](http://sl4.org/crocker.html)
-<!-- Image -->
-![email](https://raw.githubusercontent.com/pyrustic/misc/master/media/email.png)

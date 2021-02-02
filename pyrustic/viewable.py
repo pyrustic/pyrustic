@@ -3,6 +3,13 @@ from pyrustic import tkmisc
 from pyrustic.exception import PyrusticException
 
 
+# Constants
+NEW = "new"
+BUILT = "built"
+DISPLAYED = "displayed"
+DESTROYED = "destroyed"
+
+
 class Viewable():
     """
     Subclass this if you are going to create a view.
@@ -56,6 +63,20 @@ class Viewable():
             self.__set_default_attributes()
         return self._body
 
+    @property
+    def state(self):
+        """ Return the current state of the Viewable instance.
+        States are integers, you can use these constants:
+            - viewable.NEW: the state just after instantiation;
+            - viewable.BUILT: the state after the call of on_body
+            - viewable.DISPLAYED: the state after the call of on_display
+            - viewable.DESTROYED: the state after the call of on_destroy
+        """
+        try:
+            self.__state
+        except AttributeError:
+            self.__set_default_attributes()
+        return self.__state
     # ==============================================
     #                 PUBLIC METHODS
     # ==============================================
@@ -93,7 +114,7 @@ class Viewable():
         Destroy the body of this view
         """
         self.__build()
-        return self.__exec_on_destroy(destroy=True)
+        self.__exec_on_destroy()
 
     # ==============================================
     #               METHODS TO IMPLEMENT
@@ -124,7 +145,8 @@ class Viewable():
         you need to change the geometry of this toplevel,
         override this method !
         """
-        tkmisc.center_window(self._body, self.__master.winfo_toplevel())
+        tkmisc.center_window(self.body, self.__master.winfo_toplevel())
+        tkmisc.dialog_effect(self.body)
 
     # ==============================================
     #                 INTERNAL METHODS
@@ -136,33 +158,40 @@ class Viewable():
         except AttributeError:
             self.__set_default_attributes()
         if self.__built:
-            return self._body
+            return self.body
         self._on_build()
-        self._body = self._body
         self.__built = True
+        self.__state = BUILT
         try:
-            self.__master = self._body.master
+            self.__master = self.body.master
         except Exception:
             pass
-        if isinstance(self._body, tk.Toplevel):
+        if isinstance(self.body, tk.Toplevel):
             self.__is_toplevel = True
+            self.body.protocol("WM_DELETE_WINDOW", self.__exec_on_destroy)
             self.__bind_destroy_event()
             self._toplevel_geometry()
             try:
-                self._body.wait_visibility()
+                self.body.wait_visibility()
             except Exception as e:
                 pass
             else:
                 self._on_display()
-        elif isinstance(self._body, tk.Frame):
+                self.__state = DISPLAYED
+        elif isinstance(self.body, tk.Frame):
             self.__bind_destroy_event()
-            self._body.after(0, self.__exec_on_display)
+            self.body.after(0, self.__exec_on_display)
         else:
             message = "The body of a a Viewable should be either a tk.Frame or a tk.Toplevel"
             raise PyrusticException(message)
-        return self._body
+        return self.body
 
     def __set_default_attributes(self):
+        # __state
+        try:
+            self.__state
+        except AttributeError:
+            self.__state = 0
         # __built
         try:
             self.__built
@@ -191,28 +220,47 @@ class Viewable():
 
     def __bind_destroy_event(self):
         command = (lambda event,
-                          widget=self._body,
+                          widget=self.body,
                           callback=self.__exec_on_destroy:
                    callback() if event.widget is widget else None)
-        self._body.bind("<Destroy>", command, "+")
+        self.body.bind("<Destroy>", command, "+")
 
     def __exec_on_display(self):
         try:
-            self._body.wait_visibility()
+            self.body.wait_visibility()
         except Exception as e:
             pass
         else:
             self._on_display()
+            self.__state = DISPLAYED
 
-    def __exec_on_destroy(self, destroy=False):
-        if self.__built and not self.__destroyed:
-            self.__destroyed = True
-            self._on_destroy()
-            if destroy:
-                self._body.destroy()
-                self._body = None
-            try:
-                if self.__master.focus_get() is None:
-                    self.__master.winfo_toplevel().focus_lastfor().focus_force()
-            except Exception as e:
-                pass
+    def __exec_on_destroy(self):
+        if not self.__built or self.__destroyed:
+            return
+        self.__destroyed = True
+        self._on_destroy()
+        self.__state = DESTROYED
+        window_manager = self.body.winfo_manager()
+        # Hide the window first to avoid the visual slow destruction
+        # of each child
+        if window_manager == "wm":
+            if self.body.winfo_ismapped():
+                self.body.withdraw()
+        elif window_manager == "grid":
+            if self.body.winfo_ismapped():
+                self.body.grid_forget()
+        elif window_manager == "pack":
+            if self.body.winfo_ismapped():
+                self.body.pack_forget()
+        elif window_manager == "place":
+            if self.body.winfo_ismapped():
+                self.body.place_forget()
+        try:
+            self.body.destroy()
+        except Exception as e:
+            pass
+        try:
+            if self.__master.focus_get() is None:
+                self.__master.winfo_toplevel().focus_lastfor().focus_force()
+        except Exception as e:
+            pass

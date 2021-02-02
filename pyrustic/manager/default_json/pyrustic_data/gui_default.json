@@ -1,0 +1,9 @@
+{
+		"root_geometry": "+0+0",
+		"root_background": "black",
+		"ignore_geometry": false,
+		"maximize_window": false,
+		"resizable_width": true,
+		"resizable_height": true,
+		"allow_theme": true
+}
