@@ -4,7 +4,24 @@ import shutil
 from pyrustic.manager import constant
 from pyrustic.jasonix import Jasonix
 from pyrustic.gurl import Gurl
+import pyrustic
 
+
+def check_project_state(target):
+    """ Target is the path to the project
+    Return:
+        0: all right
+        1: uninitialized project
+        2: uninstalled project
+    """
+    app_pkg = os.path.basename(target)
+    app_dir = os.path.join(target, app_pkg)
+    if not os.path.exists(app_dir):
+        return 1
+    data = pyrustic.dist(app_pkg)
+    if not data:
+        return 2
+    return 0
 
 
 def copyto(src, dest):
@@ -128,29 +145,25 @@ def get_root_from_package(package_name):
 
 def get_manager_jasonix(readonly=True):
     jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE,
-                      constant.DEFAULT_MANAGER_SHARED_DATA_FILE,
-                      readonly)
+                      readonly=readonly)
     return jasonix
 
 
 def get_sqleditor_jasonix(readonly=True):
     jasonix = Jasonix(constant.SQLEDITOR_SHARED_DATA_FILE,
-                      constant.DEFAULT_SQLEDITOR_SHARED_DATA_FILE,
-                      readonly)
+                      readonly=readonly)
     return jasonix
 
 
 def get_runtest_jasonix(readonly=True):
     jasonix = Jasonix(constant.RUNTEST_SHARED_DATA_FILE,
-                      constant.DEFAULT_RUNTEST_SHARED_DATA_FILE,
-                      readonly)
+                      readonly=readonly)
     return jasonix
 
 
 def get_hub_jasonix(readonly=True):
     jasonix = Jasonix(constant.HUB_SHARED_DATA_FILE,
-                      constant.DEFAULT_HUB_SHARED_DATA_FILE,
-                      readonly)
+                      readonly=readonly)
     return jasonix
 
 

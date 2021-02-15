@@ -1,4 +1,2 @@
-recursive-include pyrustic *.json
-recursive-include pyrustic *.txt
-recursive-include pyrustic *.png
-recursive-include pyrustic LICENSE
+recursive-include pyrustic *
+global-exclude *.py[cod]

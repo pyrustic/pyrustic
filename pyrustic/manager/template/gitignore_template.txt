@@ -17,8 +17,5 @@ env/
 # Databases
 *.db
 
-# Releases
-pyrustic_data/dist/
-
 # Secret
 secret/

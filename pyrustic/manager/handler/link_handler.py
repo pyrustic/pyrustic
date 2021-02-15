@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import filedialog
 import os
 import os.path
+from pyrustic import dist
 from pyrustic.manager.misc import funcs
 
 
@@ -20,8 +21,9 @@ class LinkHandler:
     - Command: link </path/to/target/project>
 
     """
-    def __init__(self, target, args):
+    def __init__(self, target, app_pkg, args):
         self._target = target
+        self._app_pkg = app_pkg
         self._process(args)
 
     @property
@@ -73,8 +75,17 @@ class LinkHandler:
         if not self._store_target(path):
             print("Failed to store the Target in config")
             return
-        print("Successfully linked !\nTarget: {}".format(path))
         self._target = path
+        print("Successfully linked !")
+        app_pkg = os.path.basename(path)
+        print("[{}] {}".format(app_pkg, path))
+        data = funcs.check_project_state(path)
+        if data == 0:
+            print("Version: {}".format(dist(app_pkg)["version"]))
+        elif data == 1:
+            print("Not yet initialized project (check 'help init')")
+        elif data == 2:
+            print("Not yet installed project (think about: 'pip install -e .')")
 
     def _store_target(self, path):
         jasonix = funcs.get_manager_jasonix(False)

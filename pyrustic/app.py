@@ -1,20 +1,14 @@
-import tkinter as tk
+import sys
+import json
 import copy
 import platform
-import sys
-import os
-import os.path
+import pkgutil
+import tkinter as tk
+from pyrustic import dist
 from pyrustic.viewable import Viewable
 from pyrustic import tkmisc
-from pyrustic import about as pyrustic_about
 from pyrustic.exception import PyrusticAppException
 from pyrustic.private.enhance_tk import EnhanceTk
-from pyrustic.jasonix import Jasonix
-
-
-_DEFAULT_CONFIG_PATH = os.path.join(pyrustic_about.ROOT_DIR,
-                                    "private",
-                                    "default_app_config.json")
 
 
 class App:
@@ -22,13 +16,14 @@ class App:
     Pyrustic Framework's entry point.
     This class should be instantiated inside the file "main.py".
     """
-    def __init__(self, root_dir=None):
+    def __init__(self, package):
         """
         Create an App instance.
+        package: the name of the package in which the caller is. Use __package__.
+
         It's recommended to don't write any code above this instantiation.
         """
-        self._root_dir = root_dir
-        self._project_name = None
+        self._package = package
         self._is_running = False
         self._root = tk.Tk()
         self._theme = None
@@ -36,8 +31,6 @@ class App:
         self._center_window = False
         self._config_data = None
         self._setup()
-        self._config_path = self._get_config_path()
-        self._set_default_title()
 
     # ============================================
     #                PROPERTIES
@@ -55,7 +48,7 @@ class App:
         Get a dict-like deepcopy of your config file if it exists and is valid.
         Else you will get the default config dict.
         """
-        return self._config_path, copy.deepcopy(self._config_data)
+        return copy.deepcopy(self._config_data)
 
     @property
     def theme(self):
@@ -166,11 +159,6 @@ class App:
     #               PRIVATE METHODS
     # ============================================
     def _set_config(self):
-        if not os.path.exists(self._config_path):
-            return
-        jasonix = Jasonix(self._config_path,
-                            _DEFAULT_CONFIG_PATH)
-        self._config_data = jasonix.data
         # app geometry
         if not self._config_data["ignore_geometry"]:
             self._root.geometry(self._config_data["root_geometry"])
@@ -215,23 +203,21 @@ class App:
         sys.exit()
 
     def _set_default_title(self):
-        title = "{} | built with Pyrustic".format(self._project_name)
+        name = self._package
+        if "." in name:
+            name = "Application"
+        title = "{} | built with Pyrustic".format(name)
         self._root.title(title)
 
-    def _get_config_path(self):
-        pyrustic_data = os.path.join(self._root_dir, "pyrustic_data")
-        if not os.path.exists(pyrustic_data):
-            os.mkdir(pyrustic_data)
-        return os.path.join(pyrustic_data, "gui.json")
-
     def _setup(self):
-        if self._root_dir is None:
-            try:
-                import about
-                self._root_dir = about.ROOT_DIR
-                self._project_name = about.PROJECT_NAME
-            except ImportError:
-                message = "Please set the root_dir or put an about.py module in the root of your project"
-                raise PyrusticAppException(message)
-        if not self._project_name:
-            self._project_name = os.path.basename(self._root_dir)
+        if not self._package:
+            raise PyrusticAppException("Missing package name.")
+        # config_data
+        gui_json_resource = "pyrustic_data/gui.json"
+        default_gui_json_resource = "manager/default_json/pyrustic_data/gui_default.json"
+        gui_json = pkgutil.get_data(self._package, gui_json_resource)
+        if not gui_json:
+            gui_json = pkgutil.get_data(__package__, default_gui_json_resource)
+        self._config_data = json.loads(gui_json)
+        # set default title
+        self._set_default_title()

@@ -14,8 +14,9 @@ class SqlHandler:
     - Description: Launch the SQL Editor
     - Command: sql
     """
-    def __init__(self, target):
+    def __init__(self, target, app_pkg):
         self._target = target
+        self._app_pkg = app_pkg
         self._popen_instance = None
         self._process(target)
 
@@ -29,7 +30,8 @@ class SqlHandler:
             return
         if sys.executable:
             self._print_catalog("launching")
-            p = subprocess.Popen(["rustiql"], cwd=target)
+            p = subprocess.Popen([sys.executable, "-m", "rustiql"],
+                                 cwd=target)
             self._popen_instance = p
             self._print_catalog("opened")
         else:

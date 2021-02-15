@@ -17,16 +17,17 @@ class LastHandler:
     - Command: last
     """
 
-    def __init__(self, target, args):
+    def __init__(self, target,
+                 app_pkg, args):
         self._target = target
+        self._app_pkg = app_pkg
         self._process(args)
 
     def _process(self, args):
         if args:
             print("Wrong usage of this command")
             return
-        jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE,
-                          constant.DEFAULT_MANAGER_SHARED_DATA_FILE)
+        jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE)
         last_list = jasonix.data["last"]
         len_last_list = len(last_list)
         if len_last_list == 0:

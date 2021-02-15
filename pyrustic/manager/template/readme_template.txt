@@ -14,4 +14,4 @@ A [Python](https://www.python.org/) desktop application built to:
 - contribute to the [free software movement](https://www.fsf.org/);
 - and more...
 
-<p align="right"> built with <a href="https://github.com/pyrustic">Pyrustic</a> </p>
+<p align="right"> built with <a href="https://github.com/pyrustic/pyrustic">Pyrustic</a> </p>

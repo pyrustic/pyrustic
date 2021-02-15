@@ -50,8 +50,8 @@ def tab_to_space(text, tab_size=4):
     return "\n".join(results)
 
 
-def edit_build_version(root_dir):
-    about_json_path = os.path.join(root_dir, "pyrustic_data",
+def edit_build_version(app_dir):
+    about_json_path = os.path.join(app_dir, "pyrustic_data",
                                    "app.json")
     if not os.path.exists(about_json_path):
         return

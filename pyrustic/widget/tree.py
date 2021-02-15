@@ -241,7 +241,10 @@ class Tree(Viewable):
                 if node["container"]:
                     for child in self.children(node_id):
                         self.delete(child["node_id"])
-                node["node_frame"].destroy()
+                try:
+                    node["node_frame"].destroy()
+                except Exception as e:
+                    pass
                 if node_id > 0:
                     self.node(node["parent"])["box_frame"].config(height=1)
                 del self.__nodes[key]

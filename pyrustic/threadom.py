@@ -144,7 +144,7 @@ class Threadom:
         with self._running_synced_target_lock:
             if sync and self._running_synced_target:
                 data = {"target": target, "args": args, "kwargs": kwargs,
-                        "consumer": consumer, "sync": sync,
+                        "consumer": consumer, "sync": sync, "daemon": daemon,
                         "unpack_result": unpack_result,
                         "upstream_exception_handler": upstream_exception_handler,
                         "downstream_exception_handler": downstream_exception_handler}
@@ -270,7 +270,7 @@ class Threadom:
             data = self._waiting_synced_target_to_run[0]
             del self._waiting_synced_target_to_run[0]
             self._run(data["target"], data["args"], data["kwargs"],
-                      data["consumer"], data["sync"],
+                      data["consumer"], data["sync"], data["daemon"],
                       data["unpack_result"], data["upstream_exception_handler"],
                       data["downstream_exception_handler"])
 

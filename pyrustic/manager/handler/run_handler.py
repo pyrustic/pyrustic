@@ -37,18 +37,24 @@ class RunHandler:
     Note: Please use simple or double quotes as delimiters if a string
     contains space
     """
-    def __init__(self, target, args):
-        self._process(target, args)
+    def __init__(self, target, app_pkg, args):
+        self._target = target
+        self._app_pkg = app_pkg
+        self._process(target, app_pkg, args)
 
-    def _process(self, target, args):
+    def _process(self, target, app_pkg, args):
         if not target:
             self._print_catalog("missing_target")
             return
+        elif not app_pkg:
+            self._print_catalog("missing_app_pkg")
+            return
+        source_dir = os.path.join(target, app_pkg)
         name = None
         if len(args) == 0:
-            if os.path.exists(os.path.join(target, "main.py")):
-                args = ["-m", "main"]
-                name = "main.py"
+            if os.path.exists(os.path.join(source_dir, "__main__.py")):
+                args = ["-m", app_pkg]
+                name = "__main__"
             else:
                 print("Missing entry point")
         else:
@@ -67,4 +73,6 @@ class RunHandler:
             message = "Please link a Target first. Check 'help target'."
         elif item == "running":
             message = "Running '{}' ...".format(kwargs["module"])
+        elif item == "missing_app_pkg":
+            message = "Please init the project first. Check 'help init'."
         print(message)

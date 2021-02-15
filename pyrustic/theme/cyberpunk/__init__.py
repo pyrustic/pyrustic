@@ -28,11 +28,11 @@ from pyrustic.theme.cyberpunk.pyrustic_widget import tree
 class Cyberpunk(Theme):
     def __init__(self):
         super().__init__()
-        _add_native_widget(self)
-        _add_pyrustic_widget(self)
+        _add_native_widget_style(self)
+        _add_pyrustic_widget_style(self)
 
 
-def _add_native_widget(theme):
+def _add_native_widget_style(theme):
     elements = (button, canvas, checkbutton, entry,
                 frame, label, label_frame, listbox,
                 menu, menubutton, paned_window, radiobutton,
@@ -41,7 +41,7 @@ def _add_native_widget(theme):
         theme.add_style(element.get_style())
 
 
-def _add_pyrustic_widget(theme):
+def _add_pyrustic_widget_style(theme):
     elements = (choice, confirm, scrollbox, spinner, table,
                 toast, tree)
     for element in elements:

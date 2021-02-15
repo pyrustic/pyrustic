@@ -4,9 +4,9 @@ import sys
 
 
 class LiteTestRunner:
-    def __init__(self, path, root_dir):
+    def __init__(self, path, app_dir):
         self._path = path
-        self._root_dir = root_dir
+        self._app_dir = app_dir
 
     def run(self, failfast=True):
         reloader = _Reloader()
@@ -19,7 +19,7 @@ class LiteTestRunner:
         if not os.path.exists(self._path):
             return False, "This path doesn't exist"
         test_loader = unittest.TestLoader()
-        suite = test_loader.discover(self._path, top_level_dir=self._root_dir)
+        suite = test_loader.discover(self._path, top_level_dir=self._app_dir)
         result = unittest.TestResult()
         try:
             result.startTestRun()

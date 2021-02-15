@@ -1,9 +1,7 @@
 import os
 import os.path
+import pkgutil
 from pyrustic.manager.misc import funcs
-from pyrustic import about as pyrustic_about
-from pyrustic.jasonix import Jasonix
-from pyrustic.manager.handler.run_handler import RunHandler
 
 
 class InitHandler:
@@ -13,14 +11,54 @@ class InitHandler:
     Use this command to init your project.
     Pyrustic Manager will install a basic
     project structure in your project.
+    The PROJECT_DIR is the project's root
+    directory.
+    The APP_DIR is the directory of your
+    source code.
+    The APP_PKG is simply the name of the
+    root package of your source code.
 
     Usage
     -----
     - Description: Init your project
     - Command: init
+
+    Example
+    -------
+    Assume the linked target is:
+    /home/alex/demo
+    This target is also your project root
+    directory. And 'demo' is your project's
+    name. So let's assume that your target
+    is an empty directory.
+    When you issue the command 'init', this
+    is what the project root will look like:
+    demo # target or PROJECT_ROOT
+        demo # APP_PKG or APP_DIR, source here
+            __main__.py # entry point
+            __init__.py
+            version.py # __version__ = "0.0.1"
+            view # the demo.view package
+                main_view.py # module
+            pyrustic_data # folder
+                hubstore.json
+                gui.json # configure your GUI
+        tests
+            __init__.py
+        setup.py
+        setup.cfg # edit your project config
+        pyproject.toml
+        MANIFEST.in # don't worry, I take care
+
+    So when you want to add a file "my_file.txt"
+    and the module "mod.py" in the package
+    demo.view, you issue in the manager:
+        - add demo.view my_file.txt mod.py
+
     """
-    def __init__(self, target, args):
+    def __init__(self, target, app_pkg, args):
         self._target = target
+        self._app_pkg = app_pkg
         self._process(args)
 
     def _process(self, args):
@@ -30,6 +68,8 @@ class InitHandler:
         if args:
             print("Wrong usage of this command")
             return
+        # ask for app_pkg
+        self._set_app_pkg()
         # create package
         self._make_packages()
         # create folders
@@ -38,175 +78,109 @@ class InitHandler:
         self._add_files()
         # add json data files
         self._add_json_data_files()
-        print("Successfully installed basics !")
-        # run
-        data = input("\nDo you want to run the app ? (y/N): ")
-        if data.lower() == "y":
-            RunHandler(self._target, [])
+        print("Successfully initialized !")
 
     def _make_packages(self):
-        packages = ("host", "view", "misc",
-                    "tests", "tests.view", "tests.host",
-                    "script.packaging")
+        packages = (self._app_pkg, "tests")
         for package in packages:
             funcs.build_package(self._target, package)
+        app_dir = os.path.join(self._target, self._app_pkg)
+        packages = ("view", )
+        for package in packages:
+            funcs.build_package(app_dir, package)
 
     def _make_folders(self):
-        folders = (("pyrustic_data", ),
-                   ("script", ),
-                   ("script", "packaging"))
+        folders = ("pyrustic_data",)
         for folder in folders:
-            path = os.path.join(self._target, *folder)
+            path = os.path.join(self._target, self._app_pkg, folder)
             if os.path.exists(path):
                 continue
             os.mkdir(path)
 
-
     def _add_files(self):
-        template_path = os.path.join(pyrustic_about.ROOT_DIR,
-                                     "manager", "template")
-        # add about.py
-        src_path = os.path.join(template_path, "generic",
-                                "about_template.txt")
-        dest_path = os.path.join(self._target, "about.py")
-        data = self._get_data_from_template(src_path)
+        resource_prefix = "manager/template/"
+        # add version.py
+        resource = resource_prefix + "version_template.txt"
+        app_dir = os.path.join(self._target, self._app_pkg)
+        dest_path = os.path.join(app_dir, "version.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
-        # add main.py
-        src_path = os.path.join(template_path, "init",
-                                "main_template.txt")
-        dest_path = os.path.join(self._target, "main.py")
-        data = self._get_data_from_template(src_path)
+        # add __main__.py
+        resource = resource_prefix + "main_template.txt"
+        dest_path = os.path.join(app_dir, "__main__.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        data = data.format(app_pkg=self._app_pkg)
         self._add_file(dest_path, data)
         # add main_view.py
-        src_path = os.path.join(template_path, "init",
-                                "main_view_template.txt")
-        dest_path = os.path.join(self._target, "view", "main_view.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add my_theme.py
-        src_path = os.path.join(template_path, "init",
-                                "my_theme_template.txt")
-        dest_path = os.path.join(self._target, "misc", "my_theme.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add test_main_view.py
-        src_path = os.path.join(template_path, "init",
-                                "test_main_view_template.txt")
-        dest_path = os.path.join(self._target, "tests", "view", "test_main_view.py")
-        data = self._get_data_from_template(src_path)
+        resource = resource_prefix + "main_view_template.txt"
+        dest_path = os.path.join(app_dir, "view", "main_view.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
         # add .gitignore
-        src_path = os.path.join(template_path, "init",
-                                "gitignore_template.txt")
+        resource = resource_prefix + "gitignore_template.txt"
         dest_path = os.path.join(self._target, ".gitignore")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add packaging prolog
-        src_path = os.path.join(template_path, "packaging",
-                                "prolog_template.txt")
-        dest_path = os.path.join(self._target, "script", "packaging",
-                                 "prolog.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add packaging Act I
-        src_path = os.path.join(template_path, "packaging",
-                                "act_1_template.txt")
-        dest_path = os.path.join(self._target, "script", "packaging",
-                                 "act_1.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add packaging Act II
-        src_path = os.path.join(template_path, "packaging",
-                                "act_2_template.txt")
-        dest_path = os.path.join(self._target, "script", "packaging",
-                                 "act_2.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add packaging epilog
-        src_path = os.path.join(template_path, "packaging",
-                                "epilog_template.txt")
-        dest_path = os.path.join(self._target, "script", "packaging",
-                                 "epilog.py")
-        data = self._get_data_from_template(src_path)
-        self._add_file(dest_path, data)
-        # add packaging_exclusion
-        src_path = os.path.join(template_path, "packaging",
-                                "exclusion_template.txt")
-        dest_path = os.path.join(self._target, "script", "packaging",
-                                 "exclusion.txt")
-        data = self._get_data_from_template(src_path)
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
         # add LICENSE
-        src_path = os.path.join(template_path, "init",
-                                "license_template.txt")
+        resource = resource_prefix + "license_template.txt"
         dest_path = os.path.join(self._target, "LICENSE")
-        data = self._get_data_from_template(src_path)
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
         # add README.md
-        src_path = os.path.join(template_path, "init",
-                                "readme_template.txt")
+        resource = resource_prefix + "readme_template.txt"
         dest_path = os.path.join(self._target, "README.md")
-        data = self._get_data_from_template(src_path)
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add MANIFEST.in
+        resource = resource_prefix + "manifest_template.txt"
+        dest_path = os.path.join(self._target, "MANIFEST.in")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        data = data.format(app_pkg=self._app_pkg)
+        self._add_file(dest_path, data)
+        # add setup.py
+        resource = resource_prefix + "setup_py_template.txt"
+        dest_path = os.path.join(self._target, "setup.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add setup.cfg
+        resource = resource_prefix + "setup_cfg_template.txt"
+        dest_path = os.path.join(self._target, "setup.cfg")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        data = data.format(app_pkg=self._app_pkg)
+        self._add_file(dest_path, data)
+        # add pyproject.toml
+        resource = resource_prefix + "pyproject_template.txt"
+        dest_path = os.path.join(self._target, "pyproject.toml")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
 
     def _add_json_data_files(self):
         local_pyrustic_data_folder = os.path.join(self._target,
+                                                  self._app_pkg,
                                                   "pyrustic_data")
-        # add app.json
-        path = os.path.join(local_pyrustic_data_folder, "app.json")
-        default_path = os.path.join(pyrustic_about.ROOT_DIR,
-                                    "manager",
-                                    "default_json",
-                                    "pyrustic_data",
-                                    "app_default.json")
-        jasonix = Jasonix(path, default=default_path)
-        project_name = os.path.basename(self._target)
-        jasonix.data["project_name"] = project_name
-        jasonix.data["project_title"] = project_name.capitalize()
-        description = "A cool Python desktop application built with Pyrustic"
-        jasonix.data["description"] = description
-        jasonix.data["version"] = "0.0.1"
-        jasonix.data["dev_mode"] = True
-        jasonix.save()
+        resource_prefix = "manager/default_json/pyrustic_data/"
         # add gui.json
         path = os.path.join(local_pyrustic_data_folder, "gui.json")
-        default_path = os.path.join(pyrustic_about.ROOT_DIR,
-                                    "manager",
-                                    "default_json",
-                                    "pyrustic_data",
-                                    "gui_default.json")
-        jasonix = Jasonix(path, default=default_path)
-        # add packaging.json
-        path = os.path.join(local_pyrustic_data_folder, "packaging.json")
-        default_path = os.path.join(pyrustic_about.ROOT_DIR,
-                                    "manager",
-                                    "default_json",
-                                    "pyrustic_data",
-                                    "packaging_default.json")
-        jasonix = Jasonix(path, default=default_path)
-        jasonix.data["prolog"] = "script.packaging.prolog"
-        jasonix.data["act_1"] = "script.packaging.act_1"
-        jasonix.data["act_2"] = "script.packaging.act_2"
-        jasonix.data["epilog"] = "script.packaging.epilog"
-        jasonix.data["exclusion"] = "./script/packaging/exclusion.txt"
-        jasonix.save()
+        default_resource = resource_prefix + "gui_default.json"
+        data = pkgutil.get_data("pyrustic", default_resource)
+        if not os.path.exists(path):
+            with open(path, "wb") as file:
+                file.write(data)
         # add hubstore.json
         path = os.path.join(local_pyrustic_data_folder, "hubstore.json")
-        default_path = os.path.join(pyrustic_about.ROOT_DIR,
-                                    "manager",
-                                    "default_json",
-                                    "pyrustic_data",
-                                    "hubstore_default.json")
-        jasonix = Jasonix(path, default=default_path)
-
-    def _get_data_from_template(self, path):
-        data = ""
-        with open(path, "r") as file:
-            data = file.read()
-        return data
+        default_resource = resource_prefix + "hubstore_default.json"
+        data = pkgutil.get_data("pyrustic", default_resource)
+        if not os.path.exists(path):
+            with open(path, "wb") as file:
+                file.write(data)
 
     def _add_file(self, path, data):
         if os.path.exists(path):
             return
         with open(path, "w") as file:
             file.write(data)
+
+    def _set_app_pkg(self):
+        if self._app_pkg is not None:
+            return
+        self._app_pkg = os.path.basename(self._target)

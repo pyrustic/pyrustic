@@ -25,8 +25,10 @@ class RelinkHandler:
     with index #2 (found the index with the command "last")
     - Command: relink 2
     """
-    def __init__(self, target, args):
+    def __init__(self, target,
+                 app_pkg, args):
         self._target = target
+        self._app_pkg = app_pkg
         self._process(args)
 
     @property
@@ -34,8 +36,7 @@ class RelinkHandler:
         return self._target
 
     def _process(self, args):
-        jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE,
-                          constant.DEFAULT_MANAGER_SHARED_DATA_FILE)
+        jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE, readonly=True)
         path = jasonix.data["target"]
         if not jasonix.data["last"]:
             print("- Empty -")
@@ -50,7 +51,7 @@ class RelinkHandler:
         elif len(args) > 1:
             print("Wrong usage of this command")
             return
-        link_handler = LinkHandler(self._target, [path])
+        link_handler = LinkHandler(self._target, self._app_pkg, [path])
         self._target = link_handler.target
 
     def _check_path(self, path):
