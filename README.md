@@ -286,13 +286,13 @@ Pyrustic is a work in progress. The versions of `Pyrustic` under `1.0.0` are aim
 Read the [FAQ](https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/FAQ.md)
 
 ## Tutorial
-Read the [Tutorial](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/TUTORIAL.md)
+Read the [Tutorial](https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/TUTORIAL.md)
 
 ## Glossary
-Read the [Glossary](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/GLOSSARY.md)
+Read the [Glossary](https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/GLOSSARY.md)
 
 ## Framework Reference
-Read the [Framework Reference](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/REFERENCE.md).
+Read the [Framework Reference](https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/REFERENCE.md).
 
 # External Learning Resources
 Interesting links below to get started with Python, Tkinter and SQLite.
