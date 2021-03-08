@@ -62,3 +62,11 @@ def formal_geometry(window):
     coord_x = window.winfo_x()
     coord_y = window.winfo_y()
     return width, height, coord_x, coord_y
+
+
+def get_cnf(component, options):
+    options = {} if options is None else options
+    cnf = dict()
+    if component in options:
+        cnf = options[component]
+    return cnf

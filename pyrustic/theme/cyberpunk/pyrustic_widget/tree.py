@@ -7,9 +7,9 @@ from pyrustic.theme.cyberpunk import constant
 def get_theme():
     theme = Theme()
     theme.add_style(_get_tree_body_style(), scope="*Tree.")
-    theme.add_style(_get_tree_node_style(), scope="*Tree*TreeNode.")
-    theme.add_style(_get_tree_header_style(), scope="*Tree*treeHeader.")
-    theme.add_style(_get_tree_box_style(), scope="*Tree*treeBox.")
+    theme.add_style(_get_tree_node_style(), scope="*Tree*FrameNode.")
+    theme.add_style(_get_tree_header_style(), scope="*Tree*frame_header.")
+    theme.add_style(_get_tree_box_style(), scope="*Tree*frame_box.")
     return theme
 
 

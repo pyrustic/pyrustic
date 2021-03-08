@@ -1,15 +1,17 @@
 import tkinter as tk
-from pyrustic.viewable import Viewable
+from pyrustic.view import CustomView
+from pyrustic import widget
+from pyrustic.tkmisc import get_cnf
+from pyrustic.exception import PyrusticWidgetException
 
 
 # Components
-BODY = "body"
-NODE_FRAME = "node_frame"
-HEADER_FRAME = "header_frame"
-BOX_FRAME = "box_frame"
+FRAME_NODE = "frame_node"
+FRAME_HEADER = "frame_header"
+FRAME_BOX = "frame_box"
 
 
-class Tree(Viewable):
+class Tree(widget.Frame):
     """
     Tree is the megawidget to use to display the data as a tree.
     To use Tree, you need to subclass it.
@@ -23,7 +25,8 @@ class Tree(Viewable):
                  master=None,
                  indent=50,
                  spacing=10,
-                 options=None):
+                 options=None,
+                 extra_options=None):
         """
         PARAMETERS:
 
@@ -40,20 +43,22 @@ class Tree(Viewable):
                 options = {BODY: {"background": "red"},
                            NODE_FRAME: {"background": "black"}}
         """
-        self.__master = master
+        super().__init__(master=master,
+                         class_="Tree",
+                         cnf=options if options else {},
+                         on_build=self.__on_build,
+                         on_display=self.__on_display,
+                         on_destroy=self.__on_destroy)
         self.__indent = indent
         self.__spacing = spacing
-        self.__options = {} if options is None else options
-        self.__body_options = None
-        self.__node_frame_options = None
-        self.__header_frame_options = None
-        self.__box_frame_options = None
-        self.__parse_options(self.__options)
-        self._body = None
-        self.__nodes = {}
+        self.__options = options
+        self.__extra_options = extra_options
         self.__root = None
+        self.__nodes = {}
         self.__internal_count = 0
         self.__cache = None
+        self.__hook = None
+        self.__view = self.build()
 
     # ==============================================
     #                   PROPERTIES
@@ -67,10 +72,6 @@ class Tree(Viewable):
         return self.__spacing
 
     @property
-    def body(self):
-        return self._body
-
-    @property
     def root(self):
         return self.__root
 
@@ -82,6 +83,14 @@ class Tree(Viewable):
         """
         return [node.copy() for key, node in self.__nodes.items()]
 
+    @property
+    def hook(self):
+        return self.__hook
+
+    @hook.setter
+    def hook(self, val):
+        self.__hook = val
+
     # ==============================================
     #                 PUBLIC METHODS
     # ==============================================
@@ -91,7 +100,8 @@ class Tree(Viewable):
         Insert a node.
         - parent: the node_id of the parent or None if this is the root node of the tree
         - title: string
-        - index: an integer to indicate where to put the node between its parent's children.
+        - index: an integer to indicate where to put the node between
+         its parent's descendants.
             Put "end" to indicate that this node should be added at the the end
         - data: None or dictionary to contain whatever data you want. It could help later.
         - container: boolean. True, if the node should contain another node. False else.
@@ -116,8 +126,8 @@ class Tree(Viewable):
         A node is a dictionary of data:
         node = {"parent": int, "node_id": int, "container": bool,
                 "index": int, "expanded": bool, "data": dict, "title": str,
-                "node_frame": tk.Frame, "header_frame": tk.Frame,
-                "box_frame": tk.Frame, "attached": bool, "ghosted": bool}
+                "frame_node": tk.Frame, "frame_header": tk.Frame,
+                "frame_box": tk.Frame, "attached": bool, "ghosted": bool}
         Example of dotted path (each number in the path is a position index):
             Hub
                 Africa
@@ -134,23 +144,29 @@ class Tree(Viewable):
         if node:
             return node.copy()
 
-    def feed(self, *args, **kwargs):
+    def feed(self, node_id, *args, **kwargs):
         """
         This method will call "_on_feed(*args, **kwargs").
         Use it to feed some data to the tree
         """
-        self._on_feed(*args, **kwargs)
+        node = self.__get_node(node_id)
+        if not node:
+            return
+        view = node.get("view", None)
+        if not view:
+            return
+        view.on_feed_node(self, self, node, *args, **kwargs)
 
-    def children(self, node_id):
+    def descendants(self, node_id):
         """
-        List of children nodes.
+        List of descendants nodes.
         [ node, node, ...]
 
         Please check the doc of the method "node()" to learn more about
         the structure of a node object (a dict in fact)
         """
         return [node.copy() for key, node in self.__nodes.items()
-                                        if node["parent"] == node_id]
+                if node["parent"] == node_id]
 
     def expand(self, node_id):
         """
@@ -159,8 +175,10 @@ class Tree(Viewable):
         node = self.__get_node(node_id)
         if node and node["container"] and not node["expanded"]:
             node["expanded"] = True
-            self._on_expand(node)
-            node["box_frame"].grid(row=1, column=0)
+            view = node.get("view", None)
+            if view:
+                view.on_expand_node(self, node)
+            node["frame_box"].grid(row=1, column=0)
             return True
         return False
 
@@ -171,8 +189,10 @@ class Tree(Viewable):
         node = self.__get_node(node_id)
         if node and node["container"] and node["expanded"]:
             node["expanded"] = False
-            self._on_collapse(node)
-            node["box_frame"].grid_remove()
+            view = node.get("view", None)
+            if view:
+                view.on_collapse_node(self, node)
+            node["frame_box"].grid_remove()
             return True
         return False
 
@@ -239,26 +259,26 @@ class Tree(Viewable):
         for key, node in self.__nodes.items():
             if key == node_id:
                 if node["container"]:
-                    for child in self.children(node_id):
-                        self.delete(child["node_id"])
+                    for descendant in self.descendants(node_id):
+                        self.delete(descendant["node_id"])
                 try:
-                    node["node_frame"].destroy()
+                    node["frame_node"].destroy()
                 except Exception as e:
                     pass
                 if node_id > 0:
-                    self.node(node["parent"])["box_frame"].config(height=1)
+                    self.node(node["parent"])["frame_box"].config(height=1)
                 del self.__nodes[key]
                 return True
         return False
 
     def clear(self, node_id):
         """
-        Deletes the children of this node. Returns True if all right, else False.
+        Deletes the descendants of this node. Returns True if all right, else False.
         """
         cache = True
-        children = self.children(node_id)
-        for child in children:
-            deleted = self.delete(child["node_id"])
+        descendants = self.descendants(node_id)
+        for descendant in descendants:
+            deleted = self.delete(descendant["node_id"])
             cache = False if not deleted else cache
         return cache
 
@@ -282,24 +302,24 @@ class Tree(Viewable):
                 self.__relocate(parent_id, index, direction="+")
         node["parent"] = parent_id
         node["index"] = index
-        node["node_frame"].grid_remove()
-        node["node_frame"].grid(in_=parent_node["box_frame"], row=index)
+        node["frame_node"].grid_remove()
+        node["frame_node"].grid(in_=parent_node["frame_box"], row=index)
         return True
 
     def walk(self, node_id):
         """
         Walks throughout the node.
         Example:
-            for node_id, children in tree.walk(2):
-                print(node_id, len(children))
+            for node_id, descendants in tree.walk(2):
+                print(node_id, len(descendants))
         """
         for key, node in self.__nodes.items():
             if key == node_id:
                 if node["container"]:
-                    children = self.children(node_id)
-                    yield node_id, children
-                    for child in children:
-                        for a, b in self.walk(child["node_id"]):
+                    descendants = self.descendants(node_id)
+                    yield node_id, descendants
+                    for descendant in descendants:
+                        for a, b in self.walk(descendant["node_id"]):
                             if a is None:
                                 continue
                             yield a, b
@@ -310,7 +330,7 @@ class Tree(Viewable):
         """
         node = self.__get_node(node_id)
         if node and not node["attached"]:
-            node["node_frame"].grid()
+            node["frame_node"].grid()
             node["attached"] = True
             return True
         return False
@@ -319,11 +339,11 @@ class Tree(Viewable):
         """
         Detaches an attached node. Returns True if it worked, else False.
         The detached node won't be visible anymore.
-        The detached node's children won't be visible anymore.
+        The detached node's descendants won't be visible anymore.
         """
         node = self.__get_node(node_id)
         if node and node["attached"]:
-            node["node_frame"].grid_remove()
+            node["frame_node"].grid_remove()
             node["attached"] = False
             return True
         return False
@@ -331,16 +351,16 @@ class Tree(Viewable):
     def ghost(self, node_id):
         """
         Hide the header frame of the node whose node_id is given.
-        Note that the children nodes will still be visible.
-        Use this method to give illusion that children nodes
+        Note that the descendants nodes will still be visible.
+        Use this method to give illusion that descendants nodes
         don't have a root at all (kind of floating without root).
         This method returns a boolean (True to indicate that all right, else False)
         """
         node = self.__get_node(node_id)
         if node and not node["ghosted"]:
-            node["header_frame"].grid_remove()
-            node["box_frame"].grid(padx=(0, 0))
-            node["node_frame"].grid(pady=(0, 0))
+            node["frame_header"].grid_remove()
+            node["frame_box"].grid(padx=(0, 0))
+            node["frame_node"].grid(pady=(0, 0))
             node["ghosted"] = True
             node["expanded"] = True
             return True
@@ -353,97 +373,86 @@ class Tree(Viewable):
         """
         node = self.__get_node(node_id)
         if node and node["ghosted"]:
-            node["header_frame"].grid()
-            node["box_frame"].grid(padx=(self.__indent, 0))
-            node["node_frame"].grid(pady=(self.__spacing, 0))
+            node["frame_header"].grid()
+            node["frame_box"].grid(padx=(self.__indent, 0))
+            node["frame_node"].grid(pady=(self.__spacing, 0))
             node["ghosted"] = False
             return True
         return False
 
-    # ==============================================
-    #              OVERRIDABLE
-    # ==============================================
-    def _on_display(self):
-        pass
-
-    def _on_build_node(self, frame, node):
-        pass
-
-    def _on_feed(self, *args, **kwargs):
-        pass
-
-    def _on_expand(self, node):
-        pass
-
-    def _on_collapse(self, node):
-        pass
-
-    def _on_destroy(self):
-        pass
 
     # ==============================================
     #                 INTERNAL
     # ==============================================
-    def _on_build(self):
-        self._body = tk.Frame(master=self.__master, class_="Tree")
+    def __on_build(self):
+        pass
+
+    def __on_display(self):
+        pass
+
+    def __on_destroy(self):
+        pass
 
     def __build_node(self, parent, title, index, data, container, expand):
         # Case 1: root node
         if parent is None:
             index = 0
         else:
-            children_count = len([node for key, node in self.__nodes.items()
+            descendants_count = len([node for key, node in self.__nodes.items()
                                   if node["parent"] == parent])
-            # Case 2: non-root node with an index "end" or count root children
-            if index == "end" or index == children_count:
+            # Case 2: non-root node with an index "end" or count root descendants
+            if index == "end" or index == descendants_count:
                 if index == "end":
-                    index = children_count
+                    index = descendants_count
             # Case 3: non-root node with an existent index
-            elif 0 <= index < children_count:
+            elif 0 <= index < descendants_count:
                 # relocate
                 self.__relocate(parent, index)
         node_id = self.__internal_count
         self.__internal_count += 1
-        node_frame, header_frame, box_frame = self.__build_node_frame(parent,
+        frame_node, frame_header, frame_box = self.__build_node_frame(parent,
                                                                       index)
         node = {"parent": parent, "node_id": node_id, "container": container,
                 "index": index, "expanded": expand, "data": data, "title": title,
-                "node_frame": node_frame, "header_frame": header_frame,
-                "box_frame": box_frame, "attached": True, "ghosted": False}
+                "frame_node": frame_node, "frame_header": frame_header,
+                "frame_box": frame_box, "attached": True, "ghosted": False}
         self.__nodes[node_id] = node
         if parent is None:
             self.__root = node
-        self._on_build_node(header_frame, node.copy())
+        view = self.__get_view(frame_header, node.copy())
+        if view:
+            node["view"] = view
+            view.build()
         # Silently collapse
         if not expand:
-            node["box_frame"].grid_remove()
+            node["frame_box"].grid_remove()
         return node_id
 
     def __build_node_frame(self, parent, index):
         # node frame
-        master = self._body if parent is None else self.__get_node(parent)["box_frame"]
+        master = self if parent is None else self.__get_node(parent)["frame_box"]
         master.columnconfigure(0, weight=1)
-        node_frame = tk.Frame(master, class_="TreeNode",
-                              cnf=self.__node_frame_options)
-        node_frame.columnconfigure(0, weight=1)
-        # grid node_frame
+        frame_node = tk.Frame(master, class_="FrameNode",
+                              cnf=get_cnf(FRAME_NODE, self.__extra_options))
+        frame_node.columnconfigure(0, weight=1)
+        # grid frame_node
         if parent is None:
-            node_frame.grid(column=0, row=0, sticky="we")
+            frame_node.grid(column=0, row=0, sticky="we")
         else:
-            node_frame.grid(column=0, row=index,
+            frame_node.grid(column=0, row=index,
                             sticky="we", pady=(self.__spacing, 0))
         # header
-        header_frame = tk.Frame(node_frame, name="treeHeader",
-                                cnf=self.__header_frame_options)
-        header_frame.columnconfigure(0, weight=1)
-        header_frame.grid(row=0, column=0, sticky="we")
+        frame_header = tk.Frame(frame_node, name=FRAME_HEADER,
+                                cnf=get_cnf(FRAME_HEADER, self.__extra_options))
+        frame_header.columnconfigure(0, weight=1)
+        frame_header.grid(row=0, column=0, sticky="we")
         # box
-        box_frame = tk.Frame(node_frame, name="treeBox",
-                             cnf=self.__box_frame_options)
-        box_frame.grid(row=1, column=0,
+        frame_box = tk.Frame(frame_node, name=FRAME_BOX,
+                             cnf=get_cnf(FRAME_BOX, self.__extra_options))
+        frame_box.grid(row=1, column=0,
                        padx=(self.__indent, 0),
                        sticky="we")
-        return node_frame, header_frame, box_frame
+        return frame_node, frame_header, frame_box
 
     def __relocate(self, parent, from_index, direction="+"):
         """
@@ -457,7 +466,7 @@ class Tree(Viewable):
                     node["index"] -= 1
                 elif direction == "+":
                     node["index"] += 1
-                node["node_frame"].grid(column=0, row=node["index"])
+                node["frame_node"].grid(column=0, row=node["index"])
 
     def __check_non_root_node_is_legal(self, parent_id, index):
         # a non-root node should have a parent
@@ -497,90 +506,121 @@ class Tree(Viewable):
                 index = int(index)
             except Exception:
                 return
-            children = self.children(cache)
-            if not children:
+            descendants = self.descendants(cache)
+            if not descendants:
                 return
             valid_index = False
-            for child in children:
-                if child["index"] == index:
+            for descendant in descendants:
+                if descendant["index"] == index:
                     valid_index = True
-                    cache = child["node_id"]
+                    cache = descendant["node_id"]
                     break
             if not valid_index:
                 return
         return self.__get_node(cache)
 
-    def __parse_options(self, options):
-        self.__body_options = (options[BODY] if BODY in options else {})
-        self.__node_frame_options = (options[NODE_FRAME] if NODE_FRAME in options else {})
-        self.__header_frame_options = (options[HEADER_FRAME]
-                                      if HEADER_FRAME in options else {})
-        self.__box_frame_options = (options[BOX_FRAME]
-                                      if BOX_FRAME in options else {})
+    def __get_view(self, body, node):
+        if not self.__hook:
+            return None
+        hook = self.__hook()
+        if not isinstance(hook, Hook):
+            message = ("The hook should be a callable",
+                       "that returns a pyrustic.widget.tree.hook.Hook")
+            raise PyrusticWidgetException(" ".join(message))
+        on_build = (lambda tree=self,
+                           node=node,
+                           frame=body,
+                           hook=hook:
+                    hook.on_build_node(tree, node, frame))
+        on_display = (lambda tree=self,
+                           node=node,
+                           frame=body,
+                           hook=hook:
+                    hook.on_display_node(tree, node))
+        on_destroy = (lambda tree=self,
+                           node=node,
+                           frame=body,
+                           hook=hook:
+                    hook.on_destroy_node(tree, node))
+        view = CustomView(body=body, on_build=on_build,
+                          on_display=on_display,
+                          on_destroy=on_destroy)
+        view.on_feed_node = hook.on_feed_node
+        view.on_expand_node = hook.on_expand_node
+        view.on_collapse_node = hook.on_collapse_node
+        return view
+
+
+class Hook:
+
+    def on_build_node(self, tree, node, frame):
+        pass
+
+    def on_display_node(self, tree, node):
+        pass
+
+    def on_destroy_node(self, tree, node):
+        pass
+
+    def on_feed_node(self, tree, node, *args, **kwargs):
+        pass
+
+    def on_expand_node(self, tree, node):
+        pass
+
+    def on_collapse_node(self, tree, node):
+        pass
+
 
 # ====================================
 #              DEMO
 # ====================================
-class SimpleTree(Tree):
-    def __init__(self, master):
-        super().__init__(master=master)
-        self._nodes = dict()
+class ExampleHook(Hook):
+    def __init__(self):
+        self._expander_stringvar = tk.StringVar()
+        self._title_stringvar = tk.StringVar()
 
-    def _on_build_node(self, header_frame, node):
-        expander_stringvar = tk.StringVar()
-        title_stringvar = tk.StringVar()
-        self._nodes[node["node_id"]] = {"expander_stringvar": expander_stringvar,
-                                           "title_stringvar": title_stringvar}
+    def on_build_node(self, tree, node, frame):
         node_id = node["node_id"]
         title = node["title"]
         container = node["container"]
         # Header_1 - contains Expander_btn and title_label
-        titlebar = tk.Frame(header_frame, name="treeTitlebar")
+        titlebar = tk.Frame(frame, name="treeTitlebar")
         titlebar.grid(row=0, column=0, sticky="we")
         titlebar.columnconfigure(1, weight=1)
         # Header_2 - is a frame
-        toolbar = tk.Frame(header_frame, name="treeToolbar")
+        toolbar = tk.Frame(frame, name="treeToolbar")
         toolbar.grid(row=1, column=0, sticky="we")
         #
         if container:
-            expander_stringvar.set("-" if node["expanded"] else "+")
+            self._expander_stringvar.set("-" if node["expanded"] else "+")
             expander_btn = tk.Button(titlebar, name="treeExpander",
-                                     textvariable=expander_stringvar,
+                                     textvariable=self._expander_stringvar,
                                      padx=0, pady=0,
                                      command=lambda self=self, node_id=node_id:
-                                     self.collexp(node_id))
+                                     tree.collexp(node_id))
             expander_btn.grid(row=0, column=0)
-        title_stringvar.set(title)
+        self._title_stringvar.set(title)
         title_label = tk.Label(titlebar, name="treeTitleLabel",
-                               anchor="w", textvariable=title_stringvar)
+                               anchor="w", textvariable=self._title_stringvar)
         title_label.grid(row=0, column=1, sticky="we")
 
-    def _on_display(self):
+    def on_display_node(self, tree, node):
         pass
 
-    def _on_collapse(self, node):
-        node_id = node["node_id"]
-        self._nodes[node_id]["expander_stringvar"].set("+")
-
-    def _on_expand(self, node):
-        node_id = node["node_id"]
-        self._nodes[node_id]["expander_stringvar"].set("-")
-
-    def _on_feed(self, *args, **kwargs):
+    def on_destroy_node(self, tree, node):
         pass
 
+    def on_collapse_node(self, tree, node):
+        self._expander_stringvar.set("+")
 
-if __name__ == "__main__":
-    from pyrustic.widget.scrollbox import Scrollbox
+    def on_expand_node(self, tree, node):
+        self._expander_stringvar.set("-")
 
+    def on_feed_node(self, tree, node, *args, **kwargs):
+        pass
 
-    root = tk.Tk()
-    root.geometry("500x500+0+0")
-    scrollbox = Scrollbox(root)
-    scrollbox.build_pack(expand=1, fill=tk.BOTH)
-    tree = SimpleTree(scrollbox.box)
-    tree.build_pack(side=tk.LEFT, anchor="nw")
-
+def _populate_example(tree):
     #
     hub_id = tree.insert(title="Hub")
     africa_id = tree.insert(title="Africa", parent=hub_id)
@@ -603,4 +643,16 @@ if __name__ == "__main__":
     tunis_id = tree.insert(title="Tunis", parent=tunisia_id, container=False)
     rabat_id = tree.insert(title="Rabat", parent=morocco_id, container=False)
     tokyo_id = tree.insert(title="Tokyo", parent=japan_id, container=False)
+
+if __name__ == "__main__":
+    from pyrustic.widget.scrollbox import Scrollbox
+
+    root = tk.Tk()
+    root.geometry("500x500+0+0")
+    scrollbox = Scrollbox(root)
+    scrollbox.pack(expand=1, fill=tk.BOTH)
+    tree = Tree(scrollbox.box)
+    tree.pack(side=tk.LEFT, anchor="nw")
+    tree.hook = lambda: ExampleHook()
+    _populate_example(tree)
     root.mainloop()

@@ -1,12 +1,12 @@
 import sys
-import json
 import copy
 import platform
 import pkgutil
+import json
 import tkinter as tk
-from pyrustic import dist
-from pyrustic.viewable import Viewable
+from pyrustic.view import View, CustomView
 from pyrustic import tkmisc
+from pyrustic.jasonix import Jasonix
 from pyrustic.exception import PyrusticAppException
 from pyrustic.private.enhance_tk import EnhanceTk
 
@@ -29,7 +29,8 @@ class App:
         self._theme = None
         self._view = None
         self._center_window = False
-        self._config_data = None
+        self._config_data = None  # TODO: rename it into self._gui_config
+        self._exit_hook = None
         self._setup()
 
     # ============================================
@@ -43,12 +44,17 @@ class App:
         return self._root
 
     @property
-    def config(self):
+    def gui_config(self):
         """
         Get a dict-like deepcopy of your config file if it exists and is valid.
         Else you will get the default config dict.
         """
         return copy.deepcopy(self._config_data)
+
+    @gui_config.setter
+    def gui_config(self, val):
+        # TODO: make it accept dict, path and file-like object
+        pass
 
     @property
     def theme(self):
@@ -87,14 +93,19 @@ class App:
         """
         Set a view object.
         If you set None, the previous view will be destroyed.
-        A view should implement "pyrustic.viewable.Viewable".
         The new view will destroy the previous one if there are a previous one.
         """
-        if val is not None and not isinstance(val, Viewable):
-            raise PyrusticAppException("{} isn't a Viewable".format(val))
         if self._view:
             self._view.destroy()
         self._view = val
+
+    @property
+    def exit_hook(self):
+        return self._exit_hook
+
+    @exit_hook.setter
+    def exit_hook(self, val):
+        self._exit_hook = val
 
     # ============================================
     #               PUBLIC METHODS
@@ -181,20 +192,41 @@ class App:
         self._theme.target(self._root)
 
     def _install_view(self):
-        if not self._view:
-            return
+        if isinstance(self._view, type):
+            self._view = self._view()
+        elif isinstance(self._view, View):
+            pass
+        else:
+            if self._view is None:
+                self._view = tk.Frame(self._root,
+                                      bg="black",
+                                      width=350,
+                                      height=200)
+            if callable(self._view):
+                self._view = self._view()
+            self._view = CustomView(body=self._view)
         if not self._view.build():
             return
-        if isinstance(self._view.body, tk.Frame):
+        body = self._view.body
+        if isinstance(body, tk.Frame):
             self._view.body.pack(in_=self._root,
                                  expand=1, fill=tk.BOTH)
+        elif isinstance(body, tk.Toplevel):
+            pass
+        else:
+            self._view.body.pack(in_=self._root)
         # center
         if self._center_window:
             tkmisc.center_window(self._root)
 
-
     def _on_exit(self):
+        if self._exit_hook:
+            val = self._exit_hook()
+            if not val:
+                return
         if self._view:
+            if self._view.body:
+                self._view.body.pack_forget()
             self._view.destroy()
             self._view = None
         if self._root:
@@ -213,11 +245,16 @@ class App:
         if not self._package:
             raise PyrusticAppException("Missing package name.")
         # config_data
+        gui_json = None
         gui_json_resource = "pyrustic_data/gui.json"
-        default_gui_json_resource = "manager/default_json/pyrustic_data/gui_default.json"
-        gui_json = pkgutil.get_data(self._package, gui_json_resource)
+        default_gui_json_resource = \
+            "manager/default_json/pyrustic_data/gui_default.json"
+        try:
+            gui_json = pkgutil.get_data(self._package, gui_json_resource)
+        except Exception as e:
+            pass
         if not gui_json:
             gui_json = pkgutil.get_data(__package__, default_gui_json_resource)
-        self._config_data = json.loads(gui_json)
+        self._config_data = json.loads(gui_json) # TODO use Jasonix and also add property config
         # set default title
         self._set_default_title()

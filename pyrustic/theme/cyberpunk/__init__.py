@@ -19,7 +19,6 @@ from pyrustic.theme.cyberpunk.native_widget import toplevel
 from pyrustic.theme.cyberpunk.pyrustic_widget import choice
 from pyrustic.theme.cyberpunk.pyrustic_widget import confirm
 from pyrustic.theme.cyberpunk.pyrustic_widget import scrollbox
-from pyrustic.theme.cyberpunk.pyrustic_widget import spinner
 from pyrustic.theme.cyberpunk.pyrustic_widget import table
 from pyrustic.theme.cyberpunk.pyrustic_widget import toast
 from pyrustic.theme.cyberpunk.pyrustic_widget import tree
@@ -42,7 +41,7 @@ def _add_native_widget_style(theme):
 
 
 def _add_pyrustic_widget_style(theme):
-    elements = (choice, confirm, scrollbox, spinner, table,
+    elements = (choice, confirm, scrollbox, table,
                 toast, tree)
     for element in elements:
         theme.add_theme(element.get_theme())

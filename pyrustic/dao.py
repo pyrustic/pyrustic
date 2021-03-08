@@ -16,11 +16,9 @@ class Dao:
         """
         - path: absolute path to database file
 
-        - creational_script: A tuple (format, value).
-            - Format is a string that is either "inline" or "file".
-            - Value is either the inline sql script or the absolute path to the file.
-            Example_a: ("inline", "CREATE TABLE my_table(id INTEGER NOT NULL PRIMARY KEY);"
-            Example_b: ("file", "/path/to/script.sql")
+        - creational_script: a path to a file, a file-like object or a string of sql code
+            Example_a: "CREATE TABLE my_table(id INTEGER NOT NULL PRIMARY KEY);"
+            Example_b: "/path/to/script.sql"
 
         - raise_exception: By default, True, so exceptions (sqlite.Error) will be raised
 
@@ -53,8 +51,7 @@ class Dao:
         finally:
             atexit.register(self.close)
         if use_creational_script and creational_script:
-            is_file = True if creational_script[0] == "file" else False
-            self.script(creational_script[1], is_file)
+            self.script(creational_script)
 
     # ====================================
     #              PROPERTIES
@@ -160,17 +157,17 @@ class Dao:
                     cur.close()
             return [x[0] for x in description], data
 
-    def script(self, script, is_file=True):
+    def script(self, script):
         """
-        Executes the string script as an sql-script. Meaning: there are multiple lines of sql.
-        This method returns nothing but could raise sqlite.Error, sqlite.Warning
+        Executes the script as an sql-script. Meaning: there are multiple lines of sql.
+        This method returns nothing but could raise sqlite.Error, sqlite.Warning.
+
+        script could be a path to a file, a file-like object or just a string.
         """
         with self._lock:
             cur = None
             try:
-                if is_file:
-                    with open(script, "r") as script:
-                        script = script.read()
+                script = self._stringify_script(script)
                 cur = self._con.cursor()
                 cur.executescript(script)
             except sqlite.Error as e:
@@ -267,3 +264,29 @@ class Dao:
                     pass
                 self._con = None
                 atexit.unregister(self.close)
+
+    def _stringify_script(self, script):
+        """ This method will:
+        - try to read the script: if the script is a file-like object,
+            the content (string) will be returned
+        - try to open the script: if the script is a path to a file,
+            the content (string) will be returned
+        - if the script is already a string, it will be returned as it,
+        - the script will be returned as it if failed to read/open
+        """
+        # if script is a file-like object
+        try:
+            script = script.read()
+        except Exception as e:
+            pass
+        else:
+            return script
+        # if script is a path to a file
+        try:
+            with open(script, "r") as file:
+                script = file.read()
+        except Exception as e:
+            pass
+        else:
+            return script
+        return script

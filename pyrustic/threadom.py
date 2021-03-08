@@ -101,12 +101,15 @@ class Threadom:
          "exception_handler": callback, "latency": integer}
         """
         if qid is None:
-            return tuple([x.copy() for x in self._queues])
+            with self._queues_lock:
+                return tuple([x.copy() for x in self._queues])
         if not self._is_valid_qid(qid):
             return
-        return self._queues[qid].copy()
+        with self._queues_lock:
+            return self._queues[qid].copy()
 
-    def run(self, target, args=None, kwargs=None,
+    def run(self, target, target_args=None,
+            target_kwargs=None,
             consumer=None,
             sync=None,
             daemon=True,
@@ -116,8 +119,8 @@ class Threadom:
         """
         Runs a target in background. Return False if the target is in WAITING state (sync)
         - target: the callable to run
-        - args: tuple, arguments to use
-        - kwargs: dict, keyword-arguments to use
+        - target_args: tuple, arguments to use
+        - target_kwargs: dict, keyword-arguments to use
         - consumer: the callback with parameter(s) that will consume the returned value by target
         - sync: None or boolean to override the constructor's argument sync
         - unpack_result: boolean, True, to unpack the result returned by target
@@ -127,9 +130,10 @@ class Threadom:
             raised while calling the consumer
         """
         sync = self._sync if sync is None else sync
-        args = {} if args is None else args
-        kwargs = {} if kwargs is None else kwargs
-        return self._run(target, args, kwargs, consumer,
+        target_args = {} if target_args is None else target_args
+        target_kwargs = {} if target_kwargs is None else target_kwargs
+        return self._run(target, target_args,
+                         target_kwargs, consumer,
                          sync, daemon, unpack_result,
                          upstream_exception_handler,
                          downstream_exception_handler)
@@ -137,25 +141,32 @@ class Threadom:
     # ===========================================
     #               INTERNAL
     # ===========================================
-    def _run(self, target, args, kwargs, consumer,
+
+    def _run(self, target, target_args,
+             target_kwargs, consumer,
              sync, daemon, unpack_result,
              upstream_exception_handler,
              downstream_exception_handler):
-        with self._running_synced_target_lock:
-            if sync and self._running_synced_target:
-                data = {"target": target, "args": args, "kwargs": kwargs,
-                        "consumer": consumer, "sync": sync, "daemon": daemon,
-                        "unpack_result": unpack_result,
-                        "upstream_exception_handler": upstream_exception_handler,
-                        "downstream_exception_handler": downstream_exception_handler}
-                self._waiting_synced_target_to_run.append(data)
-                return False
-            if sync:
+        if sync:
+            with self._running_synced_target_lock:
+                if self._running_synced_target:
+                    data = {"target": target,
+                            "target_args": target_args,
+                            "target_kwargs": target_kwargs,
+                            "consumer": consumer,
+                            "sync": sync, "daemon": daemon,
+                            "unpack_result": unpack_result,
+                            "upstream_exception_handler":
+                                upstream_exception_handler,
+                            "downstream_exception_handler":
+                                downstream_exception_handler}
+                    self._waiting_synced_target_to_run.append(data)
+                    return False
                 self._running_synced_target = True
         queue = self.q()
         thread = threading.Thread(target=self._runner,
-                                  args=(queue, target, args,
-                                        kwargs,
+                                  args=(queue, target, target_args,
+                                        target_kwargs,
                                         upstream_exception_handler),
                                   daemon=daemon)
         thread.start()
@@ -181,12 +192,12 @@ class Threadom:
         self._loop(qid)
         return qid
 
-    def _runner(self, queue, target, args, kwargs, exception_handler):
+    def _runner(self, queue, target, target_args, target_kwargs, exception_handler):
         result = None
         exception = None
         exception_occurred = False
         try:
-            result = target(*args, **kwargs)
+            result = target(*target_args, **target_kwargs)
         except Exception as e:
             exception_occurred = True
             exception = e
@@ -220,7 +231,6 @@ class Threadom:
                     upstream_exception_handler,
                     downstream_exception_handler):
         if not queue.empty():
-            self._run_next_synced_target()
             result = queue.get()
             exception = None
             if not queue.empty():
@@ -231,6 +241,7 @@ class Threadom:
                 self._dispatch_result(result, consumer,
                                       unpack_result,
                                       downstream_exception_handler)
+            self._run_next_synced_target()
         else:
             next_call = (lambda self=self, queue=queue, consumer=consumer,
                             unpack_result=unpack_result,
@@ -269,11 +280,10 @@ class Threadom:
         if self._waiting_synced_target_to_run:
             data = self._waiting_synced_target_to_run[0]
             del self._waiting_synced_target_to_run[0]
-            self._run(data["target"], data["args"], data["kwargs"],
+            self._run(data["target"], data["target_args"], data["target_kwargs"],
                       data["consumer"], data["sync"], data["daemon"],
                       data["unpack_result"], data["upstream_exception_handler"],
                       data["downstream_exception_handler"])
-
 
     def _is_valid_qid(self, qid):
         with self._queues_lock:
@@ -282,13 +292,9 @@ class Threadom:
             return False
 
     def _run_consumer(self, consumer, result, unpack_result):
-        if not unpack_result:
-            collections.Sequence
-            consumer(result)
-            return
-        if isinstance(result, dict):
+        if unpack_result and isinstance(result, dict):
             consumer(**result)
-        elif isinstance(result, collections.Sequence):
+        elif unpack_result and isinstance(result, collections.Sequence):
             consumer(*result)
         else:
             consumer(result)

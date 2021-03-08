@@ -10,7 +10,7 @@ DISPLAYED = "displayed"
 DESTROYED = "destroyed"
 
 
-class Viewable():
+class View:
     """
     Subclass this if you are going to create a view.
 
@@ -48,6 +48,14 @@ class Viewable():
       Use "build_wait" for toplevels if you want the app to wait till the window closes
     """
 
+    def __init__(self):
+        self.__master = None
+        self.__state = 0
+        self.__built = False
+        self.__bind_id = None
+        self.__destroyed = False
+        self._body = None
+
     # ==============================================
     #                 PROPERTIES
     # ==============================================
@@ -57,10 +65,6 @@ class Viewable():
         """
         Get the body of this view.
         """
-        try:
-            self._body
-        except AttributeError:
-            self.__set_default_attributes()
         return self._body
 
     @property
@@ -72,10 +76,6 @@ class Viewable():
             - viewable.DISPLAYED: the state after the call of on_display
             - viewable.DESTROYED: the state after the call of on_destroy
         """
-        try:
-            self.__state
-        except AttributeError:
-            self.__set_default_attributes()
         return self.__state
     # ==============================================
     #                 PUBLIC METHODS
@@ -90,16 +90,19 @@ class Viewable():
     def build_pack(self, cnf=None, **kwargs):
         cnf = {} if not cnf else cnf
         body = self.__build()
+        self._check_missing_body(body)
         body.pack(cnf=cnf, **kwargs)
 
     def build_grid(self, cnf=None, **kwargs):
         cnf = {} if not cnf else cnf
         body = self.__build()
+        self._check_missing_body(body)
         body.grid(cnf=cnf, **kwargs)
 
     def build_place(self, cnf=None, **kwargs):
         cnf = {} if not cnf else cnf
         body = self.__build()
+        self._check_missing_body(body)
         body.place(cnf=cnf, **kwargs)
 
     def build_wait(self):
@@ -115,6 +118,7 @@ class Viewable():
         """
         self.__build()
         self.__exec_on_destroy()
+
 
     # ==============================================
     #               METHODS TO IMPLEMENT
@@ -153,70 +157,36 @@ class Viewable():
     # ==============================================
 
     def __build(self):
-        try:
-            self.__built
-        except AttributeError:
-            self.__set_default_attributes()
         if self.__built:
             return self.body
         self._on_build()
         self.__built = True
         self.__state = BUILT
+        if not self.body:
+            return
         try:
             self.__master = self.body.master
         except Exception:
             pass
-        if isinstance(self.body, tk.Toplevel):
-            self.__is_toplevel = True
-            self.body.protocol("WM_DELETE_WINDOW", self.__exec_on_destroy)
-            self.__bind_destroy_event()
+        is_toplevel = isinstance(self.body, tk.Toplevel)
+        #is_frame = isinstance(self.body, tk.Frame)
+        if is_toplevel:
+            #self.body.protocol("WM_DELETE_WINDOW", self.__exec_on_destroy)
             self._toplevel_geometry()
-            try:
-                self.body.wait_visibility()
-            except Exception as e:
-                pass
-            else:
-                self._on_display()
-                self.__state = DISPLAYED
-        elif isinstance(self.body, tk.Frame):
-            self.__bind_destroy_event()
-            self.body.after(0, self.__exec_on_display)
+        self.__bind_destroy_event()
+        if self.body.winfo_viewable():
+            self.__exec_on_display()
         else:
-            message = "The body of a a Viewable should be either a tk.Frame or a tk.Toplevel"
-            raise PyrusticException(message)
+            self.__bind_id = self.body.bind("<Map>",
+                                            self.__exec_on_display,
+                                            "+")
         return self.body
 
-    def __set_default_attributes(self):
-        # __state
-        try:
-            self.__state
-        except AttributeError:
-            self.__state = 0
-        # __built
-        try:
-            self.__built
-        except AttributeError:
-            self.__built = False
-        # _body
-        try:
-            self._body
-        except AttributeError:
-            self._body = None
-        # __toplevel
-        try:
-            self.__is_toplevel
-        except AttributeError:
-            self.__is_toplevel = False
-        # __master
-        try:
-            self.__master
-        except AttributeError:
-            self.__master = None
-        # __destroyed
-        try:
-            self.__destroyed
-        except AttributeError:
-            self.__destroyed = False
+    def __exec_on_display(self, event=None):
+        self._on_display()
+        self.__state = DISPLAYED
+        if self.__bind_id is not None:
+            self.body.unbind("<Map>", self.__bind_id)
 
     def __bind_destroy_event(self):
         command = (lambda event,
@@ -225,24 +195,17 @@ class Viewable():
                    callback() if event.widget is widget else None)
         self.body.bind("<Destroy>", command, "+")
 
-    def __exec_on_display(self):
-        try:
-            self.body.wait_visibility()
-        except Exception as e:
-            pass
-        else:
-            self._on_display()
-            self.__state = DISPLAYED
-
     def __exec_on_destroy(self):
         if not self.__built or self.__destroyed:
             return
-        self.__destroyed = True
-        self._on_destroy()
-        self.__state = DESTROYED
+        if not self.body:
+            return
         window_manager = self.body.winfo_manager()
-        # Hide the window first to avoid the visual slow destruction
+        """
+        # Hide the window first to avoid the visual
+        # iterative (slow) destruction
         # of each child
+        #
         if window_manager == "wm":
             if self.body.winfo_ismapped():
                 self.body.withdraw()
@@ -255,12 +218,37 @@ class Viewable():
         elif window_manager == "place":
             if self.body.winfo_ismapped():
                 self.body.place_forget()
+        """
         try:
             self.body.destroy()
         except Exception as e:
             pass
+        self.__destroyed = True
+        self._on_destroy()
+        self.__state = DESTROYED
         try:
             if self.__master.focus_get() is None:
                 self.__master.winfo_toplevel().focus_lastfor().focus_force()
         except Exception as e:
             pass
+
+    def _check_missing_body(self, body):
+        if not body:
+            raise PyrusticException("Missing body")
+
+
+class CustomView(View):
+    def __init__(self, body=None, on_build=None,
+                 on_display=None,
+                 on_destroy=None,
+                 toplevel_geometry=None):
+        super().__init__()
+        self._body = body
+        if on_build:
+            self._on_build = on_build
+        if on_display:
+            self._on_display = on_display
+        if on_destroy:
+            self._on_destroy = on_destroy
+        if toplevel_geometry:
+            self._toplevel_geometry = toplevel_geometry

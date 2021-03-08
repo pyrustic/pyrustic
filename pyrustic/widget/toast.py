@@ -1,14 +1,16 @@
 import tkinter as tk
-from pyrustic.viewable import Viewable
+from pyrustic import widget
+from pyrustic.view import View, CustomView
+from pyrustic.tkmisc import get_cnf
+from pyrustic import tkmisc
 
 
 # Components
-BODY = "body"
 LABEL_HEADER = "label_header"
 LABEL_MESSAGE = "label_message"
 
 
-class Toast(Viewable):
+class Toast(widget.Toplevel):
     """
     A toast is a dialog box with or without decoration
     that is displayed for a given duration.
@@ -34,7 +36,8 @@ class Toast(Viewable):
                  duration=1234,
                  decoration=False,
                  geometry=None,
-                 options=None):
+                 options=None,
+                 extra_options=None):
         """
         PARAMETERS:
 
@@ -62,56 +65,44 @@ class Toast(Viewable):
                 options = { BODY: {"background": "red"},
                             LABEL_MESSAGE: {"background": "black"} }
         """
-        self._master = master
-        self._title = title
-        self._header = header
-        self._message = message
-        self._duration = duration
-        self._decoration = decoration
-        self._geometry = geometry
-        self._options = {} if options is None else options
-        self._body_options = None
-        self._label_header_options = None
-        self._label_message_options = None
-        self._parse_options(self._options)
-        self._body = None
-        self._cancel_id = None
-        self._components = {}
+        super().__init__(master=master,
+                         class_="Toast",
+                         cnf=options if options else {},
+                         on_build=self.__on_build,
+                         on_display=self.__on_display,
+                         on_destroy=self.__on_destroy,
+                         toplevel_geometry=self.__toplevel_geometry)
+        self.__title = title
+        self.__header = header
+        self.__message = message
+        self.__duration = duration
+        self.__decoration = decoration
+        self.__geometry = geometry
+        self.__options = options
+        self.__extra_options = extra_options
+        self.__cancel_id = None
+        self.__components = {}
+        self.__view = self.build()
 
     # ======================================
     #            PROPERTIES
     # ======================================
-    @property
-    def master(self):
-        return self._master
-
-    @property
-    def title(self):
-        return self._title
 
     @property
     def header(self):
-        return self._header
+        return self.__header
 
     @property
     def message(self):
-        return self._message
+        return self.__message
 
     @property
     def duration(self):
-        return self._duration
+        return self.__duration
 
     @property
     def decoration(self):
-        return self._decoration
-
-    @property
-    def geometry(self):
-        return self._geometry
-
-    @property
-    def options(self):
-        return self._options
+        return self.__decoration
 
     @property
     def components(self):
@@ -121,64 +112,59 @@ class Toast(Viewable):
         This property returns a dict. The keys are:
             BODY, LABEL_HEADER, LABEL_MESSAGE,
         """
-        return self._components
+        return self.__components
 
     # ======================================
     #            LIFECYCLE
     # ======================================
-    def _on_build(self):
-        self._body = tk.Toplevel(self._master,
-                                 class_="Toast",
-                                 cnf=self._body_options)
-        self._components[BODY] = self._body
-        if not self._decoration:
-            self._body.overrideredirect(1)
-        if self._geometry:
-            self._body.geometry(self._geometry)
-        if self._title:
-            self._body.title(self._title)
-        self._body.bind("<Button-1>", self._on_click, "+")
-        if self._header:
-            label_header = tk.Label(self._body,
-                              name="header",
-                              text=self._header,
-                              anchor="w",
-                              justify=tk.LEFT,
-                              cnf=self._label_header_options)
-            self._components[LABEL_HEADER] = label_header
+    def __on_build(self):
+        if not self.__decoration:
+            self.overrideredirect(1)
+        if self.__geometry:
+            self.geometry(self.__geometry)
+        if self.__title:
+            self.title(self.__title)
+        self.bind("<Button-1>", self.__on_click, "+")
+        if self.__header:
+            label_header = tk.Label(self,
+                                    name=LABEL_HEADER,
+                                    text=self.__header,
+                                    anchor="w",
+                                    justify=tk.LEFT,
+                                    cnf=get_cnf(LABEL_HEADER,
+                                                 self.__extra_options))
+            self.__components[LABEL_HEADER] = label_header
             label_header.pack(fill=tk.X, padx=10, pady=10)
-        if self._message:
-            label_message = tk.Label(self._body,
-                               name="message",
-                               text=self._message,
-                               anchor="w",
-                               justify=tk.LEFT,
-                               cnf=self._label_message_options)
-            self._components[LABEL_MESSAGE] = label_message
+        if self.__message:
+            label_message = tk.Label(self,
+                                     name=LABEL_MESSAGE,
+                                     text=self.__message,
+                                     anchor="w",
+                                     justify=tk.LEFT,
+                                     cnf=get_cnf(LABEL_MESSAGE,
+                                                 self.__extra_options))
+            self.__components[LABEL_MESSAGE] = label_message
             label_message.pack(fill=tk.X, padx=10, pady=10)
 
-    def _on_display(self):
-        if self._duration is not None:
-            self._cancel_id = self._body.after(self._duration, self._body.destroy)
+    def __on_display(self):
+        if self.__duration is not None:
+            self.__cancel_id = self.after(self.__duration, self.destroy)
 
-    def _on_destroy(self):
+    def __on_destroy(self):
         pass
 
-    def _on_click(self, event):
-        if self._body:
-            self._body.destroy()
+    def __toplevel_geometry(self):
+        tkmisc.center_window(self, within=self.master.winfo_toplevel())
+        tkmisc.dialog_effect(self)
 
-    def _parse_options(self, options):
-        self._body_options = (options[BODY] if BODY in options else {})
-        self._label_header_options = (options[LABEL_HEADER]
-                                      if LABEL_HEADER in options else {})
-        self._label_message_options = (options[LABEL_MESSAGE]
-                                       if LABEL_MESSAGE in options else {})
+    def __on_click(self, event):
+        self.destroy()
 
 
-class _ToastTest(Viewable):
+class _ToastTest(View):
 
     def __init__(self, root):
+        super().__init__()
         self._root = root
         self._body = None
 
@@ -195,10 +181,9 @@ class _ToastTest(Viewable):
         pass
 
     def _on_click_launch(self):
-        toast = Toast(self._body, title="Toast Title",
-                      header="Header", message="This is the message",
-                      duration=3000)
-        toast.build_wait()
+        Toast(self._body, title="Toast Title",
+              header="Header", message="This is the message",
+              duration=3000)
 
 
 if __name__ == "__main__":

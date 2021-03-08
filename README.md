@@ -14,53 +14,76 @@
 This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
 
 <!-- Quick Links -->
-[Demo](#demo) | [Features](#features) | [Installation](#installation) | [Tutorial](#tutorial)
+[Demo](#demo-video) | [Installation](#installation) | [Documentation](#documentation) | [Hubstore](#hubstore---to-connect-apps-with-users)
 
 <!-- Table of contents -->
-## Table Of Contents
+# Table Of Contents
 - [Overview](#overview)
-- [Hubstore](#hubstore)
-- [Demo](#demo)
-- [Philosophy](#philosophy)
-- [Features](#features)
+- [The Framework](#the-framework)
+  - [Standard Project Structure](#standard-project-structure)
+  - [GUI](#gui)
+  - [Multithreading](#multithreading)
+  - [Fetching Resources](#fetching-resources)
+  - [Communicating Between Components And Event Notification](#communicating-between-components-and-event-notification)
+  - [Database Access Object](#database-access-object)
+  - [And More](#and-more)
+- [The Manager](#the-manager)
+- [The Software Suite](#the-software-suite)
+  - [Rustiql - The Graphical SQL Editor](#rustiql---the-graphical-sql-editor)
+  - [Jupitest - The Graphical Test Runner](#jupitest---the-graphical-test-runner)
+  - [Hubway -  Release Your App To The World](#hubway---release-your-app-to-the-world)
+- [Hubstore - To Connect Apps With Users](#hubstore---to-connect-apps-with-users)
+- [Demo Video](#demo-video)
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Tutorial](#tutorial)
 - [Documentation](#documentation)
+    - [FAQ](#faq)
+    - [Tutorial](#tutorial)
+    - [Glossary](#glossary)
+    - [Framework Reference](#framework-reference)
+- [External Learning Resources](#external-learning-resources)
+- [Philosophy](#philosophy)
 - [License](#license)
 - [Contact](#contact)
 
 <!-- Overview -->
-## Overview
-Since `Python` comes with battery included, `Pyrustic` makes extensive use of `Tkinter` as GUI Toolkit and `SQLite` as database engine. The [Wheel](https://www.python.org/dev/peps/pep-0427/) standard built-package format is used to build distribution packages.
+# Overview
+Python is one of the world's most [popular](https://www.wired.com/story/python-language-more-popular-than-ever/) programming languages. There are some great frameworks for building web application with Python. Pyrustic targets Python desktop application development.
 
-`Pyrustic` is both a software suite and a framework on which the software suite is based.
-You can use both the framework and the software suite or only one of the components. The framework and the software suite are useful for a new project as well as for an existing project. Example, you could decide to only use the `Table` widget from the package `pyrustic.widget` in your existing `Tkinter` codebase. Another example is to only use `Pyrustic` to build a `Wheel` then publish it to your `Github` !
+A framework alone is not enough to build a great app. `Pyrustic` comes with batteries included, just like the Python language itself which comes with an amazing standard library. `Pyrustic` is a lightweight framework and software suite to help develop, package, and publish Python `desktop applications`.
+
+Pyrustic is flexible enough that you can use both the framework and the software suite or just one of the components. For example, you can decide to only use the `Table` widget from the` pyrustic.widget` package in your existing `Tkinter` codebase. Another example is to only use Pyrustic to build a [Wheel](https://wheel.readthedocs.io/en/stable/story.html) and then publish it.
+
+The framework and the software suite are useful for a new project as well as for an existing project.
 
 
-### The Framework
+# The Framework
+The Framework covers various topics, from GUI to database connection, and more.
+
+## Standard Project Structure
 The `Framework` is easy to use and flexible with only three constraints:
 - you have to follow the conventional Python project structure as described in the [Python Packaging User Guide](https://packaging.python.org/tutorials/packaging-projects/);
 - you need to have a `__main__.py` file in the source package;
 - the project name should be the same as the source package.
 
-In fact, these aren't constraints but simply `elegance` and [proactivity](https://en.wikipedia.org/wiki/Proactivity). It will save you a lot of trouble in the future (believe me). By the way, the command-line tool `Manager` (see next section) will take care of these details for you, you will just need to link a project directory, then issue the command `init`.
+In fact, these aren't constraints but simply `elegance` and [proactivity](https://en.wikipedia.org/wiki/Proactivity). It will save you a lot of trouble in the future (believe me). By the way, the command-line tool [Manager](#the-manager) will take care of these details for you, you will just need to link a project directory, then issue the command `init`.
 
-The `Framework` contains libraries that target:
-- GUI;
-- multithreading;
-- fetching resources;
-- database connection;
+## GUI
+Pyrustic proudly uses `Tkinter` as `GUI Toolkit`. Remember that the entire software suite was built with Pyrustic.
+
+Some features related to the GUI:
+- The `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
+- `pyrustic.default_style` and `pyrustic.theme`: a style/theme system to make it easy for you to build beautiful GUIs.
+- `pyrustic.theme.cyberpunk`: a dark theme ready to use, the one used as base theme by the entire software suite.
+- `pyrustic.view.View`: Pyrustic comes with the concept of `views`. `Views` are optional to use and are compatible with Tkinter. In fact, Views provides an intuitive lifecycle mechanism that will make it easier to build and maintain your GUI.
 - and more...
 
-#### Example of code - A simple Hello Friend demo - __main__.py
-Note: this is generated by `Pyrustic` when you issue the command `init`.
+### Example of typical `__main__.py` content
 
 <details>
     <summary>Click to expand (or collapse)</summary>
 
 ```python
-# "__main__.py" generated by Pyrustic Manager
 from pyrustic.app import App
 from pyrustic.theme.cyberpunk import Cyberpunk
 from demo.view.main_view import MainView
@@ -72,7 +95,7 @@ def main():
     # Set theme
     app.theme = Cyberpunk()
     # Set view
-    app.view = MainView(app)
+    app.view = MainView(app)  # it could be a Tkinter object
     # Center the window
     app.center()
     # Lift off !
@@ -86,78 +109,33 @@ if __name__ == "__main__":
 
 </details>
 
-#### Example of code - A simple Hello Friend demo - view/main_view.py
-Note: this is generated by `Pyrustic` when you issue the command `init`.
 
-<details>
-    <summary>Click to expand (or collapse)</summary>
+## Multithreading
+It is well known how difficult it is to implement multithreading in a Tkinter application. Pyrustic comes with `pyrustic.threadom`: a `library` to make it easy to develop multithreading applications. You can retrieve from the main thread the values returned by the functions executed in other threads and also the exceptions raised by these functions.
 
-```python
-# a "view" module generated by Pyrustic Manager
-import tkinter as tk
-from pyrustic.viewable import Viewable
-from pyrustic.widget.toast import Toast
+Jupitest the Pyrustic `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
 
+## Fetching Resources
+Pyrustic comes with `pyrustic.gurl`: a `library` to fetch resources with an implementation of conditional request and a smart responses caching system.
 
-class MainView(Viewable):
+`Hubway`, the Pyrustic app to publish application, uses this library to fetch resources as a good API citizen.
 
-    def __init__(self, app):
-        self._app = app
-        self._root = app.root
-        self._body = None
-        self._btn_max = None
+## Communicating Between Components And Event Notification
+As a software grows, so is its complexity. Pyrustic comes with pyrustic.com a library to allow loosely coupled components to exchange data, subscribe to and publish events.
 
-    # -- View's Lifecycle --
-    def _on_build(self): # it's mandatory to override this method
-        self._body = tk.Frame(self._root)
-        self._root.geometry("500x300")
-        # Label
-        label = tk.Label(self._body, text="Hello Friend !")
-        label.pack(expand=1, fill=tk.BOTH)
-        # Footer
-        footer = tk.Frame(self._body)
-        footer.pack(side=tk.BOTTOM, fill=tk.X)
-        # Button Leave
-        btn_leave = tk.Button(footer, text="Leave",
-                              command=self._on_click_btn_leave)
-        btn_leave.pack(side=tk.RIGHT, padx=2, pady=2)
-        # Button Maximize
-        self._btn_max = tk.Button(footer, text="Maximize",
-                                  command=self._on_click_btn_max)
-        self._btn_max.pack(side=tk.RIGHT, pady=2)
-
-    def _on_display(self): # optional - code executed when the view is displayed
-        pass
-
-    def _on_destroy(self): # optional - code executed as the view is destroyed
-        pass
-
-    # -- Private --
-    def _on_click_btn_max(self):
-        self._app.maximize()
-        self._btn_max.destroy()
-
-    def _on_click_btn_leave(self):
-        toast = Toast(self._body, message="Goodbye Friend !")
-        toast.build_wait() # next line will be executed after toast is destroyed
-        self._app.exit()
+Please read the [tutorial](#tutorial) to geet a deep understanding of this section.
 
 
-```
+## Database Access Object
+Pyrustic comes with `pyrustic.dao`: a `library` to simplify the connection to your SQLite database.
+This library has some cool features like the ability to specify what I call a `creational script` that will be used to create a new database when it is missing.
 
-</details>
+## And More
+- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a fresh copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
+- for obvious reasons (clue: `beta`), `Pyrustic` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `trash` folder.
+- and more...
 
-### The software suite
-The lightweight software suite is made of:
-- `Manager`: an _optional_ command-line application to rule them all;
-- `Rustiql`: a graphical `SQL Editor`;
-- `Jupitest`: a graphical `Test Runner`;
-- and `Hubway`: an application to publish your project.
-
-All these components come with `Pyrustic` from the first installation, so you don't have to think about how to get them. They are the `batteries included` in `Pyrustic`.
-
-
-#### The Manager
+# The Manager
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/manager.gif" alt="Manager" width="650">
@@ -166,21 +144,27 @@ All these components come with `Pyrustic` from the first installation, so you do
     </p>
 </div>
 
-The `Manager` is the entry point to the software suite. An optional command-line application with an API that you can use programmatically to automate your workflow.
+The `Manager` is the entry point to the software suite. It's an optional command-line application with an API that you can use programmatically to automate your workflow.
 
 Via the `Manager` you can:
 - create a project with battery included (project structure, pyproject.toml, etc);
 - easily add `packages`, `modules` or `files` to your project;
 - run a specific `module` of your project;
 - view recent projects list and quickly switch between projects;
-- launch the `SQL Editor`, `Test Runner` and `Hubway`;
+- launch the `SQL Editor`, `Test Runner` and `Hubway` (respectively with commands `sql`, `test` and `hub`);
 - build a distribution package according to setup.cfg and MANIFEST.in;
+- find out if the project is installed ('pip install -e') in the current virtual env;  
 - and more...
 
 The `build` command builds a package that could be published with the application `Hubway`.
 
+# The Software Suite
+The lightweight software suite is made of:
+- `Rustiql`: a graphical `SQL Editor`;
+- `Jupitest`: a graphical `Test Runner`;
+- and `Hubway`: an application to publish your project.
 
-#### Rustiql - The SQL Editor
+## Rustiql - The Graphical SQL Editor
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/rustiql.gif" alt="SQL Editor" width="650">
@@ -198,7 +182,7 @@ The graphical `SQL Editor` allows you to:
 
 The `SQL Editor` makes extensive use of the `pyrustic.dao` library.
 
-#### Jupitest - The Test Runner
+## Jupitest - The Graphical Test Runner
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/jupitest.gif" alt="Test Runner" width="650">
@@ -216,7 +200,7 @@ The `Test Runner` reproduces the tree structure of the `tests` folder in your pr
 
 The `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
 
-#### Hubway
+## Hubway - Release Your App To The World
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/hubway.gif" alt="Hubway" width="650">
@@ -234,7 +218,15 @@ It is easy to generate a personal access token. Read this [article](https://docs
 
 
 
-## Hubstore
+# Hubstore - To Connect Apps With Users
+<!-- Image -->
+<div align="center">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/pyrustic_hubstore.png" alt="Pyrustic Hubstore" width="650">
+    <p align="center">
+    Pyrustic - Hubstore
+    </p>
+</div>
+
 Once you are ready to release a new version of your app, `Pyrustic` allows you to build a distribution package with the `build` command and then publish it to Github with `Hubway`.
 
 Then the question that arises is "How to make the `find-download-install-run` process easier for users?". This is where the `Hubstore` comes in.
@@ -243,19 +235,91 @@ With `Hubstore`, it's easy to showcase, distribute, install, and manage your Pyt
 
 `Hubstore` is available on PyPI and yes it's also built with `Pyrustic` !
 
-Do you want to learn more about `Hubstore` ? Click on this [link](https://github.com/pyrustic/hubstore#readme).
+Do you want to learn more about `Hubstore` ? Discover [Hubstore](https://github.com/pyrustic/hubstore#readme) !
 
 
 <!-- Demo -->
-## Demo
-This is the _now obsolete_ [demo video](https://pyrustic.github.io).
+# Demo Video
+This is the _now obsolete_ demo video but still worth watching.
+
+Watch the [video](https://pyrustic.github.io) !
+
 I will upload an up-to-date video later.
 
 To open the page in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
 
+
+<!-- Requirements -->
+# Requirements
+`Pyrustic` is a `cross platform` software suite. It should work on your computer (or nope, haha, versions under `1.0.0` will be considered `Beta` at best). It is built on [Ubuntu](https://ubuntu.com/download/desktop) with `Python 3.5`. `Pyrustic` comes with absolutely no warranty. So... à la guerre comme à la guerre.
+
+As `Pyrustic` is built with `Python` for `Python developers` and also makes extensive use of `Tkinter`, you may need to learn [Python](#introduction-to-python) and [Tkinter](#introduction-to-tkinter).
+
+<!-- Installation -->
+# Installation
+`Pyrustic` is available on [PyPI](https://pypi.org/) (the Python Package Index) to simplify the life of Python developers.
+
+If you have never installed a package from PyPI, you must install the pip tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
+
+```bash
+$ pip install pyrustic
+
+$ pyrustic
+Welcome to Pyrustic Manager !
+Version: 0.0.9
+Type "help" or "?" to list commands. Type "exit" to leave.
+
+(pyrustic) 
+```
+
+To upgrade `Pyrustic`:
+
+```bash
+$ pip install pyrustic --upgrade --upgrade-strategy eager
+```
+
+
+<!-- Documentation -->
+# Documentation
+Pyrustic is a work in progress. The versions of `Pyrustic` under `1.0.0` are aimed at an audience of early adopters. Check the FAQ and the Tutorial.
+## FAQ
+Read the [FAQ](https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/FAQ.md)
+
+## Tutorial
+Read the [Tutorial](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/TUTORIAL.md)
+
+## Glossary
+Read the [Glossary](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/GLOSSARY.md)
+
+## Framework Reference
+Read the [Framework Reference](#https://raw.githubusercontent.com/pyrustic/pyrustic/master/docs/REFERENCE.md).
+
+# External Learning Resources
+Interesting links below to get started with Python, Tkinter and SQLite.
+
+## Introduction to Python
+- [python-guide](https://docs.python-guide.org/intro/learning/).
+- [python tutorial](https://www.python-course.eu/python3_course.php). 
+- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=rfscVS0vtbw).
+
+## Introduction to Tkinter
+- [tkdocs](https://tkdocs.com/).
+- [tkinter tutorial](https://www.python-course.eu/python_tkinter.php).
+- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=YXPyB4XeYLA).
+
+## Introduction to SQLite
+- [sqlitetutorial](https://www.sqlitetutorial.net/).
+- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=byHcYRpMgI4).
+
+Note: I am not affiliated with any of these entities. A simple web search brings them up.
+
+
 <!-- Philosophy -->
-## Philosophy
-### Wisdom from Antiquity
+# Philosophy
+<details>
+    <summary>Click to expand (or collapse)</summary>
+
+## Wisdom from Antiquity
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/diogenes.jpg" alt="Diogenes" width="650">
@@ -272,134 +336,56 @@ To open the page in a new tab, you can just do a CTRL+click (on Windows and Linu
 
 <br>
 
-### Advertisement from the twentieth century
+## Advertisement from the twentieth century
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/ibm.jpg" alt="IBM" width="650">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/ibm.jpg" alt="IBM" width="500">
     <p align="justify">
     By Cecile &amp; Presbrey advertising agency for International Business Machines. - Scanned from the December 1951 issue of Fortune by <a href="//commons.wikimedia.org/wiki/User:Swtpc6800" title="User:Swtpc6800">User:Swtpc6800</a> Michael Holley. The image was touched up with Adobe Photo Elements., Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=17480483">Link</a>
     </p>
 </div>
 
+<br>
 
-<!-- Features -->
-## Features
-A non-exhaustive list of features:
-- `Manager`: optional command-line application to help you to manage your project, build package, launch the `Test Runner`, launch the `SQL Editor` and `Hubway`.
-- `Test Runner`: a graphical `Test Runner` to run test `packages`, `modules`, `classes` and `methods`.
-- `SQL Editor`: a graphical `SQL Editor` to edit your database, open `in-memory` database, load scripts.
-- `Hubway`: publish your app, track it and see the metrics like the number of `stargazers`, `subscribers` or `downloads`.
-- An optional `Framework` to use in your project. The same `Framework` used by `Pyrustic`.
-- `pyrustic.threadom`: a `library` included in the `Framework` to make it easy to develop multithreading applications. You can retrieve from the main thread the values returned by the functions executed in other threads and also the exceptions raised by these functions.
-- `pyrustic.dao`: a `library` included in the `Framework` to simplify the connection to your database.
-- `pyrustic.gurl`: a `library` included in the `Framework` to fetch resources with an implementation of conditional request and a smart responses caching system. `Hubway` uses this library to fetch resources as a good API citizen.
-- `pyrustic.default_style` and `pyrustic.theme`: a style/theme system to make it easy for you to build beautiful GUIs.
-- `pyrustic.theme.cyberpunk`: a dark theme ready to use, the one used as base theme by the `SQL Editor`, `Test Runner` and `Hubway`.
-- `pyrustic.viewable.Viewable`: bring an intuitive lifecycle system to your `Views` by making them implement `Viewable`. The mega-widgets in this framework implement `Viewable`.
-- the `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
-- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a fresh copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
-- for obvious reasons (clue: `beta`), `Pyrustic` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `trash` folder.
-- and more...
+> 150 Extra Engineers
+>
+> An IBM Electronic Calculator speeds through thousands of intricate computations so quickly that on many complex problems it's like having 150 EXTRA Engineers.
+>
+> No longer must valuable engineering personnel ... now in critical shortage ... spend priceless creative time at routine repetive figuring.
+>
+> Thousands of IBM Electronic Business Machines ... vital to our nation's defense ... are at work for science, industry, and the armed forces, in laboratories, factories, and offices, helping to meet urgent demands for greater production.
+>
+> -- IBM International Business Machines
 
-<!-- Requirements -->
-## Requirements
-`Pyrustic` is a `cross platform` software suite. It should work on your computer (or nope, haha, versions under `1.0.0` will be considered `Beta` at best). It is built on [Ubuntu](https://ubuntu.com/download/desktop) with `Python 3.5`. `Pyrustic` comes with absolutely no warranty. So... à la guerre comme à la guerre.
+</details>
 
-As `Pyrustic` is built with `Python` for `Python developers` and also makes extensive use of `Tkinter`, you may need to learn [Python](#introduction-to-python) and [Tkinter](#introduction-to-tkinter).
-
-<!-- Installation -->
-## Installation
-`Pyrustic` is available on [PyPI](https://pypi.org/) (the Python Package Index) to simplify the life of Python developers.
-
-If you have never installed a package from PyPI, you must install the pip tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
-
-```bash
-$ pip install pyrustic
-
-$ pyrustic
-Welcome to Pyrustic Manager !
-Version: 0.0.9
-Type "help" or "?" to list commands. Type "exit" to leave.
-
-(pyrustic) 
-```
-
-
-<!-- Tutorial -->
-## Tutorial
-- Create a `demo` folder to contain the project you want to start. This folder will be the `PROJECT_DIR` of your project.
-- Run `pyrustic` in your shell to open the `Manager`.
-- Link your project to the `Manager` by typing the command `link` in the `Manager`. A dialog will appear so you could choose your demo project folder. You can also put the absolute path of the folder directly in front of the `link` command. The `link` command does not make any change in your project.
-- Your project is now linked to the `Manager` and becomes the Target project. The `target` command displays the path to the Target project (its `PROJECT_DIR`). You can unlink it with the command `unlink`. Whenever you come back to the `Manager`, just type `relink` to link again your previous Target project. Use the command `last` to see the list of last projects.
-- Type `init` in the `Manager` to perform a project Kickstart. The `init` command modifies your project. This command will create the minimal project structure with a source package `APP_PKG`. You will write your code in `APP_PKG` and setup.py/setup.cfg/pyproject.toml will stay in `PROJECT_DIR`.
-- You can run your project with the `run` command without arguments. You can also run a specific `module` in your project. Example: `run host.calc.addition`.
-- Type `sql`, `test` or `hub` commands in the `Manager` to launch the `SQL Editor`, `Test Runner` or `Hubway` respectively.
-- Your project has an entry point which is `__main__.py`. In the `__main__.py` file, there is an instance of `pyrustic.app.App` to which the first `View` to display is passed.
-- A `View` is a class that implements `pyrustic.viewable.Viewable`. In a `View` you must implement the `on_build()` method in which you assign a `Tk` object (`tk.Frame` or `tk.Toplevel`) to the `_body` instance variable.
-- The `life cycle` of a `View` that implements `pyrustic.viewable.Viewable` is:
-    - the call of the method `__init__()` at the `View` class instantiation;
-    - then the call of the method `on_build()`;
-    - then the call of the method `on_display()` when the `View` is visible;
-    - and the call of the method `on_destroy()` when the `View` is destroyed.
-- To run a `View`, call the `build()` method which will execute `on_build()` and will return the content of the `_body` instance variable. The `build_pack()` method builds the `View` then calls the method `pack()` on the `body` in a single call. Same stuff with `build_grid()` and `build_place()`. The method `build_wait()` is used for `View` built with a `Toplevel` as `_body`, thus, execution of the next instructions is paused until the destruction of the `View`. To destroy a `View`, call the method `destroy()`.
-- About application publishing, read [this](#application-publishing).
-
-Note: Initializing your project with the `init` command in the `Manager` will create the `pyrustic_data` folder in the `APP_PKG`. Take a look at this folder if you want to change your GUI default settings.
-
-A better tutorial will come later. Use the `init` command in the `Manager` to get an equivalent of a graphical `Hello World` demo project, then explore the contents of your project. Start with `$APP_PKG.__main__`, then `$APP_PKG.view.main_view`. Good luck !
-
-<!-- Documentation -->
-## Documentation
-The versions of `Pyrustic` under `1.0.0` are aimed at an audience of early adopters. The documentation is precarious but public classes and methods have minimal documentation in the source code. You can also check the command `help` in the `Manager`.
-
-### Introduction to Python
-- [python-guide](https://docs.python-guide.org/intro/learning/).
-- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=rfscVS0vtbw).
-
-### Introduction to Tkinter
-- [tkdocs](https://tkdocs.com/).
-- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=YXPyB4XeYLA).
-
-### Introduction to SQLite
-- [sqlitetutorial](https://www.sqlitetutorial.net/).
-- freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=byHcYRpMgI4).
-
-Note: I am not affiliated with any of these entities. A simple web search brings them up.
 
 <!-- License -->
-## License
+# License
 `Pyrustic` is licensed under the terms of the permissive free software license `MIT License`.
 
 <!-- Contact -->
-## Contact
+# Contact
+<details>
+    <summary>Click to expand (or collapse)</summary>
+
+<br>
+
 Hi ! I'm Alex, operating by ["Crocker's Rules"](http://sl4.org/crocker.html)
 <!-- Image -->
 ![email](https://raw.githubusercontent.com/pyrustic/misc/master/media/email.png)
 
-
-<!-- Memes -->
+<!-- xoxo -->
 <details>
     <summary></summary>
         <br>
         <br>
-        Congratz ! You found the Easter Memeggs ! Enjoy (or cry) !
+        Congratz ! You just found the Easter Meggs !
         <br>
         <br>
         <!-- Image -->
         <div align="center">
             <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_1.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_2.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_3.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_4.jpg" alt="Meme">
             <br>
             <br>
             <br>
@@ -415,18 +401,9 @@ Hi ! I'm Alex, operating by ["Crocker's Rules"](http://sl4.org/crocker.html)
             <br>
             <br>
             <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_8.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_9.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_10.jpg" alt="Meme">
-            <br>
-            <br>
-            <br>
-            <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/meme_11.jpg" alt="Meme">
         </div>
 </details>
+
+</details>
+
+

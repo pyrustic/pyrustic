@@ -9,7 +9,7 @@ from pyrustic.theme.cyberpunk import constant
 # == table theme
 def get_theme():
     theme = Theme()
-    theme.add_style(_get_table_header_frame_style(), scope="*Table*TableHeaderFrame*")
+    theme.add_style(_get_table_header_frame_style(), scope="*Table*frame_background*Frame*")
     theme.add_style(_get_table_header_style(), scope="*Table*Label*")
     theme.add_style(_get_table_column_style(), scope="*Table*Listbox*")
     theme.add_style(_get_table_hsb_style(), scope="*Table*hsb*")

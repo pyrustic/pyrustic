@@ -11,7 +11,7 @@ def get_theme():
     theme.add_style(_get_body_style(), scope="*Choice*")
     theme.add_style(_get_radiobutton_style(), scope="*Choice*Radiobutton*")
     theme.add_style(_get_text_style(), scope="*Choice*Text*")
-    theme.add_style(_get_header_style(), scope="*Choice*header*")
+    theme.add_style(_get_header_style(), scope="*Choice*label_header*")
     return theme
 
 

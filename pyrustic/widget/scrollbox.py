@@ -1,9 +1,10 @@
 import tkinter as tk
-from pyrustic.viewable import Viewable
+from pyrustic import widget
+from pyrustic.tkmisc import get_cnf
+from pyrustic.view import View
 
 
 # Components
-BODY = "body"
 CANVAS = "canvas"
 BOX = "box"
 HSB = "hsb"
@@ -15,7 +16,7 @@ VERTICAL = "vertical"
 HORIZONTAL = "horizontal"
 
 
-class Scrollbox(Viewable):
+class Scrollbox(widget.Frame):
     """
     Scrollbox is a scrollable surface. You just need to use its property "box" as
     your layout's parent.
@@ -40,7 +41,8 @@ class Scrollbox(Viewable):
                  orient=VERTICAL,
                  box_sticky="nswe",
                  resizable_box=True,
-                 options=None):
+                 options=None,
+                 extra_options=None):
         """
         - master: widget parent. Example: an instance of tk.Frame
 
@@ -51,50 +53,40 @@ class Scrollbox(Viewable):
             Example: Assume that you want to set the CANVAS background to red
                 options = {CANVAS: {"background": "red"}}
         """
-        self._master = master
-        self._orient = orient
-        self._box_sticky = box_sticky
-        self._resizable_box = resizable_box
-        self._options = {} if options is None else options
-        self._body_options = None
-        self._canvas_options = None
-        self._box_options = None
-        self._vsb_options = None
-        self._hsb_options = None
-        self._parse_options(self._options)
-        self._body = None
-        self._canvas = None
-        self._box = None
-        self._box_id = None
-        self._vsb = None
-        self._hsb = None
-        self._hsb_under_mouse = False
-        self._is_scrollable = False
-        self._components = {}
-
+        super().__init__(master=master,
+                         class_="Scrollbox",
+                         cnf=options if options else {},
+                         on_build=self.__on_build,
+                         on_display=self.__on_display,
+                         on_destroy=self.__on_destroy)
+        self.__orient = orient
+        self.__box_sticky = box_sticky
+        self.__resizable_box = resizable_box
+        self.__options = options
+        self.__extra_options = extra_options
+        self.__canvas_options = None
+        self.__canvas = None
+        self.__box = None
+        self.__box_id = None
+        self.__vsb = None
+        self.__hsb = None
+        self.__hsb_under_mouse = False
+        self.__is_scrollable = False
+        self.__components = {}
+        # build
+        self.__view = self.build()
     # ==============================================
     #                   PROPERTIES
     # ==============================================
 
-    @property
-    def master(self):
-        return self._master
-
-    @property
-    def body(self):
-        return self._body
 
     @property
     def box(self):
-        return self._box
+        return self.__box
 
     @property
     def orient(self):
-        return self._orient
-
-    @property
-    def options(self):
-        return self._options
+        return self.__orient
 
     @property
     def components(self):
@@ -108,7 +100,7 @@ class Scrollbox(Viewable):
         the widget linked to the HSB key may be missing because
         only VSB is used
         """
-        return self._components
+        return self.__components
 
     # ==============================================
     #                 PUBLIC METHODS
@@ -121,9 +113,9 @@ class Scrollbox(Viewable):
             - 0: to scroll to left
             - 1: to scroll to right
         """
-        if self._canvas:
-            self._body.update_idletasks()
-            self._canvas.xview_moveto(fraction)
+        if self.__canvas:
+            self.update_idletasks()
+            self.__canvas.xview_moveto(fraction)
 
     def yview_moveto(self, fraction):
         """
@@ -132,9 +124,9 @@ class Scrollbox(Viewable):
             - 0: to scroll to top
             - 1: to scroll to bottom
         """
-        if self._canvas:
-            self._body.update_idletasks()
-            self._canvas.yview_moveto(fraction)
+        if self.__canvas:
+            self.update_idletasks()
+            self.__canvas.yview_moveto(fraction)
 
     def box_config(self, **options):
         """
@@ -147,154 +139,144 @@ class Scrollbox(Viewable):
         Warning: these options are not the same as the arguments
          of BOX's own constructor !
         """
-        if self._box:
-            self._canvas.itemconfig(self._box_id, cnf=options)
+        if self.__box:
+            self.__canvas.itemconfig(self.__box_id, cnf=options)
 
     def clear(self):
         """
         Clears the Scrollbox.
         This method doesn't destruct this object but BOX's children
         """
-        if self._box:
-            for x in self._box.winfo_children():
+        if self.__box:
+            for x in self.__box.winfo_children():
                 x.destroy()
+
 
     # ==============================================
     #                 PRIVATE METHODS
     # ==============================================
 
-    def _on_build(self):
-        self._body = tk.Frame(self._master,
-                              class_="Scrollbox",
-                              cnf=self._body_options)
-        self._components[BODY] = self._body
-        self._body.bind("<Enter>", self._on_enter_body, "+")
-        self._body.bind("<Leave>", self._on_leave_body, "+")
-        self._body.bind("<Unmap>", self._on_unmap_body, "+")
-        self._body.bind("<Destroy>", self._on_destroy_body, "+")
-        self._body.bind_all("<MouseWheel>", self._on_mouse_wheel, "+")
-        self._body.bind_all("<Button-4>", self._on_mouse_wheel, "+")
-        self._body.bind_all("<Button-5>", self._on_mouse_wheel, "+")
-        self._body.columnconfigure(0, weight=1, uniform=1)
-        self._body.rowconfigure(0, weight=1, uniform=1)
-        self._body.winfo_toplevel().bind("<Configure>",
-                                         self._on_configure_box_canvas, "+")
+    def __on_build(self):
+        self.bind("<Enter>", self.__on_enter_body, "+")
+        self.bind("<Leave>", self.__on_leave_body, "+")
+        self.bind("<Unmap>", self.__on_unmap_body, "+")
+        self.bind("<Destroy>", self.__on_destroy_body, "+")
+        self.bind_all("<MouseWheel>", self.__on_mouse_wheel, "+")
+        self.bind_all("<Button-4>", self.__on_mouse_wheel, "+")
+        self.bind_all("<Button-5>", self.__on_mouse_wheel, "+")
+        self.columnconfigure(0, weight=1, uniform=1)
+        self.rowconfigure(0, weight=1, uniform=1)
+        self.winfo_toplevel().bind("<Configure>",
+                                   self.__on_configure_box_canvas, "+")
         # canvas
-        self._canvas = tk.Canvas(self._body,
-                                 name=CANVAS,
-                                 width=0,
-                                 height=0,
-                                 cnf=self._canvas_options)
-        self._components[CANVAS] = self._canvas
-        self._canvas.grid(row=0, column=0, sticky=self._box_sticky)
+        self.__canvas = tk.Canvas(self,
+                                  name=CANVAS,
+                                  width=0,
+                                  height=0,
+                                  cnf=get_cnf(CANVAS,
+                                              self.__extra_options))
+        self.__components[CANVAS] = self.__canvas
+        self.__canvas.grid(row=0, column=0, sticky=self.__box_sticky)
         # box
-        self._box = tk.Frame(self._canvas,
-                             name=BOX,
-                             cnf=self._box_options)
-        self._components[BOX] = self._box
-        self._box_id = self._canvas.create_window(0, 0, window=self._box, anchor="nw")
-        self._box.bind("<Configure>", self._on_configure_box_canvas, "+")
+        self.__box = tk.Frame(self.__canvas,
+                              name=BOX,
+                              cnf=get_cnf(BOX, self.__extra_options))
+        self.__components[BOX] = self.__box
+        self.__box_id = self.__canvas.create_window(0, 0, window=self.__box, anchor="nw")
+        self.__box.bind("<Configure>", self.__on_configure_box_canvas, "+")
         # scrollbar
-        self._set_scrollbars()
+        self.__set_scrollbars()
 
-    def _on_display(self):
-        if not self._master:
-            self._master = self._body.master
+    def __on_display(self):
+        pass
 
-    def _on_destroy(self):
-        if self._body:
-            self._unbind_funcs()
+    def __on_destroy(self):
+        self.__unbind_funcs()
 
-    def _on_mouse_wheel(self, event):
-        if not self._orient or not self._is_scrollable:
+    def __on_mouse_wheel(self, event):
+        if not self.__orient or not self.__is_scrollable:
             return
         # scroll down   (value: 1)   ->  event.num = 5   or  event.delta < 0
         # scroll up     (value: -1)  ->  event.num = 4   or  event.delta >= 0
         scroll = 1 if event.num == 5 or event.delta < 0 else -1
-        if self._orient in ("horizontal", "x", "h"):
-            self._canvas.xview_scroll(scroll, "units")
-        elif self._orient in ("both", "vertical", "y", "v"):
-            if self._hsb_under_mouse:
-                self._canvas.xview_scroll(scroll, "units")
+        if self.__orient in ("horizontal", "x", "h"):
+            self.__canvas.xview_scroll(scroll, "units")
+        elif self.__orient in ("both", "vertical", "y", "v"):
+            if self.__hsb_under_mouse:
+                self.__canvas.xview_scroll(scroll, "units")
             else:
-                self._canvas.yview_scroll(scroll, "units")
+                self.__canvas.yview_scroll(scroll, "units")
 
-    def _set_scrollbars(self):
-        if self._orient in ("both", "horizontal", "h", "x"):
-            self._hsb = tk.Scrollbar(self._body, orient="horizontal",
-                                     name=HSB,
-                                     command=self._canvas.xview,
-                                     cnf=self._hsb_options)
-            self._components[HSB] = self._hsb
-            self._hsb.grid(row=1, column=0, columnspan=2, sticky="swe")
-            self._canvas.config(xscrollcommand=self._hsb.set)
-            self._bind_enter_leave_to_hsb()
-        if self._orient in ("both", "vertical", "v", "y"):
-            self._vsb = tk.Scrollbar(self._body, orient="vertical",
-                                     name=VSB,
-                                     command=self._canvas.yview,
-                                     cnf=self._vsb_options)
-            self._components[VSB] = self._vsb
-            self._vsb.grid(row=0, column=1, sticky=self._box_sticky)
-            self._canvas.config(yscrollcommand=self._vsb.set)
+    def __set_scrollbars(self):
+        if self.__orient in ("both", "horizontal", "h", "x"):
+            self.__hsb = tk.Scrollbar(self, orient="horizontal",
+                                      name=HSB,
+                                      command=self.__canvas.xview,
+                                      cnf=get_cnf(HSB, self.__extra_options))
+            self.__components[HSB] = self.__hsb
+            self.__hsb.grid(row=1, column=0, columnspan=2, sticky="swe")
+            self.__canvas.config(xscrollcommand=self.__hsb.set)
+            self.__bind_enter_leave_to_hsb()
+        if self.__orient in ("both", "vertical", "v", "y"):
+            self.__vsb = tk.Scrollbar(self, orient="vertical",
+                                      name=VSB,
+                                      command=self.__canvas.yview,
+                                      cnf=get_cnf(VSB, self.__extra_options))
+            self.__components[VSB] = self.__vsb
+            self.__vsb.grid(row=0, column=1, sticky=self.__box_sticky)
+            self.__canvas.config(yscrollcommand=self.__vsb.set)
 
-    def _bind_enter_leave_to_hsb(self):
+    def __bind_enter_leave_to_hsb(self):
         def enter_hsb(event):
-            self._hsb_under_mouse = True
+            self.__hsb_under_mouse = True
         def leave_hsb(event):
-            self._hsb_under_mouse = False
-        self._hsb.bind('<Enter>', enter_hsb, "+")
-        self._hsb.bind('<Leave>', leave_hsb, "+")
+            self.__hsb_under_mouse = False
+        self.__hsb.bind('<Enter>', enter_hsb, "+")
+        self.__hsb.bind('<Leave>', leave_hsb, "+")
 
-    def _on_configure_box_canvas(self, event):
-        if self._box:
-            if self._orient in ("horizontal", "h", "x"):
-                if self._resizable_box:
-                    self._canvas.itemconfig(self._box_id,
-                                            height=self._canvas.winfo_height())
+    def __on_configure_box_canvas(self, event):
+        if self.__box:
+            if self.__orient in ("horizontal", "h", "x"):
+                if self.__resizable_box:
+                    self.__canvas.itemconfig(self.__box_id,
+                                             height=self.__canvas.winfo_height())
                 else:
-                    self._canvas.config(height=self._box.winfo_height())
-            elif self._orient in ("vertical", "v", "y"):
-                if self._resizable_box:
-                    self._canvas.itemconfig(self._box_id,
-                                            width=self._canvas.winfo_width())
+                    self.__canvas.config(height=self.__box.winfo_height())
+            elif self.__orient in ("vertical", "v", "y"):
+                if self.__resizable_box:
+                    self.__canvas.itemconfig(self.__box_id,
+                                             width=self.__canvas.winfo_width())
                 else:
-                    self._canvas.config(width=self._box.winfo_width())
-            self._canvas.config(scrollregion=self._canvas.bbox("all"))
+                    self.__canvas.config(width=self.__box.winfo_width())
+            self.__canvas.config(scrollregion=self.__canvas.bbox("all"))
 
-    def _on_enter_body(self, event):
-        self._is_scrollable = True
+    def __on_enter_body(self, event):
+        self.__is_scrollable = True
 
-    def _on_leave_body(self, event):
-        self._is_scrollable = False
+    def __on_leave_body(self, event):
+        self.__is_scrollable = False
 
-    def _on_unmap_body(self, event):
-        self._is_scrollable = False
+    def __on_unmap_body(self, event):
+        self.__is_scrollable = False
 
-    def _on_destroy_body(self, event):
-        self._is_scrollable = False
+    def __on_destroy_body(self, event):
+        self.__is_scrollable = False
 
-    def _unbind_funcs(self):
+    def __unbind_funcs(self):
         try:
             for val in ("<Enter>", "<Leave>",
                         "<Unmap>", "<Destroy>",
                         "<MouseWheel>", "<Button-4>",
                         "<Button-5>", "<Configure>"):
-                self._body.unbind(val)
+                self.unbind(val)
         except Exception as e:
             pass
 
-    def _parse_options(self, options):
-        self._body_options = options[BODY] if BODY in options else {}
-        self._canvas_options = options[CANVAS] if CANVAS in options else {}
-        self._box_options = options[BOX] if BOX in options else {}
-        self._vsb_options = options[VSB] if VSB in options else {}
-        self._hsb_options = options[HSB] if HSB in options else {}
 
-
-class _ScrollboxTest(Viewable):
+class _ScrollboxTest(View):
 
     def __init__(self, root):
+        super().__init__()
         self._root = root
         self._body = None
 
@@ -306,7 +288,7 @@ class _ScrollboxTest(Viewable):
                     pady=10, expand=1, fill=tk.BOTH)
         # Scrollbox 1
         scrollbox_1 = Scrollbox(pane_1, orient=VERTICAL)
-        scrollbox_1.build_pack(pady=5, expand=1, fill=tk.BOTH)
+        scrollbox_1.pack(pady=5, expand=1, fill=tk.BOTH)
         # Button 1
         command = (lambda self=self, box=scrollbox_1.box, side=tk.TOP:
                    self._on_click_add(box, side))
@@ -319,7 +301,7 @@ class _ScrollboxTest(Viewable):
                     pady=10, expand=1, fill=tk.BOTH)
         # Scrollbox 2
         scrollbox_2 = Scrollbox(pane_2, orient=HORIZONTAL)
-        scrollbox_2.build_pack(pady=5, expand=1, fill=tk.BOTH)
+        scrollbox_2.pack(pady=5, expand=1, fill=tk.BOTH)
         # Button 2
         command = (lambda self=self, box=scrollbox_2.box, side=tk.LEFT:
                    self._on_click_add(box, side))

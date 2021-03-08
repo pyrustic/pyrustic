@@ -8,8 +8,8 @@ from pyrustic.theme import Theme
 def get_theme():
     theme = Theme()
     theme.add_style(_get_toast_toplevel_style(), scope="*Toast*")
-    theme.add_style(_get_toast_header_label_style(), scope="*Toast*header*")
-    theme.add_style(_get_toast_message_label_style(), scope="*Toast*message*")
+    theme.add_style(_get_toast_header_label_style(), scope="*Toast*label_header*")
+    theme.add_style(_get_toast_message_label_style(), scope="*Toast*label_message*")
     return theme
 
 
