@@ -283,13 +283,13 @@ $ pip install pyrustic --upgrade --upgrade-strategy eager
 # Documentation
 Pyrustic is a work in progress. The versions of `Pyrustic` under `1.0.0` are aimed at an audience of early adopters. Check the FAQ and the Tutorial.
 ## FAQ
-Read the [FAQ](https://github.com/pyrustic/pyrustic/blob/master/docs/FAQ.md)
+Read the [FAQ](https://github.com/pyrustic/pyrustic/blob/master/docs/FAQ.md).
 
 ## Tutorial
-Read the [Tutorial](https://github.com/pyrustic/pyrustic/blob/master/docs/TUTORIAL.md)
+Read the [Tutorial](https://github.com/pyrustic/pyrustic/blob/master/docs/TUTORIAL.md).
 
 ## Glossary
-Read the [Glossary](https://github.com/pyrustic/pyrustic/blob/master/docs/GLOSSARY.md)
+Read the [Glossary](https://github.com/pyrustic/pyrustic/blob/master/docs/GLOSSARY.md).
 
 ## Framework Reference
 Read the [Framework Reference](https://github.com/pyrustic/pyrustic/blob/master/docs/REFERENCE.md).
