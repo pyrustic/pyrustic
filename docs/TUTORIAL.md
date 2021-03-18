@@ -26,7 +26,7 @@
 
 
 ## Introduction
-`Pyrustic` is a lightweight framework and software suite to help develop, package, and publish `Python` desktop applications. The project is designed so that one can use only one component and ignore the others. For example, we can only use the `pyrustic.table` widget in an existing project.
+[Pyrustic](https://github.com/pyrustic/pyrustic#readme) is a lightweight framework and software suite to help develop, package, and publish `Python` desktop applications. The project is designed so that one can use only one component and ignore the others. For example, we can only use the `pyrustic.table` widget in an existing project.
 
 In this tutorial we will create a program that calculates [primes](https://en.wikipedia.org/wiki/Prime_number). The project will allow us to cover different aspects of Pyrustic such as multithreading or communicating between components.
 
