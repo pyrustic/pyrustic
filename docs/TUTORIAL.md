@@ -1,6 +1,6 @@
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/XXXprimes.gif" alt="Primes" width="650">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/primes.gif" alt="Primes" width="650">
     <p align="center">
     Primes
     </p>
