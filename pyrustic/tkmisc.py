@@ -2,6 +2,7 @@ import tkinter as tk
 
 
 def center_window(window, within=None):
+    """ Center the window within another window (tk obj) or the screen (None)"""
     window.withdraw()
     window.update_idletasks()
     window.geometry("+0+0")

@@ -123,7 +123,7 @@ Pyrustic comes with `pyrustic.gurl`: a `library` to fetch resources with an impl
 ## Communicating Between Components And Event Notification
 As a software grows, so is its complexity. Pyrustic comes with pyrustic.com a library to allow loosely coupled components to exchange data, subscribe to and publish events.
 
-Please read the [tutorial](#tutorial) to geet a deep understanding of this section.
+Please read the [tutorial](#tutorial) to get a deep understanding of this section.
 
 
 ## Database Access Object
@@ -259,7 +259,7 @@ As `Pyrustic` is built with `Python` for `Python developers` and also makes exte
 # Installation
 `Pyrustic` is available on [PyPI](https://pypi.org/) (the Python Package Index) to simplify the life of Python developers.
 
-If you have never installed a package from PyPI, you must install the pip tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
+If you have never installed a package from PyPI, you must install the `pip` tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
 
 ```bash
 $ pip install pyrustic

@@ -50,16 +50,17 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
     Table supports data sorting, multiple selection modes, and more...
 
     Example:
+    ```python
+    import tkinter as tk
+    from pyrustic.widget.table import Table
 
-        import tkinter as tk
-        from pyrustic.widget.table import Table
-
-        root = tk.Tk()
-        my_titles = ("Name", "Job")
-        my_data = (("Jack", "Architect"), ("Diana", "Physicist"))
-        table = Table(root, titles=my_titles, data=my_data)
-        table.build_pack()
-        root.mainloop()
+    root = tk.Tk()
+    my_titles = ("Name", "Job")
+    my_data = (("Jack", "Architect"), ("Diana", "Physicist"))
+    table = Table(root, titles=my_titles, data=my_data)
+    table.build_pack()
+    root.mainloop()
+    ```
 
     """
     def __init__(self,

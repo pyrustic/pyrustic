@@ -2,7 +2,7 @@ from pyrustic.exception import PyrusticException
 
 
 class Com:
-    """ The Event Notification Comprehension """
+    """ work in progress """
     def __init__(self, tk=None, event_sep=None):
         self._tk = tk
         self._event_sep = event_sep

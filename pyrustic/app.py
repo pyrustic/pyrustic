@@ -46,6 +46,7 @@ class App:
     @property
     def gui_config(self):
         """
+        Setter et Getter
         Get a dict-like deepcopy of your config file if it exists and is valid.
         Else you will get the default config dict.
         """

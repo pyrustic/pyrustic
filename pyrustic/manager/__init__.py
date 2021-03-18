@@ -11,6 +11,7 @@ def command(line=None, target=None):
         - line is a string
         - target is a string
     """
+    print("EXECUTION")
     args = None
     if line is not None:
         args = pymisc.parse_cmd(line)
