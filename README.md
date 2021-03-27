@@ -3,15 +3,15 @@
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
     <br>
     <p align="center">
-    The Pyrustic software suite with the cyberpunk theme
+    <b> Desktop apps built with Pyrustic </b>
     </p>
 </div>
 
 <!-- Intro Text -->
 # Pyrustic
-`Pyrustic` is a lightweight framework and software suite to help develop, package, and publish `Python` `desktop applications`.
+`Pyrustic` is a lightweight framework to develop, package, and publish `Python desktop applications`.
 
-This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encouraged to send a [feedback](#contact).
+This is a user-centric project. You are encouraged to send a [feedback](#contact).
 
 <!-- Quick Links -->
 [Demo](#demo-video) | [Installation](#installation) | [Documentation](#documentation) | [Hubstore](#hubstore---to-connect-apps-with-users)
@@ -28,11 +28,12 @@ This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encour
   - [Database Access Object](#database-access-object)
   - [And More](#and-more)
 - [The Manager](#the-manager)
-- [The Software Suite](#the-software-suite)
+- [Some Desktop Apps Built With Pyrustic](#some-desktop-apps-built-with-pyrustic)
   - [Rustiql - The Graphical SQL Editor](#rustiql---the-graphical-sql-editor)
   - [Jupitest - The Graphical Test Runner](#jupitest---the-graphical-test-runner)
   - [Hubway -  Release Your App To The World](#hubway---release-your-app-to-the-world)
-- [Hubstore - To Connect Apps With Users](#hubstore---to-connect-apps-with-users)
+  - [Hubstore - To Connect Apps With Users](#hubstore---to-connect-apps-with-users)
+- [tk-cyberpunk-theme - A Dark Theme For Desktop Apps](#tk-cyberpunk-theme---a-dark-theme-for-desktop-apps)
 - [Demo Video](#demo-video)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -48,13 +49,23 @@ This is an [emailware](https://en.wiktionary.org/wiki/emailware). You are encour
 
 <!-- Overview -->
 # Overview
-Python is one of the world's most [popular](https://www.wired.com/story/python-language-more-popular-than-ever/) programming languages. There are some great frameworks for building web application with Python. Pyrustic targets Python desktop application development.
 
-A framework alone is not enough to build a great app. `Pyrustic` comes with batteries included, just like the Python language itself which comes with an amazing standard library. `Pyrustic` is a lightweight framework and software suite to help develop, package, and publish Python `desktop applications`.
+<!-- Image -->
+<div align="center">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/pyrustic_hubstore.png" alt="Pyrustic Hubstore" width="650">
+    <p align="center">
+    <b> The Pyrustic Ecosystem </b>
+    </p>
+</div>
 
-Pyrustic is flexible enough that you can use both the framework and the software suite or just one of the components. For example, you can decide to only use the `Table` widget from the` pyrustic.widget` package in your existing `Tkinter` codebase. Another example is to only use Pyrustic to build a [Wheel](https://wheel.readthedocs.io/en/stable/story.html) and then publish it.
 
-The framework and the software suite are useful for a new project as well as for an existing project.
+`Python` is one of the world's most [popular](https://www.wired.com/story/python-language-more-popular-than-ever/) programming languages. There are some great frameworks for building web application with Python. Pyrustic targets Python desktop application development.
+
+Since a framework alone isn't enough, `Pyrustic` comes with batteries included, just like the Python language itself which comes with an amazing standard library. Pyrustic is shipped with a powerful command-line tool: `The Manager`. The Manager allows you to create a new project with the standard structure, initialize a project directory, build a distribution package, publish the distribution package, and more.
+
+Pyrustic is flexible enough that you can use only one of its components. For example, you can decide to only use the `Table` widget from the `pyrustic.widget` package in your existing `Tkinter` codebase. Another example is to only use Pyrustic to build a [Wheel](https://wheel.readthedocs.io/en/stable/story.html) and then publish it for your users to consume through [Hubstore](https://github.com/pyrustic/hubstore).
+
+Pyrustic is useful for a new project as well as for an existing project.
 
 
 # The Framework
@@ -64,28 +75,33 @@ The Framework covers various topics, from GUI to database connection, and more.
 The `Framework` is easy to use and flexible with only three constraints:
 - you have to follow the conventional Python project structure as described in the [Python Packaging User Guide](https://packaging.python.org/tutorials/packaging-projects/);
 - you need to have a `__main__.py` file in the source package;
-- the project name should be the same as the source package.
+- the project name should be the same as the source package (*).
 
-In fact, these aren't constraints but simply `elegance` and [proactivity](https://en.wikipedia.org/wiki/Proactivity). It will save you a lot of trouble in the future (believe me). By the way, the command-line tool [Manager](#the-manager) will take care of these details for you, you will just need to link a project directory, then issue the command `init`.
+In fact, these constraints are just good practice and guess what, the command-line tool [Manager](#the-manager) will take care of these details for you, you will just need to link a project directory, then issue the command `init`.
+
+(*) If you are wondering how to deal with the hyphen versus underscore issue in a project structure, take a look at [tk-cyberpunk-theme](https://github.com/pyrustic/tk-cyberpunk-theme). In short, use a hyphen in the distribution package name and use an underscore in the import package name.
+
 
 ## GUI
-Pyrustic proudly uses `Tkinter` as `GUI Toolkit`. Remember that the entire software suite was built with Pyrustic.
+Pyrustic proudly uses `Tkinter` as `GUI Toolkit`. Why [Tkinter](https://en.wikipedia.org/wiki/Tkinter) ? Read this [answer](https://github.com/pyrustic/pyrustic/blob/master/docs/FAQ.md#why-tkinter--isnt-that-a-bad-bet-).
 
 Some features related to the GUI:
 - The `Framework` comes with many awesome widgets (mega-widgets to be precise): `Table`, `Scrollbox`, `Toast`, `Tree` and more.
-- `pyrustic.default_style` and `pyrustic.theme`: a style/theme system to make it easy for you to build beautiful GUIs.
-- `pyrustic.theme.cyberpunk`: a dark theme ready to use, the one used as base theme by the entire software suite.
+- `pyrustic.default_style` and `pyrustic.theme.Theme`: a style/theme mechanism to make it easy for you to build beautiful GUIs.
+- `tk_cyberpunk_theme`: a dark theme ready to use.
 - `pyrustic.view.View`: Pyrustic comes with the concept of `views`. `Views` are optional to use and are compatible with Tkinter. In fact, Views provides an intuitive lifecycle mechanism that will make it easier to build and maintain your GUI.
 - and more...
 
 ### Example of typical `__main__.py` content
+
+The following is an excerpt from the demo. Explore the [demo project](https://github.com/pyrustic/demo).
 
 <details>
     <summary>Click to expand (or collapse)</summary>
 
 ```python
 from pyrustic.app import App
-from pyrustic.theme.cyberpunk import Cyberpunk
+from tk_cyberpunk_theme import Cyberpunk
 from demo.view.main_view import MainView
 
 
@@ -113,25 +129,25 @@ if __name__ == "__main__":
 ## Multithreading
 It is well known how difficult it is to implement multithreading in a Tkinter application. Pyrustic comes with `pyrustic.threadom`: a `library` to make it easy to develop multithreading applications. You can retrieve from the main thread the values returned by the functions executed in other threads and also the exceptions raised by these functions.
 
-Jupitest the Pyrustic `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
+[Jupitest](https://github.com/pyrustic/jupitest) the graphical `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
 
 ## Fetching Resources
-Pyrustic comes with `pyrustic.gurl`: a `library` to fetch resources with an implementation of conditional request and a smart responses caching system.
+Pyrustic comes with `pyrustic.gurl`: a `library` to fetch resources with an implementation of [conditional request](https://developer.mozilla.org/en-US/docs/Web/HTTP/Conditional_requests) and a smart responses caching system.
 
-`Hubway`, the Pyrustic app to publish application, uses this library to fetch resources as a good API citizen.
+[Hubway](https://github.com/pyrustic/hubway) the app to publish application, uses this library to fetch resources as a good API citizen.
 
 ## Communicating Between Components And Event Notification
-As a software grows, so is its complexity. Pyrustic comes with pyrustic.com a library to allow loosely coupled components to exchange data, subscribe to and publish events.
+As a software grows, so is its complexity. Pyrustic comes with `pyrustic.com` a library to allow loosely coupled components to exchange data, subscribe to and publish events.
 
 Please read the [tutorial](#tutorial) to get a deep understanding of this section.
 
 
 ## Database Access Object
-Pyrustic comes with `pyrustic.dao`: a `library` to simplify the connection to your SQLite database.
+Pyrustic comes with `pyrustic.dao`: a `library` to simplify the connection to your [SQLite](https://www.sqlite.org/index.html) database.
 This library has some cool features like the ability to specify what I call a `creational script` that will be used to create a new database when it is missing.
 
 ## And More
-- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a fresh copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open `JSON` files in readonly mode.
+- `pyrustic.jasonix`: a `library` included in the `Framework` which makes it so cool to work with `JSON` files. `Pyrustic` uses extensively this `library` to store user preferences, configuration data and more. With this `library`, you can initialize preferences/configuration/whatever files easily, thanks to the internal mechanism of `Jasonix` that creates a fresh copy of the given default `JSON` file at the target path. `Jasonix` also comes with a lock to open [JSON](https://en.wikipedia.org/wiki/JSON) files in readonly mode.
 - for obvious reasons (clue: `beta`), `Pyrustic` does not take the risk of deleting the files it needs to get rid of, instead it moves them to a `trash` folder.
 - and more...
 
@@ -140,36 +156,42 @@ This library has some cool features like the ability to specify what I call a `c
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/manager.gif" alt="Manager" width="650">
     <p align="center">
-    Manager
+    <b> Manager </b>
     </p>
 </div>
 
-The `Manager` is the entry point to the software suite. It's an optional command-line application with an API that you can use programmatically to automate your workflow.
+The `Manager` is a command-line application with an API that you can use to automate your workflow.
 
 Via the `Manager` you can:
-- create a project with battery included (project structure, pyproject.toml, etc);
-- easily add `packages`, `modules` or `files` to your project;
-- run a specific `module` of your project;
+- create a project with battery included (project structure, pyproject.toml, default README.md, etc);
+- easily add multiples `packages`, `modules` or `files` to your project with a one line command;
+- run a specific `module` or `package` of your project;
+- run any package previously installed with `pip`, in others words, you just need to type `run jupitest` to open the graphical test runner `Jupitest`;  
 - view recent projects list and quickly switch between projects;
-- launch the `SQL Editor`, `Test Runner` and `Hubway` (respectively with commands `sql`, `test` and `hub`);
 - build a distribution package according to setup.cfg and MANIFEST.in;
+- publish your application (distribution package);  
 - find out if the project is installed ('pip install -e') in the current virtual env;  
 - and more...
 
-The `build` command builds a package that could be published with the application `Hubway`.
+Type `help` in the Manager to discover the commands. Basically, you will often need to use the command `link` or `relink` to link a project to the Manager, `init` to initialize your project, `run` to run your project, `build` to build a distribution package and `publish` to publish your app.
 
-# The Software Suite
-The lightweight software suite is made of:
+You need a personal access token to publish your application. It is easy to generate a personal access token. Read this [article](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token).
+
+
+# Some Desktop Apps Built With Pyrustic
+The following apps are made with Pyrustic:
 - `Rustiql`: a graphical `SQL Editor`;
 - `Jupitest`: a graphical `Test Runner`;
 - and `Hubway`: an application to publish your project.
+
+Their themes are based on [tk-cyberpunk-theme](https://github.com/pyrustic/tk-cyberpunk-theme).
 
 ## Rustiql - The Graphical SQL Editor
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/rustiql.gif" alt="SQL Editor" width="650">
     <p align="center">
-    SQL Editor
+    <b> SQL Editor </b>
     </p>
 </div>
 
@@ -187,7 +209,7 @@ The `SQL Editor` makes extensive use of the `pyrustic.dao` library.
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/jupitest.gif" alt="Test Runner" width="650">
     <p align="center">
-    Test Runner
+    <b> Test Runner </b>
     </p>
 </div>
 
@@ -205,7 +227,7 @@ The `Test Runner` makes extensive use of the `pyrustic.threadom` library to perf
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/hubway.gif" alt="Hubway" width="650">
     <p align="center">
-    Hubway
+    <b> Hubway </b>
     </p>
 </div>
 
@@ -218,24 +240,29 @@ It is easy to generate a personal access token. Read this [article](https://docs
 
 
 
-# Hubstore - To Connect Apps With Users
+## Hubstore - To Connect Apps With Users
 <!-- Image -->
 <div align="center">
-    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/pyrustic_hubstore.png" alt="Pyrustic Hubstore" width="650">
+    <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/hubstore_cover.png" alt="Hubstore" width="650">
     <p align="center">
-    Pyrustic - Hubstore
+    <b> Hubstore </b>
     </p>
 </div>
 
-Once you are ready to release a new version of your app, `Pyrustic` allows you to build a distribution package with the `build` command and then publish it to Github with `Hubway`.
-
-Then the question that arises is "How to make the `find-download-install-run` process easier for users?". This is where the `Hubstore` comes in.
+Once you have published your app to Github with the command `publish`, the next question that arises is: "How to make the `find-download-install-run` process easier for users?". This is where the `Hubstore` comes in.
 
 With `Hubstore`, it's easy to showcase, distribute, install, and manage your Python desktop apps.
 
-`Hubstore` is available on PyPI and yes it's also built with `Pyrustic` !
+Note that any Python Wheel app is compatible with `Hubstore`, in others words, you don't need to use the `Pyrustic` Framework to have a `Hubstore` compatible app.
+
+`Hubstore` is available on PyPI.
 
 Do you want to learn more about `Hubstore` ? Discover [Hubstore](https://github.com/pyrustic/hubstore#readme) !
+
+# tk-cyberpunk-theme - A Dark Theme For Desktop Apps
+The `tk-cyberpunk-theme` is used as base theme in `Hubstore`, `Jupitest`, `Rustiql` and `Hubway`.
+
+Discover the [cyberpunk theme](https://github.com/pyrustic/tk-cyberpunk-theme) !
 
 
 <!-- Demo -->

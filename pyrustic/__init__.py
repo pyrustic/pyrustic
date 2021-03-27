@@ -5,7 +5,7 @@ except ImportError:
     import importlib_metadata as dist_info
 
 
-def dist(name, target=None): # TODO: implement target=None or path to blah blah...
+def dist(name, target=None):  # TODO: implement target=None or path to blah blah...
     """
     DESCRIPTION:
         Use this function to get some info about a distribution package

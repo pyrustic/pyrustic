@@ -2,6 +2,7 @@ import os
 import os.path
 import pkgutil
 from pyrustic.manager.misc import funcs
+from pyrustic.jasonix import Jasonix
 
 
 class InitHandler:
@@ -81,7 +82,8 @@ class InitHandler:
         print("Successfully initialized !")
 
     def _make_packages(self):
-        packages = (self._app_pkg, "tests")
+        hooking_pkg = "{}.hooking".format(self._app_pkg)
+        packages = (self._app_pkg, "tests", hooking_pkg)
         for package in packages:
             funcs.build_package(self._target, package)
         app_dir = os.path.join(self._target, self._app_pkg)
@@ -146,11 +148,40 @@ class InitHandler:
         resource = resource_prefix + "setup_cfg_template.txt"
         dest_path = os.path.join(self._target, "setup.cfg")
         data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
-        data = data.format(app_pkg=self._app_pkg)
+        data = data.format(project_name=os.path.basename(self._target),
+                           app_pkg=self._app_pkg)
         self._add_file(dest_path, data)
         # add pyproject.toml
         resource = resource_prefix + "pyproject_template.txt"
         dest_path = os.path.join(self._target, "pyproject.toml")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add pre_building_hook.py
+        resource = resource_prefix + "pre_building_hook_template.txt"
+        dest_path = os.path.join(self._target, self._app_pkg,
+                                 "hooking",
+                                 "pre_building_hook.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add post_building_hook.py
+        resource = resource_prefix + "post_building_hook_template.txt"
+        dest_path = os.path.join(self._target, self._app_pkg,
+                                 "hooking",
+                                 "post_building_hook.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add pre_publishing_hook.py
+        resource = resource_prefix + "pre_publishing_hook_template.txt"
+        dest_path = os.path.join(self._target, self._app_pkg,
+                                 "hooking",
+                                 "pre_publishing_hook.py")
+        data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
+        self._add_file(dest_path, data)
+        # add post_publishing_hook.py
+        resource = resource_prefix + "post_publishing_hook_template.txt"
+        dest_path = os.path.join(self._target, self._app_pkg,
+                                 "hooking",
+                                 "post_publishing_hook.py")
         data = pkgutil.get_data("pyrustic", resource).decode("utf-8")
         self._add_file(dest_path, data)
 
@@ -159,9 +190,27 @@ class InitHandler:
                                                   self._app_pkg,
                                                   "pyrustic_data")
         resource_prefix = "manager/default_json/pyrustic_data/"
+        # add dev.json
+        path = os.path.join(local_pyrustic_data_folder, "dev.json")
+        default_resource = resource_prefix + "dev_default.json"
+        data = pkgutil.get_data("pyrustic", default_resource)
+        if not os.path.exists(path):
+            with open(path, "wb") as file:
+                file.write(data)
+        jasonix = Jasonix(path)
+        jasonix.data["hooking_pkg"] = "{}.hooking".format(self._app_pkg)
+        jasonix.save()
         # add gui.json
         path = os.path.join(local_pyrustic_data_folder, "gui.json")
         default_resource = resource_prefix + "gui_default.json"
+        data = pkgutil.get_data("pyrustic", default_resource)
+        if not os.path.exists(path):
+            with open(path, "wb") as file:
+                file.write(data)
+        # add publishing.json
+        path = os.path.join(local_pyrustic_data_folder,
+                            "publishing.json")
+        default_resource = resource_prefix + "publishing_default.json"
         data = pkgutil.get_data("pyrustic", default_resource)
         if not os.path.exists(path):
             with open(path, "wb") as file:

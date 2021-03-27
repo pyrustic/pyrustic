@@ -8,7 +8,7 @@ class RelinkHandler:
     """
     Description
     -----------
-    Link again the previous Target or one of last Targets.
+    Link again the previous Target or one of recent Targets.
 
     Usage
     -----
@@ -22,7 +22,7 @@ class RelinkHandler:
     -------
     - Description: Link again a previous Target
     - Preliminary: Assume you want to link again the Target
-    with index #2 (found the index with the command "last")
+    with index #2 (found the index with the command "recent")
     - Command: relink 2
     """
     def __init__(self, target,
@@ -38,13 +38,13 @@ class RelinkHandler:
     def _process(self, args):
         jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE, readonly=True)
         path = jasonix.data["target"]
-        if not jasonix.data["last"]:
+        if not jasonix.data["recent"]:
             print("- Empty -")
             return
         if len(args) == 1:
             try:
                 index = int(args[0])
-                path = list(reversed(jasonix.data["last"]))[index]
+                path = list(reversed(jasonix.data["recent"]))[index]
             except Exception as e:
                 print("Wrong index")
                 return

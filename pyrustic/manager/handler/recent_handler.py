@@ -3,18 +3,18 @@ from pyrustic.jasonix import Jasonix
 import os.path
 
 
-class LastHandler:
+class RecentHandler:
     """
     Description
     -----------
-    Display the last Targets.
+    Display the recent Targets.
     The command "relink" links again Pyrustic Manager with the
-    Target at index 0 from the "last" list.
+    Target at index 0 from the "recent" list.
 
     Usage
     -----
-    - Description: List of last Targets
-    - Command: last
+    - Description: List of recent Targets
+    - Command: recent
     """
 
     def __init__(self, target,
@@ -28,13 +28,13 @@ class LastHandler:
             print("Wrong usage of this command")
             return
         jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE)
-        last_list = jasonix.data["last"]
-        len_last_list = len(last_list)
-        if len_last_list == 0:
+        recent_list = jasonix.data["recent"]
+        len_recent_list = len(recent_list)
+        if len_recent_list == 0:
             print("- Empty -")
-        for i, path in enumerate(reversed(last_list)):
+        for i, path in enumerate(reversed(recent_list)):
             print("#{}".format(i))
             print("Name: {}".format(os.path.basename(path)))
             print("Path: {}".format(path))
-            if i < len_last_list - 1:
+            if i < len_recent_list - 1:
                 print("")

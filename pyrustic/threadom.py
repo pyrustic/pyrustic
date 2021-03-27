@@ -223,6 +223,8 @@ class Threadom:
         if not queue.empty():
             result = queue.get()
             self._dispatch_result(result, consumer, unpack_result, exception_handler)
+            if result is QueueTail:
+                return
         next_call = lambda self=self, qid=qid: self._loop(qid)
         self._tk.after(latency, func=next_call)
 
@@ -298,3 +300,7 @@ class Threadom:
             consumer(*result)
         else:
             consumer(result)
+
+
+class QueueTail:
+    pass

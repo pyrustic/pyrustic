@@ -16,7 +16,7 @@ class Jasonix:
         """
         PARAMETERS:
 
-        - target: file-like object or a path to a json file. If target is a path
+        - target: dict or file-like object or a path to a json file. If target is a path
          and this path doesn't exist, a new file will be created or not according
         to the parameter "default
 

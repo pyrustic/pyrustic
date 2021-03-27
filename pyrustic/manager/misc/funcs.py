@@ -5,6 +5,7 @@ from pyrustic.manager import constant
 from pyrustic.jasonix import Jasonix
 from pyrustic.gurl import Gurl
 import pyrustic
+from setuptools.config import read_configuration
 
 
 def check_project_state(target):
@@ -22,6 +23,48 @@ def check_project_state(target):
     if not data:
         return 2
     return 0
+
+
+def get_app_pkg(target):
+    app_pkg = None
+    if not target or not os.path.exists(target):
+        return app_pkg
+    config = setup_config(target)
+    if config:
+        app_pkg = config.get("name", None)
+    if app_pkg:
+        return app_pkg
+    app_pkg = os.path.basename(target)
+    cache = app_pkg.split("-")
+    app_pkg = "_".join(cache)
+    return app_pkg
+
+
+def setup_config(target):
+    """ Get the metadata from setup.cfg """
+    setup_cfg = os.path.join(target, "setup.cfg")
+    if not os.path.exists(setup_cfg):
+        return None
+    return read_configuration(setup_cfg)["metadata"]
+
+
+def wheels_assets(target):
+    dist_folder = os.path.join(target,
+                               "dist")
+    if not os.path.exists(dist_folder):
+        return []
+    assets = []
+    for item in os.listdir(dist_folder):
+        _, ext = os.path.splitext(item)
+        if ext != ".whl":
+            continue
+        path = os.path.join(dist_folder, item)
+        if not os.path.isfile(path):
+            continue
+        assets.append(item)
+    assets = _sort_wheels_names(assets)
+    assets.reverse()
+    return assets
 
 
 def copyto(src, dest):
@@ -177,3 +220,12 @@ def create_gurl():
 def get_hub_url(res):
     target = "https://api.github.com"
     return "{}{}".format(target, res)
+
+
+def _sort_wheels_names(data):
+    cache = list()
+    for name in data:
+        version = name.split("-")[1]
+        cache.append((version, name))
+    cache.sort(key=lambda s: [int(i) for i in s[0].split('.')])
+    return [name for version, name in cache]

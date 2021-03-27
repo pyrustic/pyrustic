@@ -6,6 +6,8 @@ import subprocess
 from pyrustic.jasonix import Jasonix
 
 
+# TODO : refactor pymisc into util, tkmisc into tkutil, then put pyrustic.dist inside pyrustic.app
+
 def make_archive(name, src, dest, format="zip"):
     """
     - name is the zipfile name minus extension like 'my_archive_file';

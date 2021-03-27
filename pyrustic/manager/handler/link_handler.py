@@ -89,16 +89,16 @@ class LinkHandler:
 
     def _store_target(self, path):
         jasonix = funcs.get_manager_jasonix(False)
-        last_list = jasonix.data["last"]
-        for i, item in enumerate(last_list):
+        recent_list = jasonix.data["recent"]
+        for i, item in enumerate(recent_list):
             if item == path:
-                del last_list[i]
-        last_list.append(path)
-        len_last_list = len(last_list)
+                del recent_list[i]
+        recent_list.append(path)
+        len_recent_list = len(recent_list)
         max_items = 5
-        if len_last_list > max_items:
-            for i in range(len_last_list - max_items):
-                del last_list[0]
+        if len_recent_list > max_items:
+            for i in range(len_recent_list - max_items):
+                del recent_list[0]
         jasonix.data["target"] = path
         jasonix.save()
         return True

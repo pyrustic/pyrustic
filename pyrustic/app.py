@@ -2,8 +2,8 @@ import sys
 import copy
 import platform
 import pkgutil
-import json
 import tkinter as tk
+import pyrustic
 from pyrustic.view import View, CustomView
 from pyrustic import tkmisc
 from pyrustic.jasonix import Jasonix
@@ -25,12 +25,15 @@ class App:
         """
         self._package = package
         self._is_running = False
+        self._restartable = False
         self._root = tk.Tk()
         self._theme = None
         self._view = None
+        self._view_cache = None
         self._center_window = False
-        self._config_data = None  # TODO: rename it into self._gui_config
-        self._exit_hook = None
+        self._config = None
+        self._gui_config = None
+        self._exit_handler = None
         self._setup()
 
     # ============================================
@@ -44,18 +47,35 @@ class App:
         return self._root
 
     @property
+    def installed(self):
+        data = pyrustic.dist(self._package)
+        return True if data else False
+
+    @property
+    def config(self):
+        return copy.deepcopy(self._config)
+
+    @config.setter
+    def config(self, val):
+        """ val is dict, path or file-like object"""
+        jasonix = Jasonix(val)
+        self._config = jasonix.data
+        if self._config:
+            self._gui_config = self._config.get("gui", self._gui_config)
+
+    @property
     def gui_config(self):
         """
         Setter et Getter
-        Get a dict-like deepcopy of your config file if it exists and is valid.
-        Else you will get the default config dict.
         """
-        return copy.deepcopy(self._config_data)
+        return copy.deepcopy(self._gui_config)
 
     @gui_config.setter
     def gui_config(self, val):
-        # TODO: make it accept dict, path and file-like object
-        pass
+        jasonix = Jasonix(val)
+        self._gui_config = jasonix.data
+        if self._gui_config:
+            self._config["gui"] = self._gui_config
 
     @property
     def theme(self):
@@ -99,14 +119,24 @@ class App:
         if self._view:
             self._view.destroy()
         self._view = val
+        self._view_cache = val
+        self._body = None
 
     @property
-    def exit_hook(self):
-        return self._exit_hook
+    def body(self):
+        return self._body
 
-    @exit_hook.setter
-    def exit_hook(self, val):
-        self._exit_hook = val
+    @body.setter
+    def body(self, val):
+        self._body = val
+
+    @property
+    def exit_handler(self):
+        return self._exit_handler
+
+    @exit_handler.setter
+    def exit_handler(self, val):
+        self._exit_handler = val
 
     # ============================================
     #               PUBLIC METHODS
@@ -120,11 +150,18 @@ class App:
             message = "This method shouldn't be called twice. Please use 'restart' instead"
             raise PyrusticAppException(message)
         self._is_running = True
+        # bind self._on_exit
         self._root.protocol("WM_DELETE_WINDOW", self._on_exit)
+        handler = (lambda event,
+                          root=self._root:
+                   self._on_exit() if event.widget is root else None)
+        self._root.bind("<Destroy>", handler)
         EnhanceTk(self._root)
-        self._set_config()
-        self._set_theme()
-        self._install_view()
+        # apply config, set theme then install view
+        self._apply_config()
+        self._apply_theme()
+        self._install_view(self._view)
+        # main loop
         try:
             self._root.mainloop()
         except KeyboardInterrupt:
@@ -136,10 +173,12 @@ class App:
         You would need to submit a new view first before calling this method.
         """
         if not self._is_running:
-            message = "The app should be already running before you could call this method"
-            raise PyrusticAppException(message)
-        self._set_theme()
-        self._install_view()
+            return False
+        if not self._view_cache or not callable(self._view_cache):
+            return False
+        self._apply_theme()
+        self._view.destroy()
+        return self._install_view(self._view_cache)
 
     def exit(self):
         """
@@ -170,44 +209,71 @@ class App:
     # ============================================
     #               PRIVATE METHODS
     # ============================================
+
+    def _setup(self):
+        # gui_config
+        self._set_config()
+        # set default title
+        self._set_default_title()
+
     def _set_config(self):
+        self._set_gui_config()
+
+    def _set_gui_config(self):
+        gui_config_json = None
+        gui_config_json_resource = "pyrustic_data/gui.json"
+        default_gui_json_resource = \
+            "manager/default_json/pyrustic_data/gui_default.json"
+        if self._package:
+            try:
+                gui_config_json = pkgutil.get_data(self._package,
+                                                   gui_config_json_resource)
+            except Exception as e:
+                pass
+        if not gui_config_json:
+            gui_config_json = pkgutil.get_data(__package__,
+                                               default_gui_json_resource)
+        jasonix = Jasonix(gui_config_json)
+        self._gui_config = jasonix.data
+        self._config = {"gui": self._gui_config}
+
+    def _set_default_title(self):
+        name = self._package
+        if not self._package or "." in name:
+            name = "Application"
+        title = "{} | built with Pyrustic".format(name)
+        self._root.title(title)
+
+    def _apply_config(self):
+        self._apply_gui_config()
+
+    def _apply_gui_config(self):
         # app geometry
-        if not self._config_data["ignore_geometry"]:
-            self._root.geometry(self._config_data["root_geometry"])
+        if not self._gui_config["ignore_geometry"]:
+            self._root.geometry(self._gui_config["root_geometry"])
         # background
-        background_color = self._config_data["root_background"]
+        background_color = self._gui_config["root_background"]
         self._root.config(background=background_color)
         # resizable width and height
-        resizable_width = self._config_data["resizable_width"]
-        resizable_height = self._config_data["resizable_height"]
+        resizable_width = self._gui_config["resizable_width"]
+        resizable_height = self._gui_config["resizable_height"]
         self._root.resizable(width=resizable_width, height=resizable_height)
         # maximize screen
-        if self._config_data["maximize_window"]:
+        if self._gui_config["maximize_window"]:
             self.maximize()
 
-    def _set_theme(self):
-        if not self._config_data["allow_theme"]:
+    def _apply_theme(self):
+        if not self._gui_config["allow_theme"]:
             return
         if not self._theme:
             return
         self._theme.target(self._root)
 
-    def _install_view(self):
-        if isinstance(self._view, type):
-            self._view = self._view()
-        elif isinstance(self._view, View):
-            pass
-        else:
-            if self._view is None:
-                self._view = tk.Frame(self._root,
-                                      bg="black",
-                                      width=350,
-                                      height=200)
-            if callable(self._view):
-                self._view = self._view()
-            self._view = CustomView(body=self._view)
+    def _install_view(self, view):
+        self._view = self._get_view(view)
+        self._view.build()
         if not self._view.build():
-            return
+            return False
         body = self._view.body
         if isinstance(body, tk.Frame):
             self._view.body.pack(in_=self._root,
@@ -219,43 +285,35 @@ class App:
         # center
         if self._center_window:
             tkmisc.center_window(self._root)
+        return True
+
+    def _get_view(self, view):
+        if callable(view):
+            view = view()
+        if isinstance(view, View):
+            return view
+        if isinstance(view, type) and issubclass(view, View):
+            return view()
+        if view is None:
+            view = tk.Frame(self._root,
+                            bg="black",
+                            width=350,
+                            height=200)
+        return CustomView(body=view)
 
     def _on_exit(self):
-        if self._exit_hook:
-            val = self._exit_hook()
+        if self._exit_handler:
+            val = self._exit_handler()
             if not val:
                 return
         if self._view:
             if self._view.body:
-                self._view.body.pack_forget()
+                pass
+                #self._root.iconify()
+                #self._root.withdraw()
             self._view.destroy()
             self._view = None
         if self._root:
             self._root.destroy()
             self._root = None
         sys.exit()
-
-    def _set_default_title(self):
-        name = self._package
-        if "." in name:
-            name = "Application"
-        title = "{} | built with Pyrustic".format(name)
-        self._root.title(title)
-
-    def _setup(self):
-        if not self._package:
-            raise PyrusticAppException("Missing package name.")
-        # config_data
-        gui_json = None
-        gui_json_resource = "pyrustic_data/gui.json"
-        default_gui_json_resource = \
-            "manager/default_json/pyrustic_data/gui_default.json"
-        try:
-            gui_json = pkgutil.get_data(self._package, gui_json_resource)
-        except Exception as e:
-            pass
-        if not gui_json:
-            gui_json = pkgutil.get_data(__package__, default_gui_json_resource)
-        self._config_data = json.loads(gui_json) # TODO use Jasonix and also add property config
-        # set default title
-        self._set_default_title()

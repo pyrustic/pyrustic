@@ -6,18 +6,18 @@ import traceback
 import pyrustic
 from cmd import Cmd
 from pyrustic import pymisc
+from pyrustic.manager.misc.funcs import get_app_pkg
 from pyrustic.manager import install
 from pyrustic.manager.handler.link_handler import LinkHandler
 from pyrustic.manager.handler.unlink_handler import UnlinkHandler
 from pyrustic.manager.handler.relink_handler import RelinkHandler
 from pyrustic.manager.handler.target_handler import TargetHandler
-from pyrustic.manager.handler.last_handler import LastHandler
+from pyrustic.manager.handler.recent_handler import RecentHandler
 from pyrustic.manager.handler.init_handler import InitHandler
 from pyrustic.manager.handler.run_handler import RunHandler
 from pyrustic.manager.handler.add_handler import AddHandler
 from pyrustic.manager.handler.build_handler import BuildHandler
-from pyrustic.manager.handler.sql_handler import SqlHandler
-from pyrustic.manager.handler.test_handler import TestHandler
+from pyrustic.manager.handler.publish_handler import PublishHandler
 from pyrustic.manager.handler.hub_handler import HubHandler
 from pyrustic.manager.handler.version_handler import VersionHandler
 
@@ -67,7 +67,6 @@ class PyrusticManager(Cmd):
         super().__init__()
         self.__target = None
         self.__app_pkg = None
-        self.__popen_instances = []
 
     @property
     def target(self):
@@ -83,12 +82,8 @@ class PyrusticManager(Cmd):
 
     @property
     def app_pkg(self):
-        if self.__app_pkg is None and self.target is not None:
-            self.__app_pkg = _find_app_pkg(self.target)
-        if self.__app_pkg:
-            source_dir = os.path.join(self.target, self.__app_pkg)
-            if not os.path.exists(source_dir):
-                self.__app_pkg = None
+        if not self.__app_pkg:
+            self.__app_pkg = get_app_pkg(self.target)
         return self.__app_pkg
 
     @app_pkg.setter
@@ -145,9 +140,9 @@ class PyrusticManager(Cmd):
                       args)
 
     @guard
-    def do_last(self, args):
-        LastHandler(self.target,
-                    self.app_pkg, args)
+    def do_recent(self, args):
+        RecentHandler(self.target,
+                      self.app_pkg, args)
 
     @guard
     def do_init(self, args):
@@ -168,19 +163,12 @@ class PyrusticManager(Cmd):
         BuildHandler(self.target, self.app_pkg)
 
     @guard
-    def do_sql(self, args):
-        handler = SqlHandler(self.target, self.app_pkg)
-        self.__popen_instances.append(handler.popen_instance)
-
-    @guard
-    def do_test(self, args):
-        handler = TestHandler(self.target, self.app_pkg)
-        self.__popen_instances.append(handler.popen_instance)
+    def do_publish(self, args):
+        PublishHandler(self.target, self.app_pkg)
 
     @guard
     def do_hub(self, args):
-        handler = HubHandler(self.target, self.app_pkg)
-        self.__popen_instances.append(handler.popen_instance)
+        HubHandler(self.target, self.app_pkg, args)
 
     @guard
     def do_version(self, args):
@@ -188,10 +176,6 @@ class PyrusticManager(Cmd):
 
     @guard
     def do_exit(self, args):
-        for x in self.__popen_instances:
-            if x:
-                x.terminate()
-                pass
         print("Exiting...")
         sys.exit()
 
@@ -210,8 +194,8 @@ class PyrusticManager(Cmd):
     def help_target(self):
         print(TargetHandler.__doc__)
 
-    def help_last(self):
-        print(LastHandler.__doc__)
+    def help_recent(self):
+        print(RecentHandler.__doc__)
 
     def help_init(self):
         print(InitHandler.__doc__)
@@ -225,11 +209,8 @@ class PyrusticManager(Cmd):
     def help_build(self):
         print(BuildHandler.__doc__)
 
-    def help_sql(self):
-        print(SqlHandler.__doc__)
-
-    def help_test(self):
-        print(TestHandler.__doc__)
+    def help_publish(self):
+        print(PublishHandler.__doc__)
 
     def help_hub(self):
         print(HubHandler.__doc__)
@@ -263,10 +244,3 @@ def _non_interactive_mode(pm, data, target):
     if handler is None:
         print("Failed to process your request. Type <help>")
     handler(args)
-
-
-def _find_app_pkg(target):
-    if not os.path.exists(target):
-        return None
-    app_pkg = os.path.basename(target)
-    return app_pkg
