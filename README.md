@@ -204,6 +204,11 @@ The graphical `SQL Editor` allows you to:
 
 The `SQL Editor` makes extensive use of the `pyrustic.dao` library.
 
+Install Rustiql:
+```bash
+pip install rustiql
+```
+
 ## Jupitest - The Graphical Test Runner
 <!-- Image -->
 <div align="center">
@@ -222,6 +227,13 @@ The `Test Runner` reproduces the tree structure of the `tests` folder in your pr
 
 The `Test Runner` makes extensive use of the `pyrustic.threadom` library to perform smooth real-time test reporting.
 
+
+Install Rustiql:
+```bash
+pip install rustiql
+```
+
+
 ## Hubway - Release Your App To The World
 <!-- Image -->
 <div align="center">
@@ -237,6 +249,13 @@ The `Test Runner` makes extensive use of the `pyrustic.threadom` library to perf
 
 You need a personal access token to publish a release via `Hubway` or to increase the API rate limit.
 It is easy to generate a personal access token. Read this [article](https://docs.github.com/en/free-pro-team@latest/github/authenticating-to-github/creating-a-personal-access-token).
+
+
+
+Install Rustiql:
+```bash
+pip install rustiql
+```
 
 
 
@@ -263,6 +282,13 @@ Do you want to learn more about `Hubstore` ? Discover [Hubstore](https://github.
 The `tk-cyberpunk-theme` is used as base theme in `Hubstore`, `Jupitest`, `Rustiql` and `Hubway`.
 
 Discover the [cyberpunk theme](https://github.com/pyrustic/tk-cyberpunk-theme) !
+
+
+Install Rustiql:
+```bash
+pip install rustiql
+```
+
 
 
 <!-- Demo -->
