@@ -1,7 +1,7 @@
 <!-- Image -->
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/cover.png" alt="Cover">
-    <br>d
+    <br>
     <p align="center">
     <b> Desktop apps built with Pyrustic </b>
     </p>
