@@ -21,6 +21,14 @@ from pyrustic.manager.handler.publish_handler import PublishHandler
 from pyrustic.manager.handler.hub_handler import HubHandler
 from pyrustic.manager.handler.version_handler import VersionHandler
 
+try:
+    import readline
+except ImportError:
+    readline = None
+
+
+histfile = os.path.expanduser('~/PyrusticData/m')
+histfile_size = 1000
 
 def main(argv=None, target=None):
     if not argv:
@@ -34,12 +42,17 @@ def main(argv=None, target=None):
         _interactive_mode(pm, target)
 
 
+def exit_handler(pm):
+    pm.onecmd("exit")
+    pm.postloop()
+    sys.exit()
+
 def init_pyrustic_manager():
     install.main()
     pm = PyrusticManager()
     # Interrupt process (typically CTRL+C or 'delete' char or 'break' key)
     signal_num = signal.SIGINT
-    handler = lambda signum, frame, pm=pm: pm.do_exit([])
+    handler = lambda signum, frame, pm=pm: exit_handler(pm)
     signal.signal(signal_num, handler)
     return pm
 
@@ -47,12 +60,14 @@ def init_pyrustic_manager():
 # decorator for all commands handlers
 def guard(func):
     def obj(self, arg):
+        cache = None
         try:
             arg = pymisc.parse_cmd(arg) if isinstance(arg, str) else arg
-            func(self, arg)
+            cache = func(self, arg)
         except Exception as e:
             print("Oops... Exception occurred !\n")
             print("".join(traceback.format_exception(*sys.exc_info())))
+        return cache
     return obj
 
 
@@ -65,6 +80,8 @@ class PyrusticManager(Cmd):
 
     def __init__(self):
         super().__init__()
+        self.__history_size = 420
+        self.__history_file = None
         self.__target = None
         self.__app_pkg = None
 
@@ -90,11 +107,34 @@ class PyrusticManager(Cmd):
     def app_pkg(self, val):
         self.__app_pkg = val
 
+    @property
+    def history_size(self):
+        return self.__history_size
+
+    @property
+    def history_file(self):
+        if not self.__history_file:
+            folder = os.path.join("~", "PyrusticData", "manager")
+            path = os.path.join(folder, "cmd_history.txt")
+            path = os.path.expanduser(path)
+            if not os.path.exists(path):
+                os.makedirs(folder)
+                with open(path, "w") as file:
+                    pass
+            self.__history_file = path
+        return self.__history_file
+
     # ===============================
     #           OVERRIDING
     # ===============================
     def preloop(self):
-        pass
+        if readline and self.history_file:
+            readline.read_history_file(self.history_file)
+
+    def postloop(self):
+        if readline:
+            readline.set_history_length(self.history_size)
+            readline.write_history_file(self.history_file)
 
     def precmd(self, line):
         if line == "EOF":
@@ -177,7 +217,8 @@ class PyrusticManager(Cmd):
     @guard
     def do_exit(self, args):
         print("Exiting...")
-        sys.exit()
+        return True
+
 
     # ===============================
     #            COMMANDS

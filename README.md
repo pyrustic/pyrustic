@@ -14,7 +14,8 @@
 This is a user-centric project. You are encouraged to send a [feedback](#contact).
 
 <!-- Quick Links -->
-[Demo](#demo-video) | [Installation](#installation) | [Documentation](#documentation) | [Hubstore](#hubstore---to-connect-apps-with-users)
+[Tutorial](#tutorial) | [Installation](#installation) | [Reference](#framework-reference) | [Hubstore](#hubstore---to-connect-apps-with-users)
+
 
 <!-- Table of contents -->
 # Table Of Contents
@@ -101,7 +102,7 @@ The following is an excerpt from the demo. Explore the [demo project](https://gi
 
 ```python
 from pyrustic.app import App
-from tk_cyberpunk_theme import Cyberpunk
+from tk_cyberpunk_theme.main import Cyberpunk
 from demo.view.main_view import MainView
 
 
@@ -182,7 +183,9 @@ You need a personal access token to publish your application. It is easy to gene
 The following apps are made with Pyrustic:
 - `Rustiql`: a graphical `SQL Editor`;
 - `Jupitest`: a graphical `Test Runner`;
-- and `Hubway`: an application to publish your project.
+- `Jupitest`: a graphical `Test Runner`;
+- `Hubway`: an application to publish your project;
+- `Hubstore`: an application to connect your apps with your users. 
 
 Their themes are based on [tk-cyberpunk-theme](https://github.com/pyrustic/tk-cyberpunk-theme).
 
@@ -315,7 +318,7 @@ As `Pyrustic` is built with `Python` for `Python developers` and also makes exte
 
 <!-- Installation -->
 # Installation
-`Pyrustic` is available on [PyPI](https://pypi.org/) (the Python Package Index) to simplify the life of Python developers.
+Built on [Ubuntu](https://ubuntu.com/download/desktop) with `Python 3.5`. `Pyrustic` comes with absolutely no warranty and is available on the Python Package Index [PyPI](https://pypi.org/).
 
 If you have never installed a package from PyPI, you must install the `pip` tool enabling you to download and install a PyPI package. There are several methods which are described on this [page](https://pip.pypa.io/en/latest/installing/).
 
@@ -340,17 +343,23 @@ $ pip install pyrustic --upgrade --upgrade-strategy eager
 <!-- Documentation -->
 # Documentation
 Pyrustic is a work in progress. The versions of `Pyrustic` under `1.0.0` are aimed at an audience of early adopters. Check the FAQ and the Tutorial.
+
 ## FAQ
-Read the [FAQ](https://github.com/pyrustic/pyrustic/blob/master/docs/FAQ.md#readme).
+Read the [FAQ](https://github.com/pyrustic/pyrustic/blob/master/docs/faq/README.md#readme).
 
 ## Tutorial
-Read the [Tutorial](https://github.com/pyrustic/pyrustic/blob/master/docs/TUTORIAL.md#readme).
+Read the [Tutorial](https://github.com/pyrustic/pyrustic/blob/master/docs/tutorial/README.md#readme).
+
+## Guide
+Read the [Guide](https://github.com/pyrustic/pyrustic/blob/master/docs/guide/README.md#readme).
 
 ## Glossary
-Read the [Glossary](https://github.com/pyrustic/pyrustic/blob/master/docs/GLOSSARY.md#readme).
+Read the [Glossary](https://github.com/pyrustic/pyrustic/blob/master/docs/glossary/README.md#readme).
 
 ## Framework Reference
-Read the [Framework Reference](https://github.com/pyrustic/pyrustic/blob/master/docs/REFERENCE.md#readme).
+Read the [Framework Reference](https://github.com/pyrustic/pyrustic/blob/master/docs/reference/README.md#readme).
+
+
 
 # External Learning Resources
 Interesting links below to get started with Python, Tkinter and SQLite.

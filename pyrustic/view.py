@@ -71,10 +71,10 @@ class View:
     def state(self):
         """ Return the current state of the Viewable instance.
         States are integers, you can use these constants:
-            - viewable.NEW: the state just after instantiation;
-            - viewable.BUILT: the state after the call of on_body
-            - viewable.DISPLAYED: the state after the call of on_display
-            - viewable.DESTROYED: the state after the call of on_destroy
+            - pyrustic.view.NEW: the state just after instantiation;
+            - pyrustic.view.BUILT: the state after the call of on_body
+            - pyrustic.view.DISPLAYED: the state after the call of on_display
+            - pyrustic.view.DESTROYED: the state after the call of on_destroy
         """
         return self.__state
     # ==============================================

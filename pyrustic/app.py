@@ -28,6 +28,7 @@ class App:
         self._restartable = False
         self._root = tk.Tk()
         self._theme = None
+        self._theme_cache = None
         self._view = None
         self._view_cache = None
         self._center_window = False
@@ -98,8 +99,7 @@ class App:
         - check "pyrustic.theme.Theme";
         - then check the beautiful theme "pyrustic.theme.cyberpunk"
         """
-        self._root.option_clear()
-        self._theme = val
+        self._theme_cache = val
 
     @property
     def view(self):
@@ -115,12 +115,9 @@ class App:
         Set a view object.
         If you set None, the previous view will be destroyed.
         The new view will destroy the previous one if there are a previous one.
+        VAL can be a tkinter object or a callable (if u plan to REFRESH the app)
         """
-        if self._view:
-            self._view.destroy()
-        self._view = val
         self._view_cache = val
-        self._body = None
 
     @property
     def body(self):
@@ -150,35 +147,31 @@ class App:
             message = "This method shouldn't be called twice. Please use 'restart' instead"
             raise PyrusticAppException(message)
         self._is_running = True
-        # bind self._on_exit
-        self._root.protocol("WM_DELETE_WINDOW", self._on_exit)
-        handler = (lambda event,
-                          root=self._root:
-                   self._on_exit() if event.widget is root else None)
-        self._root.bind("<Destroy>", handler)
-        EnhanceTk(self._root)
-        # apply config, set theme then install view
-        self._apply_config()
-        self._apply_theme()
-        self._install_view(self._view)
+        self._build()
         # main loop
         try:
             self._root.mainloop()
         except KeyboardInterrupt:
             pass
 
-    def restart(self):
+    def refresh(self):
         """
-        Call this method to restart the app.
-        You would need to submit a new view first before calling this method.
+        Call this method to refresh the app.
+        If you have submitted a new view or a new theme,
+        the previous view or theme will be removed and the new one installed
         """
         if not self._is_running:
             return False
         if not self._view_cache or not callable(self._view_cache):
             return False
-        self._apply_theme()
-        self._view.destroy()
-        return self._install_view(self._view_cache)
+        if self._theme_cache:
+            self._apply_theme(self._theme_cache)
+            self._theme_cache = None
+        if self._view:
+            self._view.destroy()
+        self._body = None
+        return self._install_view(self._view_cache,
+                                  is_refresh=True)
 
     def exit(self):
         """
@@ -215,6 +208,19 @@ class App:
         self._set_config()
         # set default title
         self._set_default_title()
+
+    def _build(self):
+        # bind self._on_exit
+        self._root.protocol("WM_DELETE_WINDOW", self._on_exit)
+        handler = (lambda event,
+                          root=self._root:
+                   self._on_exit() if event.widget is root else None)
+        self._root.bind("<Destroy>", handler)
+        EnhanceTk(self._root)
+        # apply config, set theme then install view
+        self._apply_config()
+        self._apply_theme(self._theme_cache)
+        self._install_view(self._view_cache)
 
     def _set_config(self):
         self._set_gui_config()
@@ -262,14 +268,17 @@ class App:
         if self._gui_config["maximize_window"]:
             self.maximize()
 
-    def _apply_theme(self):
+    def _apply_theme(self, theme):
+        if self._theme:
+            self._root.option_clear()
+        self._theme = theme
         if not self._gui_config["allow_theme"]:
             return
         if not self._theme:
             return
         self._theme.target(self._root)
 
-    def _install_view(self, view):
+    def _install_view(self, view, is_refresh=False):
         self._view = self._get_view(view)
         self._view.build()
         if not self._view.build():
@@ -283,7 +292,7 @@ class App:
         else:
             self._view.body.pack(in_=self._root)
         # center
-        if self._center_window:
+        if not is_refresh and self._center_window:
             tkmisc.center_window(self._root)
         return True
 

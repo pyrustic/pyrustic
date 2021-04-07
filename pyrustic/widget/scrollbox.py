@@ -235,7 +235,7 @@ class Scrollbox(widget.Frame):
         self.__hsb.bind('<Leave>', leave_hsb, "+")
 
     def __on_configure_box_canvas(self, event):
-        if self.__box:
+        if self.__box.winfo_exists():
             if self.__orient in ("horizontal", "h", "x"):
                 if self.__resizable_box:
                     self.__canvas.itemconfig(self.__box_id,

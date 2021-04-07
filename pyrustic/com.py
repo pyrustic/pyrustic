@@ -3,7 +3,7 @@ from pyrustic.exception import PyrusticException
 
 class Com:
     """ work in progress """
-    def __init__(self, tk=None, event_sep=None):
+    def __init__(self, tk=None, event_sep=" "):
         self._tk = tk
         self._event_sep = event_sep
         self._i = 0
@@ -34,7 +34,7 @@ class Com:
     def pub(self, event, data=None, sync=False):
         event_seq = self._split(event)
         if not event_seq:
-            raise PyrusticException("Please submit a correct sequence")
+            raise PyrusticException("Please submit a correct event")
         if "" in self._subscriptions:
             sid_set = self._subscriptions[""]
             self._release_to_sid_set(sid_set, event, data, sync)
@@ -60,6 +60,19 @@ class Com:
             return False
         del self._subscribers[sid]
         return True
+
+    def event_handler(self, instance, prefix="_on_"):
+        event_handler_map = {}
+        for attr in dir(instance):
+            if attr.startswith(prefix):
+                event = self._convert_attr_into_event(attr, prefix)
+                event_handler_map[event] = getattr(instance, attr)
+        consumer = \
+            (lambda event, data, event_handler_map=event_handler_map:
+                event_handler_map[event](event, data)
+                    if event in event_handler_map else None)
+
+        return self.sub(None, consumer=consumer)
 
     def res(self, name, handler):
         self._resources[name] = handler
@@ -132,3 +145,12 @@ class Com:
             command()
         else:
             self._tk.after(0, command)
+
+    def _dispatch(self, event, data, event_handler_map):
+        handler = event_handler_map.get(event, None)
+        if handler:
+            handler(event, data)
+
+    def _convert_attr_into_event(self, attr, prefix):
+        cache = attr.lstrip(prefix)
+        return cache.replace("_", self._event_sep)
