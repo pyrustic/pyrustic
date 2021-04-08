@@ -5,7 +5,7 @@
     <p align="center">
     <b> Desktop apps built with Pyrustic </b>
     </p>
-</div>
+</div>d
 
 <!-- Intro Text -->
 # Pyrustic
