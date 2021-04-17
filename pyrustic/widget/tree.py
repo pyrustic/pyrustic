@@ -1,7 +1,7 @@
 import tkinter as tk
 from pyrustic.view import CustomView
 from pyrustic import widget
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 from pyrustic.exception import PyrusticWidgetException
 
 
@@ -25,8 +25,7 @@ class Tree(widget.Frame):
                  master=None,
                  indent=50,
                  spacing=10,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         PARAMETERS:
 
@@ -43,16 +42,16 @@ class Tree(widget.Frame):
                 options = {BODY: {"background": "red"},
                            NODE_FRAME: {"background": "black"}}
         """
+        self.__cnfs = merge_cnfs(None, cnfs, components=("body",
+                    FRAME_NODE, FRAME_HEADER, FRAME_BOX))
         super().__init__(master=master,
                          class_="Tree",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy)
         self.__indent = indent
         self.__spacing = spacing
-        self.__options = options
-        self.__extra_options = extra_options
         self.__root = None
         self.__nodes = {}
         self.__internal_count = 0
@@ -433,7 +432,7 @@ class Tree(widget.Frame):
         master = self if parent is None else self.__get_node(parent)["frame_box"]
         master.columnconfigure(0, weight=1)
         frame_node = tk.Frame(master, class_="FrameNode",
-                              cnf=get_cnf(FRAME_NODE, self.__extra_options))
+                              cnf=self.__cnfs[FRAME_NODE])
         frame_node.columnconfigure(0, weight=1)
         # grid frame_node
         if parent is None:
@@ -443,12 +442,12 @@ class Tree(widget.Frame):
                             sticky="we", pady=(self.__spacing, 0))
         # header
         frame_header = tk.Frame(frame_node, name=FRAME_HEADER,
-                                cnf=get_cnf(FRAME_HEADER, self.__extra_options))
+                                cnf=self.__cnfs[FRAME_HEADER])
         frame_header.columnconfigure(0, weight=1)
         frame_header.grid(row=0, column=0, sticky="we")
         # box
         frame_box = tk.Frame(frame_node, name=FRAME_BOX,
-                             cnf=get_cnf(FRAME_BOX, self.__extra_options))
+                             cnf=self.__cnfs[FRAME_BOX])
         frame_box.grid(row=1, column=0,
                        padx=(self.__indent, 0),
                        sticky="we")

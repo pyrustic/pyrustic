@@ -2,7 +2,7 @@ import tkinter as tk
 from pyrustic import widget
 from pyrustic import tkmisc
 from pyrustic.view import View
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 
 
 # Components
@@ -40,8 +40,7 @@ class Confirm(widget.Toplevel):
                  message=None,
                  handler=None,
                  geometry=None,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         PARAMETERS:
 
@@ -70,9 +69,12 @@ class Confirm(widget.Toplevel):
                             LABEL_MESSAGE: {"background": "black"} }
 
         """
+        self.__cnfs = merge_cnfs(None, cnfs, components=("body",
+                        LABEL_HEADER, LABEL_MESSAGE, FRAME_FOOTER,
+                        BUTTON_CANCEL, BUTTON_CONFIRM))
         super().__init__(master=master,
                          class_="Confirm",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy,
@@ -82,8 +84,6 @@ class Confirm(widget.Toplevel):
         self.__message = message
         self.__handler = handler
         self.__geometry = geometry
-        self.__options = options
-        self.__extra_options = extra_options
         self.__components = {}
         self.__ok = False
         # build
@@ -142,8 +142,7 @@ class Confirm(widget.Toplevel):
                                     anchor="w",
                                     justify=tk.LEFT,
                                     name=LABEL_HEADER,
-                                    cnf=get_cnf(LABEL_HEADER,
-                                                self.__extra_options))
+                                    cnf=self.__cnfs[LABEL_HEADER])
             self.__components[LABEL_HEADER] = label_header
             label_header.pack(fill=tk.X, expand=1, anchor="w", pady=5, padx=5)
         #
@@ -153,15 +152,13 @@ class Confirm(widget.Toplevel):
                                      text=self.__message,
                                      anchor="w",
                                      justify=tk.LEFT,
-                                     cnf=get_cnf(LABEL_MESSAGE,
-                                                 self.__extra_options))
+                                     cnf=self.__cnfs[LABEL_MESSAGE])
             self.__components[LABEL_MESSAGE] = label_message
             label_message.pack(fill=tk.BOTH,
                                expand=1, padx=5, pady=(5, 10))
 
         #
-        frame_footer = tk.Frame(self, cnf=get_cnf(FRAME_FOOTER,
-                                                  self.__extra_options))
+        frame_footer = tk.Frame(self, cnf=self.__cnfs[FRAME_FOOTER])
         self.__components[FRAME_FOOTER] = frame_footer
         frame_footer.pack(anchor="e", pady=(0, 2), padx=2)
         #
@@ -169,8 +166,7 @@ class Confirm(widget.Toplevel):
                                    text="Confirm",
                                    name=BUTTON_CONFIRM,
                                    command=self.__on_click_confirm,
-                                   cnf=get_cnf(BUTTON_CONFIRM,
-                                               self.__extra_options))
+                                   cnf=self.__cnfs[BUTTON_CONFIRM])
         self.__components[BUTTON_CONFIRM] = button_confirm
         button_confirm.pack(side=tk.RIGHT)
         #
@@ -178,8 +174,7 @@ class Confirm(widget.Toplevel):
                                   text="Cancel",
                                   name=BUTTON_CANCEL,
                                   command=self.__on_click_cancel,
-                                  cnf=get_cnf(BUTTON_CANCEL,
-                                              self.__extra_options))
+                                  cnf=self.__cnfs[BUTTON_CANCEL])
         self.__components[BUTTON_CANCEL] = button_cancel
         button_cancel.pack(side=tk.RIGHT, padx=(0, 2))
 

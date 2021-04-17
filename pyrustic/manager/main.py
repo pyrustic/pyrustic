@@ -20,15 +20,13 @@ from pyrustic.manager.handler.build_handler import BuildHandler
 from pyrustic.manager.handler.publish_handler import PublishHandler
 from pyrustic.manager.handler.hub_handler import HubHandler
 from pyrustic.manager.handler.version_handler import VersionHandler
+from pyrustic.manager import constant
 
 try:
     import readline
 except ImportError:
     readline = None
 
-
-histfile = os.path.expanduser('~/PyrusticData/m')
-histfile_size = 1000
 
 def main(argv=None, target=None):
     if not argv:
@@ -114,11 +112,9 @@ class PyrusticManager(Cmd):
     @property
     def history_file(self):
         if not self.__history_file:
-            folder = os.path.join("~", "PyrusticData", "manager")
-            path = os.path.join(folder, "cmd_history.txt")
-            path = os.path.expanduser(path)
+            path = os.path.join(constant.MANAGER_SHARED_FOLDER,
+                                "cmd_history.txt")
             if not os.path.exists(path):
-                os.makedirs(folder)
                 with open(path, "w") as file:
                     pass
             self.__history_file = path

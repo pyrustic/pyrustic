@@ -2,7 +2,7 @@ import tkinter as tk
 import operator
 from pyrustic.exception import PyrusticTableException
 from pyrustic import widget
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 
 
 # Allowed Options for columns
@@ -44,7 +44,6 @@ ASC = "[+]"
 DESC = "[-]"
 
 
-
 class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
     """
     Table supports data sorting, multiple selection modes, and more...
@@ -73,8 +72,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
                  select_mode=BROWSE,
                  layout=EQUALLY,
                  orient=BOTH,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         PARAMETERS:
 
@@ -115,16 +113,18 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
                 options = {"BODY": {"background": "red"},
                            "HSB": {"background": "black"}}
         """
+        self.__cnfs = merge_cnfs(None, cnfs,
+                                 components=("body", VSB, HSB, CANVAS,
+                        FRAME_BACKGROUND, FRAMES_HEADERS, LISTBOXES_COLUMNS,
+                        LABELS_SORTING, LABELS_TITLES))
         super().__init__(master=master,
                          class_="Table",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy)
-        self.__options = options
-        self.__extra_options = extra_options
         # check if listboxes options are valid
-        _verify_options(get_cnf(LISTBOXES_COLUMNS, self.__extra_options))
+        _verify_options(self.__cnfs[LISTBOXES_COLUMNS])
         self.__titles_cache = () if titles is None else titles
         self.__titles = []
         self.__data_cache = () if data is None else data
@@ -423,8 +423,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.__canvas = tk.Canvas(self, name=CANVAS,
-                                  cnf=get_cnf(CANVAS,
-                                              self.__extra_options))
+                                  cnf=self.__cnfs[CANVAS])
         self.__components[CANVAS] = self.__canvas
         self.__canvas.grid(row=0, column=0, sticky="nswe")
         self.__background = tk.Frame(self.__canvas, self.__frame_background_options)
@@ -454,8 +453,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
             # Build Header
             # - install header frame
             frame_header = tk.Frame(self.__background,
-                                    cnf=get_cnf(FRAMES_HEADERS,
-                                                self.__extra_options))
+                                    cnf=self.__cnfs[FRAMES_HEADERS])
             self.__components[FRAMES_HEADERS].append(frame_header)
             frame_header.grid(row=0, column=i, sticky="nswe")
             frame_header.columnconfigure(1, weight=1)
@@ -465,8 +463,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
             self.__labels_sorting_stringvars_cache.append(label_sorting_stringvar)
             label_sorting = tk.Label(frame_header,
                                      textvariable=label_sorting_stringvar,
-                                     cnf=get_cnf(LABELS_SORTING,
-                                                 self.__extra_options))
+                                     cnf=self.__cnfs[LABELS_SORTING])
             self.__components[LABELS_SORTING].append(label_sorting)
             label_sorting.grid(row=0, column=0)
             label_sorting.bind("<Button-1>",
@@ -479,8 +476,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
             self.__labels_titles_stringvars_cache.append(label_title_stringvar)
             label_title = tk.Label(frame_header,
                                    textvariable=label_title_stringvar,
-                                   cnf=get_cnf(LABELS_TITLES,
-                                               self.__extra_options))
+                                   cnf=self.__cnfs[LABELS_TITLES])
             self.__components[LABELS_TITLES].append(label_title)
             label_title.grid(row=0, column=1, sticky="nswe")
             label_title.bind("<Button-1>",
@@ -491,8 +487,7 @@ class Table(widget.Frame):  # TODO the select_mode MULTIPLE is buggy !
                                  activestyle="none",
                                  selectmode=BROWSE if self.__select_mode == MULTIPLE
                                  else self.__select_mode,
-                                 cnf=get_cnf(LISTBOXES_COLUMNS,
-                                             self.__extra_options), takefocus=0)
+                                 cnf=self.__cnfs[LISTBOXES_COLUMNS], takefocus=0)
             self.__components[LISTBOXES_COLUMNS].append(listbox)
             listbox.config(highlightcolor=listbox.cget("highlightbackground"))
             listbox.grid(row=1, column=i, sticky="nswe")

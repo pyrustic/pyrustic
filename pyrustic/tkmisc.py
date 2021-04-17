@@ -65,9 +65,19 @@ def formal_geometry(window):
     return width, height, coord_x, coord_y
 
 
-def get_cnf(component, options):
-    options = {} if options is None else options
-    cnf = dict()
-    if component in options:
-        cnf = options[component]
-    return cnf
+def merge_cnfs(main_cnfs, extra_cnfs, components=None):
+    main_cnfs = {} if not main_cnfs else main_cnfs
+    extra_cnfs = {} if not extra_cnfs else extra_cnfs
+    components = {} if not components else components
+    cnfs = {}
+    # components
+    for item in components:
+        cnfs[item] = {}
+    # parse extra_cnf
+    for key, val in extra_cnfs.items():
+        cnfs[key] = val
+    # parse main_cnf
+    for key, val in main_cnfs.items():
+        if val is not None:
+            cnfs[key] = val
+    return cnfs

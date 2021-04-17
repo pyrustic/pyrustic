@@ -1,6 +1,6 @@
 import tkinter as tk
 from pyrustic import widget
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 from pyrustic.view import View
 
 
@@ -41,8 +41,7 @@ class Scrollbox(widget.Frame):
                  orient=VERTICAL,
                  box_sticky="nswe",
                  resizable_box=True,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         - master: widget parent. Example: an instance of tk.Frame
 
@@ -53,17 +52,17 @@ class Scrollbox(widget.Frame):
             Example: Assume that you want to set the CANVAS background to red
                 options = {CANVAS: {"background": "red"}}
         """
+        self.__cnfs = merge_cnfs(None, cnfs,
+                                 components=("body", CANVAS, BOX, HSB, VSB))
         super().__init__(master=master,
                          class_="Scrollbox",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy)
         self.__orient = orient
         self.__box_sticky = box_sticky
         self.__resizable_box = resizable_box
-        self.__options = options
-        self.__extra_options = extra_options
         self.__canvas_options = None
         self.__canvas = None
         self.__box = None
@@ -173,14 +172,13 @@ class Scrollbox(widget.Frame):
                                   name=CANVAS,
                                   width=0,
                                   height=0,
-                                  cnf=get_cnf(CANVAS,
-                                              self.__extra_options))
+                                  cnf=self.__cnfs[CANVAS])
         self.__components[CANVAS] = self.__canvas
         self.__canvas.grid(row=0, column=0, sticky=self.__box_sticky)
         # box
         self.__box = tk.Frame(self.__canvas,
                               name=BOX,
-                              cnf=get_cnf(BOX, self.__extra_options))
+                              cnf=self.__cnfs[BOX])
         self.__components[BOX] = self.__box
         self.__box_id = self.__canvas.create_window(0, 0, window=self.__box, anchor="nw")
         self.__box.bind("<Configure>", self.__on_configure_box_canvas, "+")
@@ -212,7 +210,7 @@ class Scrollbox(widget.Frame):
             self.__hsb = tk.Scrollbar(self, orient="horizontal",
                                       name=HSB,
                                       command=self.__canvas.xview,
-                                      cnf=get_cnf(HSB, self.__extra_options))
+                                      cnf=self.__cnfs[HSB])
             self.__components[HSB] = self.__hsb
             self.__hsb.grid(row=1, column=0, columnspan=2, sticky="swe")
             self.__canvas.config(xscrollcommand=self.__hsb.set)
@@ -221,7 +219,7 @@ class Scrollbox(widget.Frame):
             self.__vsb = tk.Scrollbar(self, orient="vertical",
                                       name=VSB,
                                       command=self.__canvas.yview,
-                                      cnf=get_cnf(VSB, self.__extra_options))
+                                      cnf=self.__cnfs[VSB])
             self.__components[VSB] = self.__vsb
             self.__vsb.grid(row=0, column=1, sticky=self.__box_sticky)
             self.__canvas.config(yscrollcommand=self.__vsb.set)

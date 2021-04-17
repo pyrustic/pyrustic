@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import filedialog
 from pyrustic import widget
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 from pyrustic.view import View
 
 
 ENTRY = "entry"
 BUTTON = "button"
 DIALOG = "dialog"
+
 
 class Pathentry(widget.Frame):
     """
@@ -18,26 +19,24 @@ class Pathentry(widget.Frame):
                  width=17,
                  title=None,
                  initialdir=None,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         - master: widget parent. Example: an instance of tk.Frame
 
         """
+        self.__cnfs = merge_cnfs({ENTRY: {"width": width}}, cnfs,
+                                 components=("body", ENTRY, BUTTON, DIALOG))
         super().__init__(master=master,
                          class_="Pathentry",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy)
         self.__browse = browse
-        self.__width = width
         self.__title = title
         self.__initialdir = initialdir
         self.__entry = None
         self.__button = None
-        self.__options = options
-        self.__extra_options = extra_options
         self.__components = {}
         self.__string_var = tk.StringVar(value="")
         # build
@@ -65,15 +64,12 @@ class Pathentry(widget.Frame):
 
     def __on_build(self):
         self.__entry = tk.Entry(self, textvariable=self.__string_var,
-                                width=self.__width,
-                                cnf=get_cnf(ENTRY,
-                                              self.__extra_options))
+                                cnf=self.__cnfs[ENTRY])
         self.__entry.pack(side=tk.LEFT, pady=0, fill=tk.X, expand=1)
         self.__components["entry"] = self.__entry
         self.__button = tk.Button(self, text="...",
                                   command=self.__on_click_button,
-                                  cnf=get_cnf(BUTTON,
-                                              self.__extra_options))
+                                  cnf=self.__cnfs[BUTTON])
         self.__button.pack(side=tk.LEFT, padx=(2, 0), fill=tk.Y)
         self.__components["button"] = self.__button
 
@@ -88,8 +84,7 @@ class Pathentry(widget.Frame):
             try:
                 filename = filedialog.askopenfilename(initialdir=self.__initialdir,
                                                       title=self.__title,
-                                                      **get_cnf(DIALOG,
-                                                                self.__extra_options))
+                                                      **self.__cnfs[DIALOG])
             except Exception as e:
                 return
             path = None
@@ -105,8 +100,7 @@ class Pathentry(widget.Frame):
             try:
                 filename = filedialog.askdirectory(initialdir=self.__initialdir,
                                                    title=self.__title,
-                                                   **get_cnf(DIALOG,
-                                                             self.__extra_options))
+                                                   **self.__cnfs[DIALOG])
             except Exception as e:
                 return
             path = None

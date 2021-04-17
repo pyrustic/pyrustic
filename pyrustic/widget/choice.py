@@ -3,12 +3,13 @@ from pyrustic import tkmisc
 from pyrustic import widget
 from pyrustic.widget.scrollbox import Scrollbox
 from pyrustic.view import View
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 
 
 # select button flavor
 CHECK = "check"  # for checkbutton
 RADIO = "radio"  # for radiobutton
+
 
 # Components
 LABEL_HEADER = "label_header"
@@ -54,8 +55,7 @@ class Choice(widget.Toplevel):
                  flavor="radio",
                  handler=None,
                  geometry=None,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         PARAMETERS:
 
@@ -103,9 +103,13 @@ class Choice(widget.Toplevel):
                             LABEL_MESSAGE: {"background": "black"} }
 
         """
+        self.__cnfs = merge_cnfs(None, cnfs, components=("body",
+                                LABEL_HEADER, SCROLLBOX, LABEL_MESSAGE,
+                                FRAME_PANE, FRAME_FOOTER, BUTTON_CONTINUE,
+                                BUTTON_CANCEL, RADIOBUTTONS, CHECKBUTTONS))
         super().__init__(master=master,
                          class_="Choice",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy,
@@ -118,8 +122,6 @@ class Choice(widget.Toplevel):
         self.__flavor = flavor
         self.__handler = handler
         self.__geometry = geometry
-        self.__options = options
-        self.__extra_options = extra_options
         #
         self.__result = None
         self.__closing_context = "close"
@@ -216,8 +218,7 @@ class Choice(widget.Toplevel):
                                     text=self.__header,
                                     justify=tk.LEFT,
                                     anchor="w",
-                                    cnf=get_cnf(LABEL_HEADER,
-                                                self.__extra_options))
+                                    cnf=self.__cnfs[LABEL_HEADER])
             self.__components[LABEL_HEADER] = label_header
             label_header.grid(row=0, column=0, sticky="w",
                                     padx=(5, 5), pady=(5, 5))
@@ -229,39 +230,34 @@ class Choice(widget.Toplevel):
                                      text=self.__message,
                                      justify=tk.LEFT,
                                      anchor="w",
-                                     cnf=get_cnf(LABEL_MESSAGE,
-                                                 self.__extra_options))
+                                     cnf=self.__cnfs[LABEL_MESSAGE])
             self.__components[LABEL_MESSAGE] = label_message
             label_message.grid(row=1, column=0, sticky="w",
                                padx=(5, 5), pady=(0, 5))
         # == Scrollbox
         scrollbox = Scrollbox(self, orient="vertical",
-                              options=get_cnf(SCROLLBOX,
-                                              self.__extra_options))
+                              cnfs=self.__cnfs[SCROLLBOX])
         self.__components[SCROLLBOX] = scrollbox
         scrollbox.grid(row=2, column=0, sticky="nswe",
                              padx=5)
         # == Footer
         self.__footer = tk.Frame(self,
                                  name=FRAME_FOOTER,
-                                 cnf=get_cnf(FRAME_FOOTER,
-                                             self.__extra_options))
+                                 cnf=self.__cnfs[FRAME_FOOTER])
         self.__components[FRAME_FOOTER] = self.__footer
         self.__footer.grid(row=3, column=0, sticky="swe", pady=(30, 0))
         #
         button_continue = tk.Button(self.__footer, name=BUTTON_CONTINUE,
                                     text="Continue",
                                     command=self.__on_click_continue,
-                                    cnf=get_cnf(BUTTON_CONTINUE,
-                                                self.__extra_options))
+                                    cnf=self.__cnfs[BUTTON_CONTINUE])
         self.__components[BUTTON_CONTINUE] = button_continue
         button_continue.pack(side=tk.RIGHT, padx=2, pady=2)
         #
         button_cancel = tk.Button(self.__footer, name=BUTTON_CANCEL,
                                   text="Cancel",
                                   command=self.__on_click_cancel,
-                                  cnf=get_cnf(BUTTON_CANCEL,
-                                              self.__extra_options))
+                                  cnf=self.__cnfs[BUTTON_CANCEL])
         self.__components[BUTTON_CANCEL] = button_cancel
         button_cancel.pack(side=tk.RIGHT, padx=(2, 0), pady=2)
         # install and populate check/radio buttons
@@ -275,8 +271,7 @@ class Choice(widget.Toplevel):
                 cache = tk.Radiobutton(scrollbox.box,
                                        variable=self.__intvar,
                                        text=choice, value=i,
-                                       cnf=get_cnf(RADIOBUTTONS,
-                                                   self.__extra_options))
+                                       cnf=self.__cnfs[RADIOBUTTONS])
                 self.__components[RADIOBUTTONS].append(cache)
             elif self.__flavor == "check":
                 tk_var = tk.IntVar()
@@ -285,8 +280,7 @@ class Choice(widget.Toplevel):
                                        variable=tk_var,
                                        onvalue=1, offvalue=0,
                                        text=choice,
-                                       cnf=get_cnf(CHECKBUTTONS,
-                                                   self.__extra_options))
+                                       cnf=self.__cnfs[CHECKBUTTONS])
                 self.__components[CHECKBUTTONS].append(cache)
             if cache:
                 cache.pack(anchor="w", expand=1)

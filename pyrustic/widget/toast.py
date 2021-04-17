@@ -1,7 +1,7 @@
 import tkinter as tk
 from pyrustic import widget
 from pyrustic.view import View, CustomView
-from pyrustic.tkmisc import get_cnf
+from pyrustic.tkmisc import merge_cnfs
 from pyrustic import tkmisc
 
 
@@ -36,8 +36,7 @@ class Toast(widget.Toplevel):
                  duration=1234,
                  decoration=False,
                  geometry=None,
-                 options=None,
-                 extra_options=None):
+                 cnfs=None):
         """
         PARAMETERS:
 
@@ -65,9 +64,11 @@ class Toast(widget.Toplevel):
                 options = { BODY: {"background": "red"},
                             LABEL_MESSAGE: {"background": "black"} }
         """
+        self.__cnfs = merge_cnfs(None, cnfs, components=("body",
+                        LABEL_HEADER, LABEL_MESSAGE))
         super().__init__(master=master,
                          class_="Toast",
-                         cnf=options if options else {},
+                         cnf=self.__cnfs["body"],
                          on_build=self.__on_build,
                          on_display=self.__on_display,
                          on_destroy=self.__on_destroy,
@@ -78,8 +79,6 @@ class Toast(widget.Toplevel):
         self.__duration = duration
         self.__decoration = decoration
         self.__geometry = geometry
-        self.__options = options
-        self.__extra_options = extra_options
         self.__cancel_id = None
         self.__components = {}
         self.__view = self.build()
@@ -131,8 +130,7 @@ class Toast(widget.Toplevel):
                                     text=self.__header,
                                     anchor="w",
                                     justify=tk.LEFT,
-                                    cnf=get_cnf(LABEL_HEADER,
-                                                 self.__extra_options))
+                                    cnf=self.__cnfs[LABEL_HEADER])
             self.__components[LABEL_HEADER] = label_header
             label_header.pack(fill=tk.X, padx=10, pady=10)
         if self.__message:
@@ -141,8 +139,7 @@ class Toast(widget.Toplevel):
                                      text=self.__message,
                                      anchor="w",
                                      justify=tk.LEFT,
-                                     cnf=get_cnf(LABEL_MESSAGE,
-                                                 self.__extra_options))
+                                     cnf=self.__cnfs[LABEL_MESSAGE])
             self.__components[LABEL_MESSAGE] = label_message
             label_message.pack(fill=tk.X, padx=10, pady=10)
 
