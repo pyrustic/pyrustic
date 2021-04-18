@@ -36,7 +36,6 @@ This is a user-centric project. You are encouraged to send a [feedback](#contact
   - [Hubway -  Release Your App To The World](#hubway---release-your-app-to-the-world)
   - [Hubstore - To Connect Apps With Users](#hubstore---to-connect-apps-with-users)
 - [tk-cyberpunk-theme - A Dark Theme For Desktop Apps](#tk-cyberpunk-theme---a-dark-theme-for-desktop-apps)
-- [Demo Video](#demo-video)
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Documentation](#documentation)
@@ -298,17 +297,6 @@ pip install tk-cyberpunk-theme
 
 Discover the [cyberpunk theme](https://github.com/pyrustic/tk-cyberpunk-theme) !
 
-
-
-<!-- Demo -->
-# Demo Video
-This is the _now obsolete_ demo video but still worth watching.
-
-Watch the [video](https://pyrustic.github.io) !
-
-I will upload an up-to-date video later.
-
-To open the page in a new tab, you can just do a CTRL+click (on Windows and Linux) or CMD+click (on MacOS) on the link.
 
 
 <!-- Requirements -->
