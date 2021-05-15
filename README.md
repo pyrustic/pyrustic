@@ -356,6 +356,7 @@ Interesting links below to get started with Python, Tkinter and SQLite.
 ## Introduction to Python
 - [python-guide](https://docs.python-guide.org/intro/learning/).
 - [python tutorial](https://www.python-course.eu/python3_course.php). 
+- [Python Tutorial - Tutlane](https://www.tutlane.com/tutorial/python).
 - freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=rfscVS0vtbw).
 
 ## Introduction to Tkinter
@@ -365,6 +366,7 @@ Interesting links below to get started with Python, Tkinter and SQLite.
 
 ## Introduction to SQLite
 - [sqlitetutorial](https://www.sqlitetutorial.net/).
+- [SQLite Tutorial - Tutlane](https://www.tutlane.com/tutorial/sqlite).
 - freeCodeCamp on [Youtube](https://www.youtube.com/watch?v=byHcYRpMgI4).
 
 Note: I am not affiliated with any of these entities. A simple web search brings them up.
