@@ -18,3 +18,12 @@ class EnhanceTk:
     def _select_all_in_text(self, event):
         widget = event.widget
         widget.tag_add(tk.SEL, "1.0", tk.END)
+
+
+class Error(Exception):
+    def __init__(self, *args, **kwargs):
+        self.message = args[0] if args else ""
+        super().__init__(self.message)
+
+    def __str__(self):
+        return self.message

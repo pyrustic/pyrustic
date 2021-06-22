@@ -1,7 +1,6 @@
 {
     "timestamp": null,
-    "target": null,
-    "app_pkg": null,
     "app_version": null,
-    "wheel_asset": null
+    "wheel_asset": null,
+    "released": null
 }

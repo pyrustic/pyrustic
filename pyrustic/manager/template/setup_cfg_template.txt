@@ -1,6 +1,6 @@
 [metadata]
 name = {project_name}
-version = attr: {app_pkg}.version.__version__
+version = file: VERSION
 url = https://github.com/pyrustic/pyrustic
 author = Johnny Silverhand
 author_email = sapiens@earth.invalid

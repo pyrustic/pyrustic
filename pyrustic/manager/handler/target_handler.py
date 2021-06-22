@@ -1,6 +1,5 @@
-import os.path
-from pyrustic import dist
-from pyrustic.manager.misc import funcs
+from pyrustic import manager
+from pyrustic.manager.core import funcs
 
 
 class TargetHandler:
@@ -14,12 +13,11 @@ class TargetHandler:
     - Description: Check the currently linked Target
     - Command: target
 
-    Note: This command also shows the version of your project
-    if the data is available.
+    Note: This command also shows additional useful
+    information about the Target.
     """
     def __init__(self, target,
-                 app_pkg,
-                 args):
+                 app_pkg, *args):
         self._target = target
         self._app_pkg = app_pkg
         self._process(target, app_pkg, args)
@@ -32,16 +30,26 @@ class TargetHandler:
         if not target:
             print("None")
             return
-        # args are present: invalid command
-        if args:
+        # no arg
+        if not args:
+            self._show_current_version()
+        # set a new version
+        elif len(args) == 1:
+            self._change_current_version(args[0])
+        # wrong usage of this command
+        else:
             print("Wrong usage of this command")
-            return
-        #
-        data = funcs.check_project_state(target)
-        print("[{}] {}".format(os.path.basename(target), self._target))
-        if data == 0:
-            print("Version: {}".format(dist(app_pkg)["version"]))
-        elif data == 1:
+
+    def _show_current_version(self):
+        data = funcs.check_project_state(self._target)
+        print("[{}] {}".format(self._app_pkg,
+                               self._target))
+        print("Version: {}".format(manager.get_version(self._target)))
+        if data == 1:
+            print("")
             print("Not yet initialized project (check 'help init')")
-        elif data == 2:
-            print("Not yet installed project (think about: 'pip install -e .')")
+        #elif data == 2:
+        #    print("Not yet installed project (think about: 'pip install -e .')")
+
+    def _change_current_version(self, new_version):
+        pass

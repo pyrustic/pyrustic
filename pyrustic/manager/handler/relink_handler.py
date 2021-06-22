@@ -1,5 +1,5 @@
 from pyrustic.manager import constant
-from pyrustic.jasonix import Jasonix
+from jayson import Jayson
 from pyrustic.manager.handler.link_handler import LinkHandler
 import os.path
 
@@ -8,25 +8,27 @@ class RelinkHandler:
     """
     Description
     -----------
-    Link again the previous Target or one of recent Targets.
+    Link again the previously linked Target or one of
+    recent linked Targets.
 
     Usage
     -----
-    - Description: Link again the previous Target
+    - Description: Link again the previously linked Target
     - Command: relink
 
-    - Description: Link again a previous Target with its index
+    - Description: Link again a recently linked Target with
+    its index
     - Command: relink <index>
 
     Example
     -------
-    - Description: Link again a previous Target
+    - Description: Link again a previously linked Target
     - Preliminary: Assume you want to link again the Target
     with index #2 (found the index with the command "recent")
     - Command: relink 2
     """
     def __init__(self, target,
-                 app_pkg, args):
+                 app_pkg, *args):
         self._target = target
         self._app_pkg = app_pkg
         self._process(args)
@@ -36,7 +38,7 @@ class RelinkHandler:
         return self._target
 
     def _process(self, args):
-        jasonix = Jasonix(constant.MANAGER_SHARED_DATA_FILE, readonly=True)
+        jasonix = Jayson(constant.MANAGER_SHARED_DATA_FILE, readonly=True)
         path = jasonix.data["target"]
         if not jasonix.data["recent"]:
             print("- Empty -")
@@ -51,7 +53,7 @@ class RelinkHandler:
         elif len(args) > 1:
             print("Wrong usage of this command")
             return
-        link_handler = LinkHandler(self._target, self._app_pkg, [path])
+        link_handler = LinkHandler(self._target, self._app_pkg, *[path])
         self._target = link_handler.target
 
     def _check_path(self, path):

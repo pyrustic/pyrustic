@@ -1,0 +1,14 @@
+{
+    "ante_build": [
+        "pyrustic.hooking.ante_build_hook"
+    ],
+    "ante_release": [
+        "pyrustic.hooking.ante_release_hook"
+    ],
+    "post_build": [
+        "pyrustic.hooking.post_build_hook"
+    ],
+    "post_release": [
+        "pyrustic.hooking.post_release_hook"
+    ]
+}

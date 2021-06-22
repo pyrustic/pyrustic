@@ -1,16 +1,17 @@
-import sys
-import subprocess
+import os
 import os.path
+from pyrustic import manager
 
 
 class RunHandler:
     """
     Description
     -----------
-    Use this command to run a module located in the Target.
+    Use this command to run a module.
+    The module can be located either in the Target or in
+    a regular place where Python stores packages.
     Only dotted name of a module is allowed, so please ignore
     the extension ".py".
-    Running a module blocks Pyrustic Manager.
 
     Usage
     -----
@@ -19,7 +20,7 @@ class RunHandler:
 
     - Description: Run the Target
     - Command: run
-    - Note: The Manager will implicitly execute __main__.py
+    Note: Project Manager will implicitly run APP_DIR/__main__.py
 
     - Description: Run a module with some arguments
     - Command: run <the.module.name> <argument_1> <argument_2>
@@ -34,38 +35,33 @@ class RunHandler:
     - Preliminary: Assume that "my_view.py" is in the "view" package
     - Command: run view.my_view argument_1 "argument 2"
 
+    - Description: Display the Zen of Python
+    - Command: run this
+
     Note: Please use simple or double quotes as delimiters if a string
-    contains space
+    contains space.
     """
-    def __init__(self, target, app_pkg, args):
+    def __init__(self, target, app_pkg, *args):
         self._target = target
         self._app_pkg = app_pkg
         self._process(target, app_pkg, args)
 
     def _process(self, target, app_pkg, args):
         name = None
-        if len(args) == 0:
-            if not target:
-                self._print_catalog("missing_target")
-                return
-            elif not app_pkg:
-                self._print_catalog("missing_app_pkg")
-                return
-            source_dir = os.path.join(target, app_pkg)
-            if os.path.exists(os.path.join(source_dir, "__main__.py")):
-                args = ["-m", app_pkg]
-                name = "__main__"
-            else:
-                print("Missing entry point")
+        if not args and not target:
+            self._print_catalog("missing_target")
+            return
+        if not args and not os.path.exists(os.path.join(target, app_pkg)):
+            print("Please initialize this project first. Check 'help init'.")
+            return
+        if not args and target:
+            args = ["-m", app_pkg]
         else:
             args = ["-m", *args]
-            name = " ".join(args)
-        if not args:
-            return
-        if sys.executable:
-            self._print_catalog("running", module=name)
-            p = subprocess.Popen([sys.executable, *args], cwd=target)
-            p.communicate()
+        name = " ".join(args)
+        self._print_catalog("running", module=name)
+        print("")
+        manager.run(target, *args)
 
     def _print_catalog(self, item, **kwargs):
         message = ""

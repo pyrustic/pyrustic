@@ -1,25 +1,24 @@
 import os
 import os.path
-from pyrustic.manager.misc.funcs import create_gurl
-from pyrustic.manager import hubway
-from pyrustic.jasonix import Jasonix
+from pyrustic import manager
+from pyrustic.manager.core.funcs import create_kurl
+from jayson import Jayson
 
 
 class HubHandler:
     """
     Description
     -----------
-    Use this command to build a distribution package
-    that could be published later with Hub.
-    This command will block the Pyrustic Manager.
-    The distribution package is a Wheel.
+    Use this command to retrieve useful information
+    from a Github repository.
 
     Usage
     -----
-    - Description: Build
-    - Command: build
+    - Description: Retrieve useful information from
+    this repository https://github.com/pyrustic/demo
+    - Command: hub pyrustic/demo
     """
-    def __init__(self, target, app_pkg, args):
+    def __init__(self, target, app_pkg, *args):
         self._target = target
         self._app_pkg = app_pkg
         self._args = args
@@ -43,7 +42,7 @@ class HubHandler:
             return
         owner, repo = owner_repo
         print("https://github.com/{}/{}\n".format(owner, repo))
-        gurl = create_gurl()
+        gurl = create_kurl()
         if not self._show_repo_description(gurl, owner, repo):
             return
         if not self._show_latest_release(gurl, owner, repo):
@@ -52,12 +51,14 @@ class HubHandler:
             return
 
     def _show_repo_description(self, gurl, owner, repo):
-        status_code, status_text, data = hubway.repo_description(gurl,
-                                                                 owner,
-                                                                 repo)
+        cache = manager.github_repo_description(gurl, owner, repo)
+        status_code, status_text, data = cache
         if status_code not in (200, 304):
             print("Failed to get the repo description")
-            print("{} {}".format(status_code, status_text))
+            if status_code:
+                print("{} {}".format(status_code, status_text))
+            else:
+                print(status_text)
             return False
         self._show_section("Repository description")
         description = data["description"]
@@ -74,12 +75,14 @@ class HubHandler:
         return True
 
     def _show_latest_release(self, gurl, owner, repo):
-        status_code, status_text, data = hubway.latest_release(gurl,
-                                                               owner,
-                                                               repo)
+        cache = manager.github_latest_release(gurl, owner, repo)
+        status_code, status_text, data = cache
         if status_code not in (200, 304):
             print("Failed to get the latest release info")
-            print("{} {}".format(status_code, status_text))
+            if status_code:
+                print("{} {}".format(status_code, status_text))
+            else:
+                print(status_text)
             return False
         self._show_section("Latest release")
         print("Tag name: {}".format(data["tag_name"]))
@@ -91,11 +94,14 @@ class HubHandler:
         return True
 
     def _show_latest_releases_downloads(self, gurl, owner, repo):
-        status_code, status_text, data = \
-            hubway.latest_releases_downloads(gurl, owner, repo)
+        cache = manager.github_downloads(gurl, owner, repo)
+        status_code, status_text, data = cache
         if status_code not in (200, 304):
             print("Failed to get the latest ten (pre)releases info")
-            print("{} {}".format(status_code, status_text))
+            if status_code:
+                print("{} {}".format(status_code, status_text))
+            else:
+                print(status_text)
             return False
         self._show_section("Latest ten (pre)releases")
         downloads = data
@@ -121,7 +127,7 @@ class HubHandler:
                                             "publishing.json")
         if not os.path.exists(publishing_json_path):
             return None
-        jasonix = Jasonix(publishing_json_path)
+        jasonix = Jayson(publishing_json_path)
         if not jasonix.data:
             return None
         owner = jasonix.data["owner"]
