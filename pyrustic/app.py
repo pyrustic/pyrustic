@@ -249,8 +249,6 @@ class App:
     def _apply_gui_config(self):
         # geometry
         self._root.geometry(self._geometry)
-        # background
-        self._root.config(background=self._background)
         # resizable width and height
         resizable_width, resizable_height = self._resizable
         self._root.resizable(width=resizable_width, height=resizable_height)
@@ -280,6 +278,10 @@ class App:
         # center
         if not is_refresh and self._center_window:
             tkutil.center_window(self._root)
+        # sync background color
+        #background = body.option_get("background", body.winfo_class())
+        self._background = body.cget("background")
+        self._root.config(background=self._background)
         return True
 
     def _get_view(self, view):
@@ -291,7 +293,6 @@ class App:
         #    return view()
         if view is None:
             view = tk.Frame(self._root,
-                            bg="black",
                             width=350,
                             height=200)
         return CustomView(body=view)
