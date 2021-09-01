@@ -1,0 +1,5 @@
+[
+    "backstage.script.update_github_release_form",
+    "backstage.script.github_release",
+    "backstage.script.update_changelog"
+]

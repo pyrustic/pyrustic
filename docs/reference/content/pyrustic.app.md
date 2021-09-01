@@ -1,5 +1,5 @@
 
-Back to [Reference Overview](https://github.com/pyrustic/pyrustic/blob/master/docs/reference/README.md)
+Back to [Reference Overview](https://github.com/pyrustic/pyrustic/blob/master/docs/reference/README.md#readme)
 
 # pyrustic.app
 
@@ -34,16 +34,15 @@ class App:
         """
 
     @property
-    def exit_handler(self):
+    def crash_resistant(self):
         """
-        Get the exit handler, a callable called when the app exits 
+        Get the ignore_theme boolean value 
         """
 
-    @exit_handler.setter
-    def exit_handler(self, val):
+    @crash_resistant.setter
+    def crash_resistant(self, val):
         """
-        Set the exit handler. It will be called when the app exits.
-        The exit handler is just a callable 
+        Set True to allow the app to crash when an exception is raised 
         """
 
     @property

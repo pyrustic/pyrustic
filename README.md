@@ -21,12 +21,12 @@
 ## Batteries included
 
 `Pyrustic Framework` comes with batteries included:
-- `Project Manager`: command-line tool that allows you to initialize a project directory with a structure as described in the [Python Packaging User Guide](https://packaging.python.org/tutorials/packaging-projects/), perform `versioning`, `build` a [distribution package](https://wheel.readthedocs.io/en/stable/story.html), `publish` the distribution package, and more. This tool comes with a nice `hooking` mechanism and an `API` so you could easily automate your workflow with `Python` code.
+- [Backstage](https://github.com/pyrustic/backstage): a project manager command-line tool that allows you to initialize a project directory with a structure as described in the [Python Packaging User Guide](https://packaging.python.org/tutorials/packaging-projects/), perform `versioning`, `build` a [distribution package](https://wheel.readthedocs.io/en/stable/story.html), `publish` the distribution package, and more. This tool comes with a nice `hooking` mechanism and an `API` so you could easily automate your workflow with `Python` code.
 - [Viewable](https://github.com/pyrustic/viewable): subclass it to implement a view with a transparent `lifecycle` mechanism that will make it easier to build and maintain your `GUI`.
 - [Megawidget](https://github.com/pyrustic/megawidget): a set of useful megawidgets like `Table`, `Scrollbox`, `Toast`, `Tree` and more.
-- [Themebase](https://github.com/pyrustic/themebase) and [stylebase](https://github.com/pyrustic/stylebase): a style/theme mechanism to make it easy for you to create your own `styles` and `themes`. 
-- [Cyberpunk-theme](https://github.com/pyrustic/cyberpunk-theme): give a modern look to your desktop app with this `dark theme`.
-- [Winter-theme](https://github.com/pyrustic/winter-theme): give a modern look to your desktop app with this `light theme`.
+- [TkStyle](https://github.com/pyrustic/tkstyle): a library to make it easy for you to create your own `styles` and `themes`.
+- [Cyberpunk-theme](https://github.com/pyrustic/cyberpunk-theme): give a modern look to your desktop app with this `dark theme`. Theme built with `TkStyle`.
+- [Winter-theme](https://github.com/pyrustic/winter-theme): give a modern look to your desktop app with this `light theme`. Coming soon !
 - [Threadom](https://github.com/pyrustic/threadom): it is well known how difficult it is to implement `multithreading` in a `Tkinter` application. `Threadom` is a library to make it easy to develop multithreading applications. You can retrieve from the main thread the values returned and the exceptions raised by the functions executed in other threads.
 - [Shared](https://github.com/pyrustic/shared): library to store, expose, read, and edit `collections` of data.
 - [Diaspora](https://github.com/pyrustic/diaspora): as a software grows, so is its complexity. `Diaspora` allows loosely coupled components to exchange data, subscribe to events and publish events notifications.

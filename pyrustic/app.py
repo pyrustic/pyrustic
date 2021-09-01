@@ -1,8 +1,9 @@
 """Pyrustic Framework entry point"""
 import platform
 import tkinter as tk
-from viewable import Viewable, CustomView
 import tkutil
+import traceback
+from viewable import Viewable, CustomView
 from pyrustic.private.enhance_tk import EnhanceTk
 
 
@@ -28,7 +29,9 @@ class App:
         self._background = "black"
         self._ignore_theme = False
         self._resizable = (True, True)
-        self._exit_handler = None
+        self._crash_resistant = True
+        self._cached_report_callback_exception = None
+        #self._exit_handler = None
         self._setup()
 
     # ============================================
@@ -134,17 +137,27 @@ class App:
     def resizable(self, val):
         """ Set a boolean to allow the app to resize or not """
         self._resizable = val
-
+        
     @property
-    def exit_handler(self):
-        """ Get the exit handler, a callable called when the app exits """
-        return self._exit_handler
+    def crash_resistant(self):
+        """ Get the crash_resistant boolean value """
+        return self._crash_resistant
 
-    @exit_handler.setter
-    def exit_handler(self, val):
-        """ Set the exit handler. It will be called when the app exits.
-         The exit handler is just a callable """
-        self._exit_handler = val
+    @ignore_theme.setter
+    def crash_resistant(self, val):
+        """ Set True to allow the app to crash when an exception is raised """
+        self._crash_resistant = val
+
+    #@property
+    #def exit_handler(self):
+    #    """ Get the exit handler, a callable called when the app exits """
+    #    return self._exit_handler
+
+    #@exit_handler.setter
+    #def exit_handler(self, val):
+    #    """ Set the exit handler. It will be called when the app exits.
+    #     The exit handler is just a callable """
+    #    self._exit_handler = val
 
     @property
     def package(self):
@@ -198,7 +211,9 @@ class App:
         """
         Exit, simply ;-)
         """
-        self._root.destroy()
+        if self._is_running:
+            self._is_running = False
+            self._root.destroy()
 
     def maximize(self):
         """
@@ -221,15 +236,17 @@ class App:
     # ============================================
 
     def _setup(self):
-        pass
+        self._cached_report_callback_exception = self._root.report_callback_exception
+        self._root.report_callback_exception = self._on_report_callback_exception
 
     def _build(self):
         # bind self._on_exit
-        self._root.protocol("WM_DELETE_WINDOW", self._root.destroy)
-        handler = (lambda event,
-                          root=self._root:
-                   self._on_exit() if event.widget is root else None)
-        self._root.bind("<Destroy>", handler)
+        #self._root.protocol("WM_DELETE_WINDOW", self._root.destroy)
+        self._root.protocol("WM_DELETE_WINDOW", self.exit)
+        #handler = (lambda event,
+        #                  root=self._root:
+        #           self._on_exit() if event.widget is root else None)
+        #self._root.bind("<Destroy>", handler)
         EnhanceTk(self._root)
         # set title, apply config, set theme then install view
         self._set_title()
@@ -296,10 +313,15 @@ class App:
                             width=350,
                             height=200)
         return CustomView(body=view)
+        
+    def _on_report_callback_exception(self, exc, val, tb):
+        self._cached_report_callback_exception(exc, val, tb)
+        if not self._crash_resistant:
+            self.exit()
 
-    def _on_exit(self):
-        if self._exit_handler:
-            val = self._exit_handler()
+    #def _on_exit(self):
+    #    if self._exit_handler:
+    #        self._exit_handler()
 
 
 class Error(Exception):
