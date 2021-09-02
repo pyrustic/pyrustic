@@ -1,3 +1,4 @@
+"""Demo"""
 import tkinter as tk
 from viewable import Viewable
 from megawidget.toast import Toast
