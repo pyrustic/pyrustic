@@ -1,1 +1,8 @@
-[]
+[
+    {
+        "app_version": "0.1.8",
+        "released": true,
+        "timestamp": 1630524496,
+        "wheel_asset": "pyrustic-0.1.8-py3-none-any.whl"
+    }
+]
