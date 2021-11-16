@@ -1,4 +1,3 @@
 recursive-include pyrustic *
 global-exclude *.py[cod]
 include VERSION
-

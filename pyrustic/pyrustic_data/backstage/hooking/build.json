@@ -1,5 +1,4 @@
 [
-    "backstage.script.run_tests",
     "backstage.script.build_project",
     "backstage.script.versioning"
 ]
