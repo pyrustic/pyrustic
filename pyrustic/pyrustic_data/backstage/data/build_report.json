@@ -1,5 +1,11 @@
 [
     {
+        "build_timestamp": 1637094394,
+        "dist": "pyrustic-0.1.10-py3-none-any.whl",
+        "release_timestamp": null,
+        "version": "0.1.10"
+    },
+    {
         "build_timestamp": 1637086001,
         "dist": "pyrustic-0.1.9-py3-none-any.whl",
         "release_timestamp": null,
