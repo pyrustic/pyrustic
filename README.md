@@ -13,6 +13,8 @@ Collection of lightweight `Python` projects that share the same policy.
 |Name | Description|
 |---|---|
 |[Shared](https://github.com/pyrustic/shared) |  Library to store, expose, read, and edit `collections` of data|
+|[Subrun](https://github.com/pyrustic/subrun) | An elegant API to safely start and communicate with processes in Python|
+|[Backstage](https://github.com/pyrustic/backstage) | Intuitive and extensible command line tool for managing software projects|
 |[TkStyle](https://github.com/pyrustic/tkstyle) | Library to create `styles` and `themes` for Python apps|
 |[Litemark](https://github.com/pyrustic/litemark) | Lightweight `Markdown` dialect for Python apps|
 |[Megawidget](https://github.com/pyrustic/megawidget) | Collection of `megawidgets` to build graphical user interfaces for Python apps|

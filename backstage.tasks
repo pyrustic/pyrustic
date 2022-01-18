@@ -1,0 +1,27 @@
+[init]
+python -m backstage.script.init
+
+[run]
+python -m backstage.script.run
+
+[build]
+python -m rustic.script.build
+
+[release]
+python -m rustic.script.release
+
+[version]
+python -m backstage.script.version
+
+[test]
+python -m unittest discover -f -s tests -t .
+
+[gitinit]
+python -m backstage.script.gitinit
+
+[gitcommit]
+python -m rustic.script.gitcommit
+
+[gitpush]
+python -m backstage.script.gitpush
+
