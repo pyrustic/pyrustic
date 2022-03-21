@@ -1,27 +1,34 @@
 [init]
-python -m backstage.script.init
+# Initialize the Python project.
+setupinit init
 
-[run]
-python -m backstage.script.run
-
-[build]
-python -m rustic.script.build
-
-[release]
-python -m rustic.script.release
-
-[version]
-python -m backstage.script.version
+[check]
+# Get the project version and latest build information.
+buildver check
 
 [test]
+# Run tests.
 python -m unittest discover -f -s tests -t .
 
+[release]
+# Build then release a new version of the project.
+# Note: you can extend this command in the CLI to set the next version.
+# Example: backstage release then 3.0.0
+# Example: backstage release then +maj
+rustic release
+
 [gitinit]
-python -m backstage.script.gitinit
+# Initialize a new Git repository then create a new connection to the remote repository.
+# Note: the user is prompted to submit the 'origin'.
+git init
+python -c 'import subrun; subrun.run("git remote add origin {}".format(input("Origin: ")))'
 
 [gitcommit]
-python -m rustic.script.gitcommit
+# Save your changes to the local repository.
+# Note: the user is prompted to submit a commit message.
+git add .
+python -c 'import subrun; subrun.run("git commit -m \"{}\"".format(input("Commit message: ")))'
 
 [gitpush]
-python -m backstage.script.gitpush
-
+# Send the commits from your local Git repository to the remote repository
+git push origin master
