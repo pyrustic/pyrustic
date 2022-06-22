@@ -38,7 +38,7 @@ Projects can be subdivided into the following subsections: frameworks, libraries
 | Name | Description |
 | --- | --- |
 | [Shared](https://github.com/pyrustic/shared) | Data exchange and persistence |
-| [Hackernote](https://github.com/pyrustic/backstage) | Reference library to parse and render hackernotes |
+| [Jesth](https://github.com/pyrustic/backstage) | Just Extract Sections Then Hack ! |
 | [Subrun](https://github.com/pyrustic/subrun) | Intuitive API to safely start and communicate with processes in Python |
 | [TkStyle](https://github.com/pyrustic/tkstyle) | Library to create styles and themes for Python apps |
 | [Litemark](https://github.com/pyrustic/litemark) | Lightweight Markdown dialect for Python apps |
