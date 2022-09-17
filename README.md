@@ -16,7 +16,7 @@
 
 
 
-# Pyrustic
+# Pyrustic Open Ecosystem
 **Pyrustic** is a collection of lightweight [Python](https://www.python.org/) projects that share the **same policy**.
 
 The goal is to build and maintain a reliable, consistent, easy-to-use and relevant Python codebase for novice and experienced developers.
