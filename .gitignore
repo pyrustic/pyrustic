@@ -17,5 +17,9 @@ env/
 # Databases
 *.db
 
-# Secret
-secret/
+
+# Pyrustic local data
+.pyrustic/
+
+# Backstage local data
+.backstage/
