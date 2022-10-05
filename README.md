@@ -29,7 +29,7 @@ These projects cover various topics: automation, data persistence and exchange, 
 | --- | --- |
 | [Backstage](https://github.com/pyrustic/backstage) | Three-speed scripting language and automation tool |
 | [Shared](https://github.com/pyrustic/shared) | Triptych for data exchange and persistence |
-| [Hooking](https://github.com/pyrustic/hooking) | Event lifecycle oriented hooking |
+| [Hooking](https://github.com/pyrustic/hooking) | Generic Hooking Mechanism for Python |
 | [Gaspium](https://github.com/pyrustic/gaspium) | Reference framework to build `GASP` apps |
 | [TkStyle](https://github.com/pyrustic/tkstyle) | Library to create styles and themes for Python apps |
 | [Subrun](https://github.com/pyrustic/subrun) | Processes spawning in Python |
