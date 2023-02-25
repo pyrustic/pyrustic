@@ -2,7 +2,7 @@
 <div align="center">
     <img src="https://raw.githubusercontent.com/pyrustic/misc/master/media/diogenes.jpg" alt="Diogenes">
     <p align="center">
-    By <a href="https://en.wikipedia.org/wiki/en:Jean-L%C3%A9on_G%C3%A9r%C3%B4me" class="extiw" title="w:en:Jean-Léon Gérôme">Jean-Léon Gérôme</a> - <a href="https://en.wikipedia.org/wiki/en:Walters_Art_Museum" class="extiw" title="w:en:Walters Art Museum">Walters Art Museum</a>: <a href="https://thewalters.org/" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://thewalters.org/">Home page</a>&nbsp;<a href="https://art.thewalters.org/detail/31957" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://art.thewalters.org/detail/31957">Info about artwork</a>, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=323523">Link</a>
+    <a href="https://en.wikipedia.org/wiki/Diogenes">Diogenes</a> by <a href="https://en.wikipedia.org/wiki/en:Jean-L%C3%A9on_G%C3%A9r%C3%B4me" class="extiw" title="w:en:Jean-Léon Gérôme">Jean-Léon Gérôme</a> - <a href="https://en.wikipedia.org/wiki/en:Walters_Art_Museum" class="extiw" title="w:en:Walters Art Museum">Walters Art Museum</a>: <a href="https://thewalters.org/" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://thewalters.org/">Home page</a>&nbsp;<a href="https://art.thewalters.org/detail/31957" rel="nofollow"></a> <a rel="nofollow" class="external text" href="https://art.thewalters.org/detail/31957">Info about artwork</a>, Public Domain, <a href="https://commons.wikimedia.org/w/index.php?curid=323523">Link</a>
     </p>
 </div>
 
@@ -10,7 +10,7 @@
 
 > He owned a cup which served also as a bowl for food but threw it away when he saw a boy drinking water from his hands and realized one did not even need a cup to sustain oneself.</p>
 >
->    --Mark, J. J. (2014, August 02). [Diogenes of Sinope](href="https://www.ancient.eu/Diogenes_of_Sinope/). Ancient History Encyclopedia. Retrieved from https://www.ancient.eu/Diogenes_of_Sinope/
+>    --Mark, J. J. (2014, August 02). [Diogenes of Sinope](https://www.worldhistory.org/Diogenes_of_Sinope/). World History Encyclopedia. Retrieved from https://www.worldhistory.org/Diogenes_of_Sinope/
 
 <br>
 
@@ -19,7 +19,7 @@
 # Pyrustic Open Ecosystem
 **Pyrustic** is a collection of lightweight [Python](https://www.python.org/) projects that share the **same policy**.
 
-The goal is to build and maintain a reliable, consistent, easy-to-use and relevant Python codebase for novice and experienced developers.
+The goal is to build and maintain a reliable, consistent, easy-to-use and relevant Python codebase for tech enthusiasts.
 
 These projects cover various topics: automation, data persistence and exchange, GUI, themes, widgets, multithreading, markup, utilities, project management, et cetera. 
 
@@ -27,6 +27,7 @@ These projects cover various topics: automation, data persistence and exchange, 
 
 | Name | Description |
 | --- | --- |
+| [Exonote](https://github.com/pyrustic/exn) | Write and render rich, scriptable, and interactive notes |
 | [Backstage](https://github.com/pyrustic/backstage) | Three-speed scripting language and automation tool |
 | [Shared](https://github.com/pyrustic/shared) | Triptych for data exchange and persistence |
 | [Hooking](https://github.com/pyrustic/hooking) | Generic Hooking Mechanism for Python |
