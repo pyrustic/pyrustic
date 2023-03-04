@@ -55,15 +55,4 @@ These projects cover various topics: automation, data persistence and exchange, 
 
 
 ## Installation
-### For the first time
-Each package listed above can be installed individually from [PyPI](https://pypi.org). You can still install all the packages with just one single command:
-
-```bash
-pip install pyrustic
-```
-
-### Upgrade
-```bash
-$ pip install pyrustic --upgrade --upgrade-strategy eager
-
-```
+Each package listed above can be installed individually from [PyPI](https://pypi.org).
